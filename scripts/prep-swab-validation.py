@@ -19,6 +19,8 @@ target_deliveries = [
     "NAO-ONT-20250313-Zephyr12",
 ]
 
+total_reads_to_validate = 0
+
 dashboard_dir = os.path.expanduser("~/code/mgs-restricted/dashboard")
 
 with open(os.path.join(dashboard_dir, "metadata_samples.json")) as f:
@@ -129,6 +131,7 @@ for delivery in target_deliveries:
                         sample_id,
                     )
                 )
+                total_reads_to_validate += 1
             taxid_counts[taxid] += 1
 
     with gzip.open(f"delivery_analyses/{delivery}/to_validate.tsv.gz", "wt") as outf:
@@ -147,21 +150,46 @@ for delivery in target_deliveries:
         for taxid, seq, qual, date, loc, read_id, sample_id in to_validate:
             fasta_overall.write(f">{read_id}::{loc}::{date}::{sample_id}\n{seq}\n")
 
-    if delivery == "NAO-ONT-20250220-Zephyr11":
-        with open(
-            f"delivery_analyses/{delivery}/hcov_299E.fasta",
-            "w",
-        ) as fasta_299E:
-            for taxid, seq, qual, date, loc, read_id, sample_id in hcov_299E_reads:
-                fasta_299E.write(f">{read_id}::{loc}::{date}::{sample_id}\n{seq}\n")
-    if sars_cov_2_reads:
-        with open(
-            f"delivery_analyses/{delivery}/sars_cov_2.fasta",
-            "w",
-        ) as fasta_sars_cov_2:
-            for taxid, seq, qual, date, loc, read_id, sample_id in sars_cov_2_reads:
-                fasta_sars_cov_2.write(
-                    f">{read_id}::{loc}::{date}::{sample_id}\n{seq}\n"
-                )
+    if hcov_299E_reads or sars_cov_2_reads:
+        with gzip.open(
+            f"delivery_analyses/{delivery}/non_validated.tsv.gz", "wt"
+        ) as outf:
+            outf.write(
+                        "\t".join(("taxid", "sequence", "quality", "date", "loc", "read_id", "sample_id"))
+                        + "\n"
+                    )
+            if hcov_299E_reads:
+                for taxid, seq, qual, date, loc, read_id, sample_id in hcov_299E_reads:
+                    outf.write(
+                        "\t".join((str(taxid), seq, qual, date, loc, read_id, sample_id))
+                        + "\n"
+                    )
+
+            if sars_cov_2_reads:
+                for taxid, seq, qual, date, loc, read_id, sample_id in sars_cov_2_reads:
+                    outf.write(
+                        "\t".join((str(taxid), seq, qual, date, loc, read_id, sample_id))
+                        + "\n"
+                    )
+
+
+    #     with open(
+    #         f"delivery_analyses/{delivery}/hcov_299E.fasta",
+    #         "w",
+    #     ) as fasta_299E:
+    #         for taxid, seq, qual, date, loc, read_id, sample_id in hcov_299E_reads:
+    #             fasta_299E.write(f">{read_id}::{loc}::{date}::{sample_id}\n{seq}\n")
+    # if sars_cov_2_reads:
+    #     with open(
+    #         f"delivery_analyses/{delivery}/sars_cov_2.fasta",
+    #         "w",
+    #     ) as fasta_sars_cov_2:
+    #         for taxid, seq, qual, date, loc, read_id, sample_id in sars_cov_2_reads:
+    #             fasta_sars_cov_2.write(
+    #                 f">{read_id}::{loc}::{date}::{sample_id}\n{seq}\n"
+    #             )
+
     for count, taxid in sorted((c, t) for (t, c) in taxid_counts.items()):
         print(count, taxid, taxid_names[taxid])
+
+print(f"Total reads to validate: {total_reads_to_validate}")
