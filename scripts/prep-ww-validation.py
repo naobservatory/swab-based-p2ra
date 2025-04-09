@@ -125,7 +125,7 @@ for delivery in target_deliveries:
             ):
                 if taxid == 2697049:
                     sars_reads.append(
-                        (seq, qual, date, fine_location, read_id, sample_id)
+                        (taxid, seq, qual, date, fine_location, read_id, sample_id)
                     )
                 else:
                     to_validate.append(
@@ -167,14 +167,14 @@ for delivery in target_deliveries:
 
     # Write SARS-CoV-2 reads to a separate FASTA file
     with gzip.open(
-        f"delivery_analyses/{delivery}/sars_reads.tsv.gz", "wt"
+        f"delivery_analyses/{delivery}/non_validated.tsv.gz", "wt"
     ) as outf:
         outf.write(
-            "\t".join(("sequence", "quality", "date", "loc", "read_id", "sample_id"))
+            "\t".join(("taxid", "sequence", "quality", "date", "loc", "read_id", "sample_id"))
             + "\n"
         )
         for record in sorted(sars_reads):
-            outf.write("%s\t%s\t%s\t%s\t%s\t%s\n" % record)
+            outf.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % record)
 
     for count, taxid in sorted((c, t) for (t, c) in taxid_counts.items()):
         print(count, taxid, taxid_names[taxid])
