@@ -74,8 +74,6 @@ genome_names = {
     'OM001407.1': 'Rhinovirus C1',
     'PV206816.1': 'Rhinovirus C2',
     'PV178562.1': 'Rhinovirus C3',
-
-
     'EF582385.1': 'Rhinovirus C4',
     'PV178659.1': 'Rhinovirus C7',
     'PV178426.1': 'Rhinovirus C8',
@@ -147,14 +145,13 @@ with open("to_validate_ww.fasta", "w") as outfasta:
         for delivery in target_deliveries:
             try:
                 with gzip.open(f"delivery_analyses/{delivery}/to_validate.tsv.gz", "rt") as inf:
-                    reader = csv.reader(inf, delimiter='\t')
-                    header = next(reader)
 
+                    reader = csv.DictReader(inf, delimiter='\t')
                     if not header_written:
-                        outtsv.write('\t'.join(header) + '\n')
+                        outtsv.write('\t'.join(reader.fieldnames) + '\n')
                         header_written = True
                     for row in reader:
-                        outtsv.write('\t'.join(row) + '\n')
+                        outtsv.write('\t'.join(row.values()) + '\n')
             except FileNotFoundError:
                 print(f"Warning: Could not find to_validate.tsv.gz for {delivery}")
 
@@ -223,6 +220,7 @@ if not any(glob.glob("%s*" % blastdb)):
         "-out", blastdb])
 
 blast_results = "%s.blast" % reads_fasta
+
 subprocess.check_call([
     "blastn",
     "-query", reads_fasta,
@@ -248,7 +246,7 @@ with open(blast_results) as inf:
         if (read_id not in good_primary_hits or
             good_primary_hits[read_id][-1] < bit_score):
             good_primary_hits[read_id] = genome, bit_score
-
+print(len(good_primary_hits))
 
 dedup_observations = {} # (date, loc, genome) -> [(read_id, start, end)]
 past_observations = {} # (date, loc, genome) -> [(start, end)]
