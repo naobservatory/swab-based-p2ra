@@ -172,23 +172,6 @@ for delivery in target_deliveries:
                         + "\n"
                     )
 
-
-    #     with open(
-    #         f"delivery_analyses/{delivery}/hcov_299E.fasta",
-    #         "w",
-    #     ) as fasta_299E:
-    #         for taxid, seq, qual, date, loc, read_id, sample_id in hcov_299E_reads:
-    #             fasta_299E.write(f">{read_id}::{loc}::{date}::{sample_id}\n{seq}\n")
-    # if sars_cov_2_reads:
-    #     with open(
-    #         f"delivery_analyses/{delivery}/sars_cov_2.fasta",
-    #         "w",
-    #     ) as fasta_sars_cov_2:
-    #         for taxid, seq, qual, date, loc, read_id, sample_id in sars_cov_2_reads:
-    #             fasta_sars_cov_2.write(
-    #                 f">{read_id}::{loc}::{date}::{sample_id}\n{seq}\n"
-    #             )
-
     for count, taxid in sorted((c, t) for (t, c) in taxid_counts.items()):
         print(count, taxid, taxid_names[taxid])
 
