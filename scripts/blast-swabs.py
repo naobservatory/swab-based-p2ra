@@ -20,7 +20,6 @@ genome_names = {
     'PQ243243.1': 'Human coronavirus 229E',
 
     'PV178553.1': 'Rhinovirus A34',
-    'PV178553.1': 'Rhinovirus A34',
     'OK649392.1': 'Rhinovirus A94',
 
     'PV178233.1': 'Rhinovirus B37',

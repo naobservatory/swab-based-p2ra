@@ -35,6 +35,6 @@ p <- ggplot(prevalence_df) +
   scale_x_log10(labels = scales::percent_format(accuracy = 0.1)) +
   theme_minimal() +
   theme(axis.text.y = element_text(size = 10), plot.title = element_text(hjust = 0.5)) +
-  labs(title = "Virus Prevalence Estimates with Confidence Intervals", x = "Prevalence (%)", y = NULL)
+  labs(title = "", x = "Prevalence (%)", y = NULL)
 
 ggsave("prevalence_dotplot.pdf", p, width = 10, height = 6)
