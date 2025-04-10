@@ -22,7 +22,6 @@ genome_names = {
     'PP756349.1': 'Coxsackievirus A22',
     'PQ889404.1': 'Coxsackievirus A24',
     'AB828290.1': 'Coxsackievirus A19',
-    # 'PP711771.1': 'Coxsackievirus A19', # download failed
 
     'KP290111.1': 'Coxsackievirus A9',
     'OP207966.1': 'Coxsackievirus A9',
@@ -69,7 +68,6 @@ genome_names = {
     'MZ629171.1': 'Rhinovirus C11',
     'MN369038.1': 'Rhinovirus C19',
     'MZ268714.1': 'Rhinovirus C20',
-    # 'PP194074.1': 'Rhinovirus C28', download failed
     'ON729335.1': 'Rhinovirus C34',
     'OP342692.1': 'Rhinovirus C36',
     'MZ153259.1': 'Rhinovirus C44',
@@ -85,10 +83,8 @@ genome_names = {
 
     'PV260519.1': 'HMPV-1',
 
-
     'PV206814.1': 'HPIV1',
     'OQ990770.1': 'HPIV2',
-    # 'PP334259.1': 'HPIV3', # Download failed
     'KY645962.1': 'HPIV4b',
 
     'PV333623.1': 'H3N2', # A/Massachusetts/ISC-1252/2025(H3N2) S1
