@@ -3,5 +3,8 @@ deliveries/
 blastdbs/
 genomes/
 index/
-validation-work/
+validation-work/*
+!validation-work/swabs-genomes.json
+!validation-work/ww-genomes.json
+
 validation-output/
