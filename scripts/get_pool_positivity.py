@@ -59,12 +59,15 @@ with open("[2024] Zephyr sample log - Sampling runs.tsv", "r") as f:
 pooled_data = {}
 pathogens = set()
 
+def is_date_in_range(date):
+    return datetime(2025, 1, 7) <= date <= datetime(2025, 2, 25)
+
 for sample in sample_pool_size:
     pooled_data[sample] = defaultdict(bool)
 
 for row in csv.DictReader(open(os.path.join(validation_output_dir, "swabs-classified-dedup-reads.tsv")), delimiter="\t"):
     date = datetime.strptime(row["date"], "%Y-%m-%d")
-    if date < datetime(2025, 1, 7) or date > datetime(2025, 2, 25):
+    if not is_date_in_range(date):
         continue
     location = row["loc"]
     sample = date.strftime("%y%m%d") + "-" + location + "-NAS"
@@ -74,7 +77,7 @@ for row in csv.DictReader(open(os.path.join(validation_output_dir, "swabs-classi
 
 for row in csv.DictReader(open(os.path.join(validation_output_dir, "swabs-non-validated-reads.tsv")), delimiter="\t"):
     date = datetime.strptime(row["date"], "%Y-%m-%d")
-    if date < datetime(2025, 1, 7) or date > datetime(2025, 2, 25):
+    if not is_date_in_range(date):
         continue
     location = row["loc"]
     sample = date.strftime("%y%m%d") + "-" + location + "-NAS"
@@ -94,6 +97,7 @@ clades = sorted(list(clades))
 with open("pathogen_presence.tsv", "w") as f:
     f.write("\t".join(["sample", "pool_size"] + pathogens + clades) + "\n")
     for sample in sorted(pooled_data):
+        # Set True if any pathogen in the clade is True
         clade_positivity = defaultdict(bool)
         row = [sample, sample_pool_size[sample]]
 
@@ -102,7 +106,6 @@ with open("pathogen_presence.tsv", "w") as f:
             status = pooled_data[sample].get(pathogen, False)
             row.append("1" if status else "0")
             clade = clade_mapping[pathogen]
-            # Use OR operation to set True if any pathogen in the clade is True
             if status:
                 clade_positivity[clade] = True
 

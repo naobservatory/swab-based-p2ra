@@ -19,6 +19,9 @@ target_deliveries = [
     "NAO-ONT-20250313-Zephyr12",
 ]
 
+HCOV_299E_TAXID = 11137
+SARS_COV_2_TAXID = 2697049
+
 total_reads_to_validate = 0
 
 dashboard_dir = os.path.expanduser("~/code/mgs-restricted/dashboard")
@@ -89,13 +92,10 @@ for delivery in target_deliveries:
             date = sample_metadata["date"]
             fine_location = sample_metadata["fine_location"]
 
-            if parser.parse(date) < datetime(2025, 1, 1):
-                continue
-
             query_seq = row["query_seq_clean"]
             query_qual = row["query_qual_clean"]
 
-            if delivery == "NAO-ONT-20250220-Zephyr11" and taxid == 11137:
+            if delivery == "NAO-ONT-20250220-Zephyr11" and taxid == HCOV_299E_TAXID:
                 hcov_299E_reads.append(
                     (
                         taxid,
@@ -107,7 +107,7 @@ for delivery in target_deliveries:
                         sample_id,
                     )
                 )
-            elif taxid == 2697049:
+            elif taxid == SARS_COV_2_TAXID:
                 sars_cov_2_reads.append(
                     (
                         taxid,
@@ -158,19 +158,17 @@ for delivery in target_deliveries:
                         "\t".join(("taxid", "sequence", "quality", "date", "loc", "read_id", "sample_id"))
                         + "\n"
                     )
-            if hcov_299E_reads:
-                for taxid, seq, qual, date, loc, read_id, sample_id in hcov_299E_reads:
-                    outf.write(
-                        "\t".join((str(taxid), seq, qual, date, loc, read_id, sample_id))
-                        + "\n"
-                    )
+            for taxid, seq, qual, date, loc, read_id, sample_id in hcov_299E_reads:
+                outf.write(
+                    "\t".join((str(taxid), seq, qual, date, loc, read_id, sample_id))
+                    + "\n"
+                )
 
-            if sars_cov_2_reads:
-                for taxid, seq, qual, date, loc, read_id, sample_id in sars_cov_2_reads:
-                    outf.write(
-                        "\t".join((str(taxid), seq, qual, date, loc, read_id, sample_id))
-                        + "\n"
-                    )
+            for taxid, seq, qual, date, loc, read_id, sample_id in sars_cov_2_reads:
+                outf.write(
+                    "\t".join((str(taxid), seq, qual, date, loc, read_id, sample_id))
+                    + "\n"
+                )
 
     for count, taxid in sorted((c, t) for (t, c) in taxid_counts.items()):
         print(count, taxid, taxid_names[taxid])

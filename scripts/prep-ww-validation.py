@@ -10,12 +10,15 @@ from datetime import datetime
 from dateutil import parser
 
 target_deliveries = [
-    "NAO-BCL-2025-03-03",
     "MJ-2025-01-20-a",
     "MJ-2025-01-20-b",
-    "MJ-2025-03-01",
     "MJ-2025-02-12",
+    "MJ-2025-03-01",
+    "NAO-BCL-2025-03-03",
 ]
+
+SARS_COV_2_TAXID = 2697049
+
 
 dashboard_dir = os.path.expanduser("~/code/mgs-restricted/dashboard")
 
@@ -38,7 +41,7 @@ with open("index/20250314.taxonomy-names.dmp") as inf:
         if taxid not in taxid_names or name_class == "scientific name":
             taxid_names[taxid] = name
 
-# Even before BLASTing, some viruses we already want to exclude.
+# Even before BLASTing, some viruses we already want to exclude (due to these being GI viruses)
 taxids_to_exclude = [
     130309,  # Human mastadenovirus F
     318843,  # Almpiwar virus, spurious hit
@@ -77,7 +80,7 @@ with gzip.open("index/20250314.total-virus-db-annotated.tsv.gz", "rt") as inf:
         if row["infection_status_human"] != "0":
             retain_taxids.add(int(row["taxid"]))
 
-# We don't add SARS-CoV-2 to the validation set because BLAST chokes on SARS-CoV-2 reads.
+# We don't add SARS-CoV-2 to the validation set because BLAST is disproprtionately slow on SARS-CoV-2 reads (as there are so many reference genomes for SARS-CoV-2)
 
 for delivery in target_deliveries:
     print(delivery)
@@ -123,7 +126,7 @@ for delivery in target_deliveries:
                 (query_seq_fwd, query_seq_rev),
                 (query_qual_fwd, query_qual_rev),
             ):
-                if taxid == 2697049:
+                if taxid == SARS_COV_2_TAXID:
                     sars_reads.append(
                         (taxid, seq, qual, date, fine_location, read_id, sample_id)
                     )
