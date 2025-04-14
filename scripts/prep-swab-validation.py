@@ -8,6 +8,13 @@ import subprocess
 from collections import defaultdict, Counter
 from datetime import datetime
 from dateutil import parser
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from scripts.taxonomy import load_taxonomy_names, load_human_infecting_taxids, load_taxonomy_tree
+
+parents, children = load_taxonomy_tree()
+taxid_names = load_taxonomy_names()
+retain_taxids = load_human_infecting_taxids()
 
 target_deliveries = [
     "NAO-ONT-20250120-Zephyr8",
@@ -28,29 +35,6 @@ dashboard_dir = os.path.expanduser("~/code/mgs-restricted/dashboard")
 
 with open(os.path.join(dashboard_dir, "metadata_samples.json")) as f:
     metadata_samples = json.load(f)
-
-parents = {}
-children = defaultdict(set)
-with open("index/20250314.taxonomy-nodes.dmp") as inf:
-    for line in inf:
-        child_taxid, parent_taxid, rank, *_ = line.replace("\t|\n", "").split("\t|\t")
-        parents[int(child_taxid)] = int(parent_taxid)
-        children[int(parent_taxid)].add(int(child_taxid))
-
-taxid_names = {}
-with open("index/20250314.taxonomy-names.dmp") as inf:
-    for line in inf:
-        taxid, name, unique_name, name_class = line.replace("\t|\n", "").split("\t|\t")
-        taxid = int(taxid)
-        if taxid not in taxid_names or name_class == "scientific name":
-            taxid_names[taxid] = name
-
-
-retain_taxids = set()
-with gzip.open("index/20250314.total-virus-db-annotated.tsv.gz", "rt") as inf:
-    for row in csv.DictReader(inf, delimiter="\t"):
-        if row["infection_status_human"] != "0":
-            retain_taxids.add(int(row["taxid"]))
 
 genome_ids_to_exclude = [
     "MN369532.1",  # Vaccinia virus isolate, spurious hit
