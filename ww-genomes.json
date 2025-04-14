@@ -1,0 +1,108 @@
+{
+    "ON554083.1": "Human coronavirus OC43",
+    "OR833061.1": "Human coronavirus NL63",
+    "OR266946.1": "Human coronavirus 229E",
+    "ON553964.1": "Human coronavirus HKU1",
+
+    "PP756350.1": "Coxsackievirus A22",
+    "PP756349.1": "Coxsackievirus A22",
+    "PQ889404.1": "Coxsackievirus A24",
+    "AB828290.1": "Coxsackievirus A19",
+
+    "KP290111.1": "Coxsackievirus A9",
+    "OP207966.1": "Coxsackievirus A9",
+    "PP585361.1": "Coxsackievirus A6",
+    "PQ057343.1": "Coxsackievirus A4",
+    "JX174176.1": "Coxsackievirus A1",
+    "PP756363.1": "Coxsackievirus A1",
+
+    "PP621603.1": "Enterovirus A",
+    "PP548259.1": "Enterovirus A71",
+    "MH118028.1": "Enterovirus A76",
+
+    "MK815002.1": "Enterovirus B",
+
+    "PQ119791.1": "Enterovirus C116",
+    "KC344833.1": "Enterovirus C113",
+    "PP756365.1": "Enterovirus C99",
+
+    "PQ766584.1": "Enterovirus D68",
+
+    "MH933859.1": "Human enterovirus isolate EV/Human/CMRHP58/CMR/2014",
+
+    "JX275201.2": "Poliovirus 2",
+
+    "PV178557.1": "Rhinovirus A",
+    "MN749156.1": "Rhinovirus A1",
+    "OP342739.1": "Rhinovirus A12",
+    "LC699415.1": "Rhinovirus A24",
+    "LC720413.1": "Rhinovirus A40",
+    "MZ540950.1": "Rhinovirus A54",
+    "OK181467.1": "Rhinovirus A80",
+
+    "PV178382.1": "Rhinovirus B3",
+
+    "PP991504.1": "Rhinovirus C",
+    "PV178212.1": "Rhinovirus C",
+    "PV178246.1": "Rhinovirus C",
+    "OM001407.1": "Rhinovirus C1",
+    "PV206816.1": "Rhinovirus C2",
+    "PV178562.1": "Rhinovirus C3",
+    "EF582385.1": "Rhinovirus C4",
+    "PV178659.1": "Rhinovirus C7",
+    "PV178426.1": "Rhinovirus C8",
+    "MZ629171.1": "Rhinovirus C11",
+    "MN369038.1": "Rhinovirus C19",
+    "MZ268714.1": "Rhinovirus C20",
+    "ON729335.1": "Rhinovirus C34",
+    "OP342692.1": "Rhinovirus C36",
+    "MZ153259.1": "Rhinovirus C44",
+    "OM001443.1": "Rhinovirus C55",
+    "MG950179.1": "Rhinovirus C56",
+
+    "PV178449.1": "Rhinovirus B103",
+
+    "OQ969163.1": "Echovirus E11",
+
+    "PV178204.1": "RSV-A",
+    "PQ899930.1": "RSV-B",
+
+    "PV260519.1": "HMPV-1",
+
+    "PV206814.1": "HPIV1",
+    "OQ990770.1": "HPIV2",
+    "KY645962.1": "HPIV4b",
+
+    "PV333623.1": "H3N2",
+    "PV334560.1": "H3N2",
+    "PV333545.1": "H3N2",
+    "PV271515.1": "H3N2",
+    "PV148462.1": "H3N2",
+    "PV261577.1": "H3N2",
+    "PV249902.1": "H3N2",
+    "PV149945.1": "H3N2",
+
+    "PV152011.1": "H1N1",
+    "PV136994.1": "H1N1",
+    "PQ599415.1": "H1N1",
+    "PQ839821.1": "H1N1",
+    "PV100537.1": "H1N1",
+    "PV287334.1": "H1N1",
+    "PQ598835.1": "H1N1",
+    "PQ260637.1": "H1N1",
+
+    "PV150683.1": "Flu B",
+    "PV150682.1": "Flu B",
+    "PV150684.1": "Flu B",
+    "PV150685.1": "Flu B",
+    "PV150686.1": "Flu B",
+    "PV150687.1": "Flu B",
+    "PV150688.1": "Flu B",
+    "PV150689.1": "Flu B",
+
+    "MN901833.1": "Human mastadenovirus A",
+    "PQ189755.1": "Human mastadenovirus B114",
+    "OR876398.1": "Human adenovirus 5",
+
+    "NC_076019.1": "Apodemus agrarius picornavirus strain Longwan-Rn37 polyprotein"
+}
