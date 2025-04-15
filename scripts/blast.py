@@ -30,7 +30,7 @@ parser.add_argument("--label", type=str, choices=["swabs", "ww"], required=True)
 args = parser.parse_args()
 label = args.label
 
-with open(os.path.join(work_dir, "%s-genomes.json" % args.label), "r") as f:
+with open("%s-genomes.json" % args.label, "r") as f:
     genome_names = json.load(f)
 genomes = sorted(genome_names)
 
@@ -129,6 +129,7 @@ past_observations = {} # (date, loc, genome) -> [(start, end)]
 WIGGLE_ROOM=3 # count dups even if start/end is off by this many bp
 
 dedup_entries = []
+all_entries = []
 with open(blast_results) as inf:
     for line in inf:
         (read_id, genome, pct_identity, alignment_length,
@@ -178,6 +179,19 @@ with open(blast_results) as inf:
                 genome_end,
                 bit_score,
             ])
+        all_entries.append([
+            read_id,
+            read_dates[read_id],
+            read_locs[read_id],
+            read_samples[read_id],
+            genome,
+            genome_names[genome],
+            read_taxids[read_id],
+            genome_start,
+            genome_end,
+            bit_score,
+            is_duplicate,
+        ])
         past_observations[key].append((genome_start, genome_end))
 
 # ============================================================================
@@ -192,6 +206,15 @@ with open(os.path.join(output_dir, "%s-classified-dedup-reads.tsv" % label), "w"
 
     # Write data rows
     for row in dedup_entries:
+        outf.write("\t".join(str(x) for x in row) + "\n")
+
+with open(os.path.join(output_dir, "%s-classified-all-reads.tsv" % label), "w") as outf:
+    # Write header
+    header = ["read_id", "date", "loc", "sample", "genome", "genome_name", "taxid", "start", "end", "bit_score", "is_duplicate"]
+    outf.write("\t".join(header) + "\n")
+
+    # Write data rows
+    for row in all_entries:
         outf.write("\t".join(str(x) for x in row) + "\n")
 
 missing = set()
