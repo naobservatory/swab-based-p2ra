@@ -9,8 +9,7 @@ from collections import defaultdict, Counter
 from datetime import datetime
 from dateutil import parser
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from scripts.taxonomy import load_taxonomy_names, load_human_infecting_taxids, load_taxonomy_tree
+from taxonomy import load_taxonomy_names, load_human_infecting_taxids, load_taxonomy_tree
 
 parents, children = load_taxonomy_tree()
 taxid_names = load_taxonomy_names()

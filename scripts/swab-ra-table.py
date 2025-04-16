@@ -4,13 +4,9 @@ import csv
 import json
 import os
 import sys
-from collections import defaultdict
+from collections import defaultdict, Counter
 from datetime import datetime
-
-# Add local module path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# Local imports
-from scripts.taxonomy import load_taxonomy_names
+from taxonomy import load_taxonomy_names
 
 # Constants and paths
 dashboard_dir = os.path.expanduser("~/code/mgs-restricted/dashboard")
@@ -24,9 +20,6 @@ def is_date_in_range(date):
 
 # Load data
 taxid_names = load_taxonomy_names()
-
-with open(os.path.join(dashboard_dir, "metadata_samples.json")) as f:
-    metadata_samples = json.load(f)
 
 read_counts = {}
 with open("n_reads_per_swab_sample.tsv") as f:
@@ -65,7 +58,7 @@ first_level_mapping = {
 
 
 # Initialize data structures
-samples = defaultdict(lambda: defaultdict(int))  # (date, location, pathogen) -> counts
+samples = defaultdict(Counter)  # (date, location, pathogen) -> counts
 date_loc_sample_map = defaultdict(set)  # (date, location) -> set of samples
 
 # Process classified reads
