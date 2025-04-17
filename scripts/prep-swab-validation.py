@@ -42,6 +42,7 @@ for delivery in target_deliveries:
             if row.get("demultiplexed") == "False":
                 continue
             metadata_samples[sample] = row
+
 genome_ids_to_exclude = [
     "MN369532.1",  # Vaccinia virus isolate, spurious hit
     "AY037928.1",  # Human endogenous retrovirus, spurious hit
@@ -78,17 +79,13 @@ for delivery in target_deliveries:
     sars_cov_2_reads = []
 
     past_observations = {}
-    if delivery == "NAO-ONT-20250328-Zephyr12b":
-        version = "v2.8.3.1"
-    else:
-        version = "v2.8.1.3-dev"
 
     subprocess.run(
         [
             "aws",
             "s3",
             "sync",
-            f"s3://nao-mgs-simon/{version}/{delivery}/output/results",
+            f"s3://nao-mgs-simon/v2.8.3.2{delivery}/output/results",
             f"deliveries/{delivery}/output/results",
         ]
     )
