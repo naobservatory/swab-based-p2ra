@@ -152,7 +152,7 @@ for (date, location, pathogen, treatment), counts in treatment_samples.items():
     treatment_samples[(date, location, pathogen, treatment)]["all_reads"] = n_reads
 
 # Output results
-with open("swabs-ra-summary.tsv", "w") as outf:
+with open(os.path.join("tables", "swabs-ra-summary.tsv"), "w") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow(["date", "location", "species", "assignment", "non_dedup_hv", "dedup_hv", "all_reads"])
     # Sort samples by date
@@ -170,7 +170,7 @@ with open("swabs-ra-summary.tsv", "w") as outf:
             data["all_reads"],
         ])
 
-with open("swabs-ra-per-treatment-summary.tsv", "w") as outf:
+with open(os.path.join("tables", "swabs-ra-per-treatment-summary.tsv"), "w") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow(["date", "location", "species", "pathogen", "treatment", "non_dedup", "dedup", "all_reads"])
     for (date, location, pathogen, treatment), data in sorted(treatment_samples.items()):
