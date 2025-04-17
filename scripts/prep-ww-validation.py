@@ -65,7 +65,7 @@ def descends_from_target(taxid, cache={}):
     return cache[taxid]
 
 
-
+sample_reads = defaultdict(int)
 
 # We don't add SARS-CoV-2 to the validation set because BLAST is disproprtionately slow on SARS-CoV-2 reads (as there are so many reference genomes for SARS-CoV-2)
 
@@ -83,6 +83,13 @@ for delivery in target_deliveries:
             f"deliveries/{delivery}/output/results",
         ]
     )
+
+
+    with gzip.open(f"deliveries/{delivery}/output/results/read_counts.tsv.gz", "rt") as inf:
+        for row in csv.DictReader(inf, delimiter="\t"):
+            sample_id = row["sample"]
+            sample_reads[sample_id] += int(row["n_read_pairs"])
+
     os.makedirs(f"delivery_analyses/{delivery}", exist_ok=True)
     with gzip.open(
         f"deliveries/{delivery}/output/results/virus_hits_filtered.tsv.gz", "rt"
@@ -168,3 +175,10 @@ for delivery in target_deliveries:
 
     for count, taxid in sorted((c, t) for (t, c) in taxid_counts.items()):
         print(count, taxid, taxid_names[taxid])
+
+
+with open("n_reads_per_ww_sample.tsv", "wt") as outf:
+    writer = csv.writer(outf, delimiter="\t")
+    writer.writerow(["sample", "reads"])
+    for sample, reads in sorted(sample_reads.items()):
+        writer.writerow([sample, reads])
