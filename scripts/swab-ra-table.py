@@ -39,8 +39,8 @@ with open(os.path.join("outputs", "n_reads_per_swab_sample.tsv")) as f:
 
 
 # Create per-category counts and get treatment for each sample
-date_loc_read_counts = defaultdict(int)
-treatment_read_counts = defaultdict(int)
+date_loc_read_counts = Counter()
+treatment_read_counts = Counter()
 sample_treatment = {}
 
 for delivery in target_deliveries:
@@ -147,7 +147,7 @@ for (date, location, pathogen), counts in samples.items():
     samples[(date, location, pathogen)]["all_reads"] = n_reads
 
 for (date, location, pathogen, treatment), counts in treatment_samples.items():
-    
+
     n_reads = treatment_read_counts[treatment]
     treatment_samples[(date, location, pathogen, treatment)]["all_reads"] = n_reads
 
