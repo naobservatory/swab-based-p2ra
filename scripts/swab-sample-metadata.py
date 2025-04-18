@@ -53,7 +53,7 @@ with open("[2024] Zephyr sample log - Sampling runs.tsv", "r") as f:
         read_number = date_loc_read_counts[(sample_date, location)]
         sample_data.append((sample_name, sample_date, location, sample_pool_size, read_number))
 
-
+# Writing metadata
 with open("swab-sample-metadata.tsv", "wt") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow(["sample", "date", "location", "pool_size", "all_reads"])

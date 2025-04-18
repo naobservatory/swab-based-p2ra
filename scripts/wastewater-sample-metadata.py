@@ -22,7 +22,9 @@ with open(os.path.join("outputs", "n_reads_per_ww_sample.tsv")) as f:
 
 data = set()
 
-date_loc_read_counts = Counter(
+date_loc_read_counts = Counter()
+
+# Reading metadata
 for delivery in target_deliveries:
     with open(
         os.path.join("..", "mgs-metadata", "deliveries", delivery, "metadata.tsv")
@@ -30,7 +32,6 @@ for delivery in target_deliveries:
         reader = csv.DictReader(f, delimiter="\t")
         for row in reader:
             sample = row["sample"]
-
             fine_location = row["fine_location"]
             sample_id = row["sample"]
 
@@ -44,18 +45,11 @@ for delivery in target_deliveries:
                 continue
 
             date = datetime.strptime(row["date"], "%Y-%m-%d")
-
-
-
             date_loc_read_counts[(date, fine_location)] += read_counts.get(sample, 0)
             sample = f"{date.strftime('%y%m%d')}-{fine_location}"
-
-
             data.add((sample, date, fine_location))
 
-
-
-
+# Writing metadata
 with open("wastewater-sample-metadata.tsv", "wt") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow(["sample", "date", "location", "all_reads"])
