@@ -5,3 +5,6 @@ genomes/
 index/
 validation-work/*
 validation-output/
+.Rproj.user
+*.Rhistory
+*.Rproj
