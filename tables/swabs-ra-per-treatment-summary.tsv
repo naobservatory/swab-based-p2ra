@@ -1,0 +1,49 @@
+date	location	species	pathogen	treatment	non_dedup	dedup	all_reads
+250107	BoDT	Rhinovirus C	Rhinovirus C56	Filtration, CP, Zymo, Polyadenylated	12	12	328894
+250109	BoDT	RSV-B	RSVB	Filtration, CP, Qiagen, Polyadenylated	2	2	542383
+250113	BoDT	HCoV-OC43	Human coronavirus OC43	Filtration, Qiagen	4	3	1637488
+250113	BoDT	Rhinovirus A	Rhinovirus A94	Filtration, CP, Qiagen, Polyadenylated	1	1	542383
+250113	BoDT	Rhinovirus A	Rhinovirus A94	Filtration, Qiagen	6	5	1637488
+250115	BoDT	HCoV-NL63	Human coronavirus NL63	Filtration, Qiagen	19	14	1637488
+250116	BoDT	HCoV-NL63	Human coronavirus NL63	Filtration, Amicon, Qiagen	12	9	842301
+250116	BoDT	HCoV-NL63	Human coronavirus NL63	Filtration, Qiagen	1	1	1637488
+250116	BoDT	HCoV-OC43	Human coronavirus OC43	Filtration, Qiagen	1	1	1637488
+250116	BoDT	RSV-A	RSVA	Filtration, Amicon, Qiagen	10	10	842301
+250116	BoDT	RSV-A	RSVA	Filtration, Qiagen	1	0	1637488
+250123	BoDT	HCoV-HKU1	Human coronavirus HKU1	Filtration, Amicon, Qiagen	1	1	842301
+250123	BoDT	HCoV-HKU1	Human coronavirus HKU1	Filtration, Qiagen	130	74	1637488
+250123	BoDT	HCoV-NL63	Human coronavirus NL63	Filtration, Qiagen	2	2	1637488
+250123	BoDT	Rhinovirus C	Rhinovirus C42	Filtration, Amicon, Qiagen	3	3	842301
+250123	BoDT	Rhinovirus C	Rhinovirus C42	Filtration, Qiagen	5	4	1637488
+250127	BoDT	HPIV4b	HPIV4	Filtration, CP, Qiagen | cDNA input: = 1009.6 ng	1	1	395488
+250127	BoDT	HPIV4b	HPIV4	Filtration, CP, Qiagen | cDNA input: = 44.17 ng	1	1	131889
+250127	BoDT	HPIV4b	HPIV4	Filtration, Qiagen | cDNA input: = 44.64 ng	1	1	161683
+250127	BoDT	HCoV-OC43	Human coronavirus OC43	Filtration, CP, Qiagen	5	5	128548
+250127	BoDT	HCoV-OC43	Human coronavirus OC43	Filtration, CP, Qiagen | cDNA input: = 1009.6 ng	2	2	395488
+250127	BoDT	HCoV-OC43	Human coronavirus OC43	Filtration, Qiagen | cDNA input: = 44.64 ng	1	1	161683
+250127	BoDT	Rhinovirus A	Rhinovirus A34	Filtration, CP, Qiagen	2	2	128548
+250127	BoDT	Rhinovirus A	Rhinovirus A34	Filtration, CP, Qiagen | cDNA input: = 1009.6 ng	5	5	395488
+250127	BoDT	Rhinovirus B	Rhinovirus B37	Filtration, CP, Qiagen	2	2	128548
+250127	BoDT	Rhinovirus B	Rhinovirus B37	Filtration, CP, Qiagen | cDNA input: = 1009.6 ng	19	18	395488
+250127	BoDT	Rhinovirus B	Rhinovirus B37	Filtration, CP, Qiagen | cDNA input: = 44.17 ng	3	3	131889
+250127	BoDT	Rhinovirus B	Rhinovirus B37	Filtration, Qiagen | cDNA input: = 44.64 ng	4	4	161683
+250129	BoDT	HCoV-229E	Human coronavirus 229E	Filtration, CP, Qiagen | cDNA input: = 30.6 ng	1820	1215	351910
+250129	BoDT	HCoV-229E	Human coronavirus 229E	Filtration, CP, Qiagen | cDNA input: = 816 ng	1636	1530	287006
+250129	BoDT	HCoV-229E	Human coronavirus 229E	Filtration, Qiagen | cDNA input: = < 32 ng	3696	3215	736242
+250129	BoDT	HCoV-NL63	Human coronavirus NL63	Filtration, Qiagen | cDNA input: = < 32 ng	3	3	736242
+250129	BoDT	HCoV-OC43	Human coronavirus OC43	Filtration, CP, Qiagen | cDNA input: = 30.6 ng	52	34	351910
+250129	BoDT	HCoV-OC43	Human coronavirus OC43	Filtration, CP, Qiagen | cDNA input: = 816 ng	43	39	287006
+250129	BoDT	HCoV-OC43	Human coronavirus OC43	Filtration, Qiagen | cDNA input: = < 32 ng	96	88	736242
+250129	BoDT	Rhinovirus C	Rhinovirus C36	Filtration, CP, Qiagen | cDNA input: = 30.6 ng	4	4	351910
+250129	BoDT	Rhinovirus C	Rhinovirus C36	Filtration, CP, Qiagen | cDNA input: = 816 ng	43	39	287006
+250129	BoDT	Rhinovirus C	Rhinovirus C36	Filtration, Qiagen | cDNA input: = < 32 ng	41	36	736242
+250129	BoDT	Rhinovirus C	Rhinovirus C42	Filtration, CP, Qiagen | cDNA input: = 816 ng	1	1	287006
+250204	BoDT	HCoV-OC43	Human coronavirus OC43	Filtration, CP, Qiagen | cDNA input: = 771.2 ng	3	3	283834
+250204	BoDT	Rhinovirus C	Rhinovirus C2	Filtration, CP, Qiagen | cDNA input: = 33.74 ng	3	3	240475
+250204	BoDT	Rhinovirus C	Rhinovirus C2	Filtration, CP, Qiagen | cDNA input: = 771.2 ng	7	7	283834
+250204	BoDT	Rhinovirus C	Rhinovirus C2	Filtration, Qiagen | cDNA input: = < 32 ng	1	1	736242
+250204	BoDT	SARS-CoV-2	Severe acute respiratory syndrome coronavirus 2	Filtration, CP, Qiagen | cDNA input: = 33.74 ng	25	21	240475
+250204	BoDT	SARS-CoV-2	Severe acute respiratory syndrome coronavirus 2	Filtration, CP, Qiagen | cDNA input: = 771.2 ng	43	43	283834
+250204	BoDT	SARS-CoV-2	Severe acute respiratory syndrome coronavirus 2	Filtration, Qiagen | cDNA input: = < 32 ng	14	14	736242
+250205	BoDT	Rhinovirus A	Rhinovirus A34	Filtration, CP, Qiagen | DNAse	1	1	439325
+250212	BoDT	Influenza A	H1N1	Filtration, CP, Qiagen | DNAse	1	1	439325

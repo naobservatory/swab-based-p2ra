@@ -1,0 +1,26 @@
+date	location	species	assignment	non_dedup_hv	dedup_hv	all_reads
+250107	BoDT	Rhinovirus C	Rhinovirus C56	12	12	328894
+250109	BoDT	RSV-B	RSVB	2	2	243294
+250113	BoDT	HCoV-OC43	Human coronavirus OC43	4	3	407678
+250113	BoDT	Rhinovirus A	Rhinovirus A94	7	6	407678
+250115	BoDT	HCoV-NL63	Human coronavirus NL63	19	14	857131
+250116	BoDT	HCoV-OC43	Human coronavirus OC43	1	1	226099
+250116	BoDT	RSV-A	RSVA	11	10	226099
+250116	BoDT	HCoV-NL63	Human coronavirus NL63	13	10	226099
+250123	BoDT	HCoV-HKU1	Human coronavirus HKU1	131	75	753766
+250123	BoDT	Rhinovirus C	Rhinovirus C42	8	7	753766
+250123	BoDT	HCoV-NL63	Human coronavirus NL63	2	2	753766
+250127	BoDT	HPIV4b	HPIV4	3	3	817608
+250127	BoDT	HCoV-OC43	Human coronavirus OC43	8	8	817608
+250127	BoDT	Rhinovirus B	Rhinovirus B37	28	27	817608
+250127	BoDT	Rhinovirus A	Rhinovirus A34	7	7	817608
+250129	BoDT	HCoV-OC43	Human coronavirus OC43	191	161	1238229
+250129	BoDT	HCoV-NL63	Human coronavirus NL63	3	3	1238229
+250129	BoDT	Rhinovirus C	Rhinovirus C42	1	1	1238229
+250129	BoDT	Rhinovirus C	Rhinovirus C36	88	79	1238229
+250129	BoDT	HCoV-229E	Human coronavirus 229E	7152	5960	1238229
+250204	BoDT	HCoV-OC43	Human coronavirus OC43	3	3	661238
+250204	BoDT	Rhinovirus C	Rhinovirus C2	11	11	661238
+250204	BoDT	SARS-CoV-2	Severe acute respiratory syndrome coronavirus 2	82	78	661238
+250205	BoDT	Rhinovirus A	Rhinovirus A34	1	1	175859
+250212	BoDT	Influenza A	H1N1	1	1	216826
