@@ -5,6 +5,9 @@ from datetime import datetime
 import os
 from collections import Counter
 
+# Constants and paths
+tables_dir = "tables"
+os.makedirs(tables_dir, exist_ok=True)
 target_deliveries = [
     "NAO-ONT-20250120-Zephyr8",
     "NAO-ONT-20250127-Zephyr9",
@@ -54,7 +57,7 @@ with open("[2024] Zephyr sample log - Sampling runs.tsv", "r") as f:
         sample_data.append((sample_name, sample_date, location, sample_pool_size, read_number))
 
 # Writing metadata
-with open("swab-sample-metadata.tsv", "wt") as outf:
+with open(os.path.join(tables_dir, "swab-sample-metadata.tsv"), "wt") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow(["sample", "date", "location", "pool_size", "all_reads"])
     for sample in sorted(sample_data):
