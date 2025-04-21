@@ -85,7 +85,7 @@ for delivery in target_deliveries:
             "aws",
             "s3",
             "sync",
-            f"s3://nao-mgs-simon/v2.8.3.2{delivery}/output/results",
+            f"s3://nao-mgs-simon/v2.8.3.2/{delivery}/output/results",
             f"deliveries/{delivery}/output/results",
         ]
     )
