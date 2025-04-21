@@ -160,6 +160,7 @@ def pathogens_to_ignore():
         "Enterovirus C99",
         "Enterovirus D68",
         "Human mastadenovirus A",
+        "Human mastadenovirus F",
         "Human mastadenovirus B114",
         "Poliovirus 2",
         "Human adenovirus 5",
