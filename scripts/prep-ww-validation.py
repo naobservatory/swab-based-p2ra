@@ -100,8 +100,10 @@ for dedup_group_tsv in os.listdir("deliveries/dedup-reads"):
             read_id = row["seq_id"]
             dup_read_id = row["bowtie2_dup_exemplar"]
             # Dropping duplicates
-            if dup_read_id != read_id:
-                continue
+            if dup_read_id == read_id:
+                is_duplicate = False
+            else:
+                is_duplicate = True
             taxid = int(row["bowtie2_taxid_best"])
             # Excluding viruses we don't want to validate
             if taxid not in retain_taxids or not descends_from_target(taxid):
@@ -139,11 +141,11 @@ for dedup_group_tsv in os.listdir("deliveries/dedup-reads"):
             ):
                 if taxid == SARS_COV_2_TAXID:
                     sars_reads[sample_delivery].append(
-                        (taxid, seq, qual, date, fine_location, read_id, sample_id)
+                        (taxid, seq, qual, date, fine_location, read_id, sample_id, is_duplicate)
                     )
                 else:
                     to_validate[sample_delivery].append(
-                        (taxid, seq, qual, date, fine_location, read_id, sample_id)
+                        (taxid, seq, qual, date, fine_location, read_id, sample_id, is_duplicate)
                     )
 
             taxid_counts[sample_delivery][taxid] += 1
@@ -159,12 +161,12 @@ for delivery in target_deliveries:
     ) as outf:
         outf.write(
             "\t".join(
-                ("taxid", "sequence", "quality", "date", "loc", "read_id", "sample_id")
+                ("taxid", "sequence", "quality", "date", "loc", "read_id", "sample_id", "is_duplicate")
             )
             + "\n"
         )
-        for record in sorted(delivery_to_validate):
-            outf.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % record)
+        for taxid, seq, qual, date, loc, read_id, sample_id, is_duplicate in sorted(delivery_to_validate):
+            outf.write("\t".join((str(taxid), seq, qual, date, loc, read_id, sample_id, str(is_duplicate))) + "\n")
 
     # To make online BLASTing work, write to_validate sequences to FASTA files, 1000 reads per file
     part_num = 1
@@ -173,8 +175,8 @@ for delivery in target_deliveries:
         with open(
             f"delivery_analyses/{delivery}/to_validate_part_{part_num}.fasta", "w"
         ) as fasta_out:
-            for taxid, seq, qual, date, loc, read_id, sample_id in chunk:
-                fasta_out.write(f">{read_id}::{loc}::{date}\n{seq}\n")
+            for taxid, seq, qual, date, loc, read_id, sample_id, is_duplicate in chunk:
+                fasta_out.write(f">{read_id}::{loc}::{date}::{sample_id}\n{seq}\n")
         part_num += 1
 
     # For offline BLASTing, write to_validate sequences to a single FASTA file
@@ -182,7 +184,7 @@ for delivery in target_deliveries:
         f"delivery_analyses/{delivery}/to_validate.fasta",
         "w",
     ) as fasta_overall:
-        for taxid, seq, qual, date, loc, read_id, sample_id in delivery_to_validate:
+        for taxid, seq, qual, date, loc, read_id, sample_id, is_duplicate in delivery_to_validate:
             fasta_overall.write(f">{read_id}::{loc}::{date}::{sample_id}\n{seq}\n")
 
     # Write SARS-CoV-2 reads to a separate FASTA file
@@ -190,11 +192,11 @@ for delivery in target_deliveries:
         f"delivery_analyses/{delivery}/non_validated.tsv.gz", "wt"
     ) as outf:
         outf.write(
-            "\t".join(("taxid", "sequence", "quality", "date", "loc", "read_id", "sample_id"))
+            "\t".join(("taxid", "sequence", "quality", "date", "loc", "read_id", "sample_id", "is_duplicate"))
             + "\n"
         )
-        for record in sorted(delivery_sars_reads):
-            outf.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % record)
+        for taxid, seq, qual, date, loc, read_id, sample_id, is_duplicate in sorted(delivery_sars_reads):
+            outf.write("\t".join((str(taxid), seq, qual, date, loc, read_id, sample_id, str(is_duplicate))) + "\n")
 
     for count, taxid in sorted((c, t) for (t, c) in delivery_taxid_counts.items()):
         print(count, taxid, taxid_names[taxid])
