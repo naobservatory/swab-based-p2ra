@@ -141,6 +141,7 @@ def second_level_mapping(assignment):
 
 def pathogens_to_ignore():
     # We're restricting our analysis to RNA respiratory pathogens. Our goal is to make a comparison between wastewater and swabs, and our swab protocol includes a DNase step.
+    return [
         "Apodemus agrarius picornavirus strain Longwan-Rn37 polyprotein",
         "Coxsackievirus A1",
         "Coxsackievirus A19",
