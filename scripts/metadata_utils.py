@@ -140,7 +140,7 @@ def second_level_mapping(assignment):
 
 
 def pathogens_to_ignore():
-    # We're restricting our analysis to respiratory pathogens
+    # We're restricting our analysis to respiratory pathogens and non-DNA respiratory pathogens (DNA pathogens are unlikely to be found due to a DNAse step in swab processing protocol)
     return [
         "Apodemus agrarius picornavirus strain Longwan-Rn37 polyprotein",
         "Coxsackievirus A1",
