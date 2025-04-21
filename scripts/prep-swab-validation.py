@@ -68,8 +68,6 @@ def check_dup(date, fine_location, genome_id, minimap2_ref_start, minimap2_ref_e
     past_observations[key].append((minimap2_ref_start, minimap2_ref_end))
     return is_duplicate
 
-sample_reads = defaultdict(int)
-
 for delivery in target_deliveries:
     taxid_counts = Counter()
     to_validate = []
@@ -85,16 +83,11 @@ for delivery in target_deliveries:
             "aws",
             "s3",
             "sync",
-            f"s3://nao-mgs-simon/v2.8.3.2{delivery}/output/results",
+            f"s3://nao-mgs-simon/v2.8.3.2/{delivery}/output/results",
             f"deliveries/{delivery}/output/results",
         ]
     )
     os.makedirs(f"delivery_analyses/{delivery}", exist_ok=True)
-
-    with gzip.open(f"deliveries/{delivery}/output/results/read_counts.tsv.gz", "rt") as inf:
-        for row in csv.DictReader(inf, delimiter="\t"):
-            sample_id = row["sample"]
-            sample_reads[sample_id] += int(row["n_reads_single"])
 
     with gzip.open(f"deliveries/{delivery}/output/results/hv.tsv.gz", "rt") as inf:
         for row in csv.DictReader(inf, delimiter="\t"):
@@ -203,8 +196,3 @@ for delivery in target_deliveries:
 
 print(f"Total reads to validate: {total_reads_to_validate}")
 
-with open("n_reads_per_swab_sample.tsv", "wt") as outf:
-    writer = csv.writer(outf, delimiter="\t")
-    writer.writerow(["sample", "reads"])
-    for sample, reads in sorted(sample_reads.items()):
-        writer.writerow([sample, reads])

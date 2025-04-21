@@ -3,8 +3,11 @@
 import csv
 from datetime import datetime
 import os
-from collections import Counter
+from collections import Counter, defaultdict
 
+# Constants and paths
+tables_dir = "tables"
+os.makedirs(tables_dir, exist_ok=True)
 target_deliveries = [
     "NAO-ONT-20250120-Zephyr8",
     "NAO-ONT-20250127-Zephyr9",
@@ -40,7 +43,7 @@ for delivery in target_deliveries:
 
 
 # Getting sample pool size
-sample_data = []
+sample_data = defaultdict(int)
 with open("[2024] Zephyr sample log - Sampling runs.tsv", "r") as f:
     reader = csv.DictReader(f, delimiter="\t")
     for row in reader:
@@ -48,16 +51,17 @@ with open("[2024] Zephyr sample log - Sampling runs.tsv", "r") as f:
         sample_date = datetime.strptime(row["date collected"], "%Y-%m-%d")
         if sample_date < datetime(2025, 1, 1) or sample_date > datetime(2025, 2, 25):
             continue
-        sample_pool_size = row["total swabs"]
+        sample_pool_size = int(row["total swabs"])
         location = row["sample source"]
         read_number = date_loc_read_counts[(sample_date, location)]
-        sample_data.append((sample_name, sample_date, location, sample_pool_size, read_number))
+        sample_data[sample_name,sample_date, location, read_number] += sample_pool_size
+
 
 # Writing metadata
-with open("swab-sample-metadata.tsv", "wt") as outf:
+with open(os.path.join(tables_dir, "swab-sample-metadata.tsv"), "wt") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow(["sample", "date", "location", "pool_size", "all_reads"])
-    for sample in sorted(sample_data):
-        sample_name, sample_date, location, sample_pool_size, read_number = sample
+    for sample_info, sample_pool_size in sorted(sample_data.items()):
+        sample_name, sample_date, location, read_number = sample_info
         sample_date_str = sample_date.strftime("%y%m%d")
         writer.writerow([sample_name, sample_date_str, location, sample_pool_size, read_number])

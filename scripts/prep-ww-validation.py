@@ -8,9 +8,7 @@ import subprocess
 from collections import defaultdict, Counter
 from datetime import datetime
 from dateutil import parser
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from scripts.taxonomy import load_taxonomy_names, load_human_infecting_taxids, load_taxonomy_tree
+from taxonomy import load_taxonomy_names, load_human_infecting_taxids, load_taxonomy_tree
 
 parents, children = load_taxonomy_tree()
 taxid_names = load_taxonomy_names()
@@ -31,6 +29,8 @@ dashboard_dir = os.path.expanduser("~/code/mgs-restricted/dashboard")
 with open(os.path.join(dashboard_dir, "metadata_samples.json")) as f:
     metadata_samples = json.load(f)
 
+with open(os.path.join(dashboard_dir, "metadata_deliveries.json")) as f:
+    metadata_deliveries = json.load(f)
 
 # Even before BLASTing, some viruses we already want to exclude (due to these being GI viruses)
 taxids_to_exclude = [
@@ -67,39 +67,58 @@ def descends_from_target(taxid, cache={}):
 
 sample_reads = defaultdict(int)
 
-# We don't add SARS-CoV-2 to the validation set because BLAST is disproprtionately slow on SARS-CoV-2 reads (as there are so many reference genomes for SARS-CoV-2)
+# Getting dedup reads and setting up directories
+
+subprocess.run(
+    [
+        "aws",
+        "s3",
+        "sync",
+        "--include",
+        "*duplicate_reads*",
+        "--exclude",
+        "*duplicate_stats*",
+        "s3://nao-mgs-simon/ww-dedup/output/results_downstream/",
+        "deliveries/dedup-reads",
+    ]
+)
 
 for delivery in target_deliveries:
-    print(delivery)
-    taxid_counts = Counter()
-    to_validate = []
-    sars_reads = []
-    subprocess.run(
-        [
-            "aws",
-            "s3",
-            "sync",
-            f"s3://nao-mgs-simon/{delivery}/2.8.1/20250314/output/results",
-            f"deliveries/{delivery}/output/results",
-        ]
-    )
-
-
-    with gzip.open(f"deliveries/{delivery}/output/results/read_counts.tsv.gz", "rt") as inf:
-        for row in csv.DictReader(inf, delimiter="\t"):
-            sample_id = row["sample"]
-            sample_reads[sample_id] += int(row["n_read_pairs"])
-
     os.makedirs(f"delivery_analyses/{delivery}", exist_ok=True)
+
+# We don't add SARS-CoV-2 to the validation set because BLAST is disproprtionately slow on SARS-CoV-2 reads (as there are so many reference genomes for SARS-CoV-2)
+taxid_counts = defaultdict(Counter)
+to_validate = defaultdict(list)
+sars_reads = defaultdict(list)
+
+for dedup_group_tsv in os.listdir("deliveries/dedup-reads"):
     with gzip.open(
-        f"deliveries/{delivery}/output/results/virus_hits_filtered.tsv.gz", "rt"
+        f"deliveries/dedup-reads/{dedup_group_tsv}", "rt"
     ) as inf:
+
         for row in csv.DictReader(inf, delimiter="\t"):
+            read_id = row["seq_id"]
+            dup_read_id = row["bowtie2_dup_exemplar"]
+            # Dropping duplicates
+            if dup_read_id == read_id:
+                is_duplicate = False
+            else:
+                is_duplicate = True
             taxid = int(row["bowtie2_taxid_best"])
+            # Excluding viruses we don't want to validate
             if taxid not in retain_taxids or not descends_from_target(taxid):
                 continue
-            read_id = row["seq_id"]
+
             sample_id = row["sample"].rsplit("_", 1)[0]
+            # Get the delivery for this sample by searching through metadata_deliveries
+            sample_delivery = None
+            for delivery_name, delivery_info in metadata_deliveries.items():
+                if "samples" in delivery_info and sample_id in delivery_info["samples"]:
+                    sample_delivery = delivery_name
+                    break
+
+            if sample_delivery is None:
+                raise ValueError(f"Could not find delivery for sample {sample_id}")
 
             sample_metadata = metadata_samples[sample_id]
             date = sample_metadata["date"]
@@ -121,37 +140,43 @@ for delivery in target_deliveries:
                 (query_qual_fwd, query_qual_rev),
             ):
                 if taxid == SARS_COV_2_TAXID:
-                    sars_reads.append(
-                        (taxid, seq, qual, date, fine_location, read_id, sample_id)
+                    sars_reads[sample_delivery].append(
+                        (taxid, seq, qual, date, fine_location, read_id, sample_id, is_duplicate)
                     )
                 else:
-                    to_validate.append(
-                        (taxid, seq, qual, date, fine_location, read_id, sample_id)
+                    to_validate[sample_delivery].append(
+                        (taxid, seq, qual, date, fine_location, read_id, sample_id, is_duplicate)
                     )
 
-            taxid_counts[taxid] += 1
+            taxid_counts[sample_delivery][taxid] += 1
+
+
+for delivery in target_deliveries:
+    delivery_sars_reads = sars_reads[delivery]
+    delivery_to_validate = to_validate[delivery]
+    delivery_taxid_counts = taxid_counts[delivery]
 
     with gzip.open(
         f"delivery_analyses/{delivery}/to_validate.tsv.gz", "wt"
     ) as outf:
         outf.write(
             "\t".join(
-                ("taxid", "sequence", "quality", "date", "loc", "read_id", "sample_id")
+                ("taxid", "sequence", "quality", "date", "loc", "read_id", "sample_id", "is_duplicate")
             )
             + "\n"
         )
-        for record in sorted(to_validate):
-            outf.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % record)
+        for taxid, seq, qual, date, loc, read_id, sample_id, is_duplicate in sorted(delivery_to_validate):
+            outf.write("\t".join((str(taxid), seq, qual, date, loc, read_id, sample_id, str(is_duplicate))) + "\n")
 
     # To make online BLASTing work, write to_validate sequences to FASTA files, 1000 reads per file
     part_num = 1
-    for i in range(0, len(to_validate), 1000):
-        chunk = to_validate[i : i + 1000]
+    for i in range(0, len(delivery_to_validate), 1000):
+        chunk = delivery_to_validate[i : i + 1000]
         with open(
             f"delivery_analyses/{delivery}/to_validate_part_{part_num}.fasta", "w"
         ) as fasta_out:
-            for taxid, seq, qual, date, loc, read_id, sample_id in chunk:
-                fasta_out.write(f">{read_id}::{loc}::{date}\n{seq}\n")
+            for taxid, seq, qual, date, loc, read_id, sample_id, is_duplicate in chunk:
+                fasta_out.write(f">{read_id}::{loc}::{date}::{sample_id}\n{seq}\n")
         part_num += 1
 
     # For offline BLASTing, write to_validate sequences to a single FASTA file
@@ -159,7 +184,7 @@ for delivery in target_deliveries:
         f"delivery_analyses/{delivery}/to_validate.fasta",
         "w",
     ) as fasta_overall:
-        for taxid, seq, qual, date, loc, read_id, sample_id in to_validate:
+        for taxid, seq, qual, date, loc, read_id, sample_id, is_duplicate in delivery_to_validate:
             fasta_overall.write(f">{read_id}::{loc}::{date}::{sample_id}\n{seq}\n")
 
     # Write SARS-CoV-2 reads to a separate FASTA file
@@ -167,18 +192,11 @@ for delivery in target_deliveries:
         f"delivery_analyses/{delivery}/non_validated.tsv.gz", "wt"
     ) as outf:
         outf.write(
-            "\t".join(("taxid", "sequence", "quality", "date", "loc", "read_id", "sample_id"))
+            "\t".join(("taxid", "sequence", "quality", "date", "loc", "read_id", "sample_id", "is_duplicate"))
             + "\n"
         )
-        for record in sorted(sars_reads):
-            outf.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % record)
+        for taxid, seq, qual, date, loc, read_id, sample_id, is_duplicate in sorted(delivery_sars_reads):
+            outf.write("\t".join((str(taxid), seq, qual, date, loc, read_id, sample_id, str(is_duplicate))) + "\n")
 
-    for count, taxid in sorted((c, t) for (t, c) in taxid_counts.items()):
+    for count, taxid in sorted((c, t) for (t, c) in delivery_taxid_counts.items()):
         print(count, taxid, taxid_names[taxid])
-
-
-with open("n_reads_per_ww_sample.tsv", "wt") as outf:
-    writer = csv.writer(outf, delimiter="\t")
-    writer.writerow(["sample", "reads"])
-    for sample, reads in sorted(sample_reads.items()):
-        writer.writerow([sample, reads])

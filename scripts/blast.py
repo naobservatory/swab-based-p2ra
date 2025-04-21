@@ -150,7 +150,7 @@ with open(blast_results) as inf:
         key = read_dates[read_id], read_locs[read_id], genome
         if key not in past_observations:
             past_observations[key] = []
-            dedup_observations[key] = [] # Note, might we want to have the key be the underlying sample? That way we differentiate between MU and NAO samples.
+            dedup_observations[key] = []
 
         genome_start = min(int(genome_start_raw), int(genome_end_raw))
         genome_end = max(int(genome_start_raw), int(genome_end_raw))

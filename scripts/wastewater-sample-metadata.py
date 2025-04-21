@@ -5,6 +5,11 @@ from datetime import datetime
 import os
 from collections import Counter
 from dateutil import parser
+
+# Constants and paths
+tables_dir = "tables"
+os.makedirs(tables_dir, exist_ok=True)
+
 target_deliveries = [
     "MJ-2025-01-20-a",
     "MJ-2025-01-20-b",
@@ -50,7 +55,7 @@ for delivery in target_deliveries:
             data.add((sample, date, fine_location))
 
 # Writing metadata
-with open("wastewater-sample-metadata.tsv", "wt") as outf:
+with open(os.path.join(tables_dir, "wastewater-sample-metadata.tsv"), "wt") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow(["sample", "date", "location", "all_reads"])
     for sample in sorted(data):
