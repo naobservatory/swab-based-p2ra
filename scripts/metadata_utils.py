@@ -140,8 +140,7 @@ def second_level_mapping(assignment):
 
 
 def pathogens_to_ignore():
-    # We're restricting our analysis to respiratory pathogens
-    return [
+    # We're restricting our analysis to RNA respiratory pathogens. Our goal is to make a comparison between wastewater and swabs, and our swab protocol includes a DNase step.
         "Apodemus agrarius picornavirus strain Longwan-Rn37 polyprotein",
         "Coxsackievirus A1",
         "Coxsackievirus A19",
@@ -160,6 +159,7 @@ def pathogens_to_ignore():
         "Enterovirus C99",
         "Enterovirus D68",
         "Human mastadenovirus A",
+        "Human mastadenovirus F",
         "Human mastadenovirus B114",
         "Poliovirus 2",
         "Human adenovirus 5",
