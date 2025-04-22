@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import csv
+import json
 from datetime import datetime
 import os
 from collections import Counter
@@ -10,13 +11,10 @@ from dateutil import parser
 tables_dir = "tables"
 os.makedirs(tables_dir, exist_ok=True)
 
-target_deliveries = [
-    "MJ-2025-01-20-a",
-    "MJ-2025-01-20-b",
-    "MJ-2025-02-12",
-    "MJ-2025-03-01",
-    "NAO-BCL-2025-03-03",
-]
+with open("deliveries.json") as f:
+    deliveries = json.load(f)
+
+target_deliveries = deliveries["ww-deliveries"]
 
 
 # Load counts

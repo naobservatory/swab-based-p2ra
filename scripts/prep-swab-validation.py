@@ -15,16 +15,11 @@ parents, children = load_taxonomy_tree()
 taxid_names = load_taxonomy_names()
 retain_taxids = load_human_infecting_taxids()
 
-target_deliveries = [
-    "NAO-ONT-20250120-Zephyr8",
-    "NAO-ONT-20250127-Zephyr9",
-    "NAO-ONT-20250213-Zephyr10",
-    "NAO-ONT-20250213-Zephyr10-QC",
-    "NAO-ONT-20250220-Zephyr11",
-    "NAO-ONT-20250226-Zephyr10-QC2",
-    "NAO-ONT-20250313-Zephyr12",
-    "NAO-ONT-20250328-Zephyr12b"
-]
+with open("deliveries.json") as f:
+    deliveries = json.load(f)
+
+target_deliveries = deliveries["swab-deliveries"]
+
 
 HCOV_299E_TAXID = 11137
 SARS_COV_2_TAXID = 2697049

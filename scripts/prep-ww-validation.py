@@ -14,13 +14,10 @@ parents, children = load_taxonomy_tree()
 taxid_names = load_taxonomy_names()
 retain_taxids = load_human_infecting_taxids()
 
-target_deliveries = [
-    "MJ-2025-01-20-a",
-    "MJ-2025-01-20-b",
-    "MJ-2025-02-12",
-    "MJ-2025-03-01",
-    "NAO-BCL-2025-03-03",
-]
+with open("deliveries.json") as f:
+    deliveries = json.load(f)
+
+target_deliveries = deliveries["ww-deliveries"]
 
 FASTA_VALIDATE_CHUNK_SIZE = 1000
 
