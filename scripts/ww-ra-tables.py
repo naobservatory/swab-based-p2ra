@@ -106,7 +106,6 @@ with open(os.path.join(validation_output_dir, "ww-non-validated-reads.tsv")) as 
 # Getting total reads
 # ---------------------------------------------------------------------
 
-# Get total reads for each grouping category
 for (date, location, pathogen), counts in samples.items():
     n_reads = date_loc_read_counts[(date, location)]
     samples[(date, location, pathogen)]["all_reads"] = n_reads
@@ -115,7 +114,6 @@ for (date, location, pathogen), counts in samples.items():
 # Output results
 # ---------------------------------------------------------------------
 
-# Output results
 with open(os.path.join("tables", "ww-ra-summary.tsv"), "w") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow([
