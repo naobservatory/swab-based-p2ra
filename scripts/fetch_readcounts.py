@@ -4,7 +4,7 @@ import os
 import csv
 import gzip
 import subprocess
-from collections import defaultdict
+from collections import Counter
 
 # Wastewater deliveries
 ww_deliveries = [
@@ -27,10 +27,12 @@ swab_deliveries = [
     "NAO-ONT-20250328-Zephyr12b"
 ]
 
-def fetch_wastewater_readcounts():
-    """Fetch and process read counts from wastewater samples."""
-    sample_reads = defaultdict(int)
+def fetch_readcounts():
+    """Fetch and process read counts from both wastewater and swab samples."""
+    ww_reads = Counter()
+    swab_reads = Counter()
 
+    # Process wastewater deliveries
     for delivery in ww_deliveries:
         # Create the directory structure
         os.makedirs(f"deliveries/{delivery}/output/results", exist_ok=True)
@@ -49,23 +51,18 @@ def fetch_wastewater_readcounts():
             with gzip.open(f"deliveries/{delivery}/output/results/read_counts.tsv.gz", "rt") as inf:
                 for row in csv.DictReader(inf, delimiter="\t"):
                     sample_id = row["sample"]
-                    sample_reads[sample_id] += int(row["n_read_pairs"])
+                    ww_reads[sample_id] += int(row["n_read_pairs"])
         except FileNotFoundError:
-            print(f"Warning: read_counts file not found for {delivery}")
+            raise ValueError(f"Read counts file not found for {delivery}")
 
-    # Write the results
+    # Write the wastewater results
     with open("n_reads_per_ww_sample.tsv", "wt") as outf:
         writer = csv.writer(outf, delimiter="\t")
         writer.writerow(["sample", "reads"])
-        for sample, reads in sorted(sample_reads.items()):
+        for sample, reads in sorted(ww_reads.items()):
             writer.writerow([sample, reads])
 
-    return sample_reads
-
-def fetch_swab_readcounts():
-    """Fetch and process read counts from swab samples."""
-    sample_reads = defaultdict(int)
-
+    # Process swab deliveries
     for delivery in swab_deliveries:
         # Create the directory structure
         os.makedirs(f"deliveries/{delivery}/output/results", exist_ok=True)
@@ -84,22 +81,21 @@ def fetch_swab_readcounts():
             with gzip.open(f"deliveries/{delivery}/output/results/read_counts.tsv.gz", "rt") as inf:
                 for row in csv.DictReader(inf, delimiter="\t"):
                     sample_id = row["sample"]
-                    sample_reads[sample_id] += int(row["n_reads_single"])
+                    swab_reads[sample_id] += int(row["n_reads_single"])
         except FileNotFoundError:
             print(f"Warning: read_counts file not found for {delivery}")
 
-    # Write the results
+    # Write the swab results
     with open("n_reads_per_swab_sample.tsv", "wt") as outf:
         writer = csv.writer(outf, delimiter="\t")
         writer.writerow(["sample", "reads"])
-        for sample, reads in sorted(sample_reads.items()):
+        for sample, reads in sorted(swab_reads.items()):
             writer.writerow([sample, reads])
 
-    return sample_reads
+    return ww_reads, swab_reads
 
 def main():
-    ww_reads = fetch_wastewater_readcounts()
-    swab_reads = fetch_swab_readcounts()
+    ww_reads, swab_reads = fetch_readcounts()
 
     # Write combined results if needed
     with open("n_reads_per_all_samples.tsv", "wt") as outf:
