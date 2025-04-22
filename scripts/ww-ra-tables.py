@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Standard library imports
 import csv
+import json
 import os
 from collections import defaultdict, Counter
 from datetime import datetime
@@ -13,7 +14,10 @@ validation_output_dir = "validation-output"
 tables_dir = "tables"
 os.makedirs(tables_dir, exist_ok=True)
 
+with open("deliveries.json") as f:
+    deliveries = json.load(f)
 
+target_deliveries = deliveries["ww-deliveries"]
 
 # ---------------------------------------------------------------------
 # Look‑ups
