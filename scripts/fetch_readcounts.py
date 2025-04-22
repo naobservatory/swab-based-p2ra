@@ -39,7 +39,8 @@ def fetch_readcounts():
                     sample_id = row["sample"]
                     ww_reads[sample_id] += int(row["n_read_pairs"])
         except FileNotFoundError:
-            raise ValueError(f"Read counts file not found for {delivery}")
+            raise Exception(f"Read counts file not found for {delivery}")
+
 
     # Write the wastewater results
     with open("n_reads_per_ww_sample.tsv", "wt") as outf:
@@ -69,7 +70,7 @@ def fetch_readcounts():
                     sample_id = row["sample"]
                     swab_reads[sample_id] += int(row["n_reads_single"])
         except FileNotFoundError:
-            print(f"Warning: read_counts file not found for {delivery}")
+            raise Exception(f"read_counts file not found for {delivery}")
 
     # Write the swab results
     with open("n_reads_per_swab_sample.tsv", "wt") as outf:
