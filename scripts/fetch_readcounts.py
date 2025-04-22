@@ -4,28 +4,14 @@ import os
 import csv
 import gzip
 import subprocess
+import json
 from collections import Counter
 
-# Wastewater deliveries
-ww_deliveries = [
-    "MJ-2025-01-20-a",
-    "MJ-2025-01-20-b",
-    "MJ-2025-02-12",
-    "MJ-2025-03-01",
-    "NAO-BCL-2025-03-03",
-]
+with open("deliveries.json") as f:
+    deliveries = json.load(f)
 
-# Swab deliveries
-swab_deliveries = [
-    "NAO-ONT-20250120-Zephyr8",
-    "NAO-ONT-20250127-Zephyr9",
-    "NAO-ONT-20250213-Zephyr10",
-    "NAO-ONT-20250213-Zephyr10-QC",
-    "NAO-ONT-20250220-Zephyr11",
-    "NAO-ONT-20250226-Zephyr10-QC2",
-    "NAO-ONT-20250313-Zephyr12",
-    "NAO-ONT-20250328-Zephyr12b"
-]
+ww_deliveries = deliveries["ww-deliveries"]
+swab_deliveries = deliveries["swab-deliveries"]
 
 def fetch_readcounts():
     """Fetch and process read counts from both wastewater and swab samples."""
