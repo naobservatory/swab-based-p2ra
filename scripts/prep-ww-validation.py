@@ -22,6 +22,8 @@ target_deliveries = [
     "NAO-BCL-2025-03-03",
 ]
 
+FASTA_VALIDATE_CHUNK_SIZE = 1000
+
 SARS_COV_2_TAXID = 2697049
 
 dashboard_dir = os.path.expanduser("~/code/mgs-restricted/dashboard")
@@ -99,11 +101,9 @@ for dedup_group_tsv in os.listdir("deliveries/dedup-reads"):
         for row in csv.DictReader(inf, delimiter="\t"):
             read_id = row["seq_id"]
             dup_read_id = row["bowtie2_dup_exemplar"]
-            # Dropping duplicates
-            if dup_read_id == read_id:
-                is_duplicate = False
-            else:
-                is_duplicate = True
+            # Identify duplicates
+            is_duplicate = dup_read_id != read_id
+
             taxid = int(row["bowtie2_taxid_best"])
             # Excluding viruses we don't want to validate
             if taxid not in retain_taxids or not descends_from_target(taxid):
@@ -165,13 +165,13 @@ for delivery in target_deliveries:
             )
             + "\n"
         )
-        for taxid, seq, qual, date, loc, read_id, sample_id, is_duplicate in sorted(delivery_to_validate):
-            outf.write("\t".join((str(taxid), seq, qual, date, loc, read_id, sample_id, str(is_duplicate))) + "\n")
+        for record in sorted(delivery_to_validate):
+            outf.write("\t".join(str(x) for x in record) + "\n")
 
     # To make online BLASTing work, write to_validate sequences to FASTA files, 1000 reads per file
     part_num = 1
-    for i in range(0, len(delivery_to_validate), 1000):
-        chunk = delivery_to_validate[i : i + 1000]
+    for i in range(0, len(delivery_to_validate), FASTA_VALIDATE_CHUNK_SIZE):
+        chunk = delivery_to_validate[i : i + FASTA_VALIDATE_CHUNK_SIZE]
         with open(
             f"delivery_analyses/{delivery}/to_validate_part_{part_num}.fasta", "w"
         ) as fasta_out:
@@ -195,8 +195,8 @@ for delivery in target_deliveries:
             "\t".join(("taxid", "sequence", "quality", "date", "loc", "read_id", "sample_id", "is_duplicate"))
             + "\n"
         )
-        for taxid, seq, qual, date, loc, read_id, sample_id, is_duplicate in sorted(delivery_sars_reads):
-            outf.write("\t".join((str(taxid), seq, qual, date, loc, read_id, sample_id, str(is_duplicate))) + "\n")
+        for record in sorted(delivery_sars_reads):
+            outf.write("\t".join(str(x) for x in record) + "\n")
 
     for count, taxid in sorted((c, t) for (t, c) in delivery_taxid_counts.items()):
         print(count, taxid, taxid_names[taxid])
