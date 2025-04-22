@@ -13,13 +13,7 @@ validation_output_dir = "validation-output"
 tables_dir = "tables"
 os.makedirs(tables_dir, exist_ok=True)
 
-target_deliveries = [
-    "MJ-2025-01-20-a",
-    "MJ-2025-01-20-b",
-    "MJ-2025-02-12",
-    "MJ-2025-03-01",
-    "NAO-BCL-2025-03-03",
-]
+
 
 # ---------------------------------------------------------------------
 # Look‑ups
@@ -70,16 +64,15 @@ with open(os.path.join(validation_output_dir, "ww-classified-all-reads.tsv")) as
         if not is_date_in_range(date):
             continue
 
-        location = row["loc"]
-        pathogen = row["genome_name"]
 
         duplicate = row["is_duplicate"]
 
+        key = date, row["loc"], row["genome_name"]
         if duplicate == "True":
-            samples[(date, location, pathogen)]["dedup"] += 1
+            samples[key]["dedup"] += 1
         else:
-            samples[(date, location, pathogen)]["non_dedup"] += 1
-            samples[(date, location, pathogen)]["dedup"] += 1
+            samples[key]["non_dedup"] += 1
+            samples[key]["dedup"] += 1
 
 # Process non-validated reads
 with open(os.path.join(validation_output_dir, "ww-non-validated-reads.tsv")) as f:
@@ -88,18 +81,19 @@ with open(os.path.join(validation_output_dir, "ww-non-validated-reads.tsv")) as 
         if not is_date_in_range(date):
             continue
 
-        location = row["loc"]
+
         taxid = row["taxid"]
         pathogen = taxid_names[int(taxid)]
-        if pathogen in pathogens_to_ignore():
-            continue
+
         duplicate = row["is_duplicate"]
 
+        key = date, row["loc"], pathogen
         if duplicate == "True":
-            samples[(date, location, pathogen)]["dedup"] += 1
+            samples[key]["dedup"] += 1
         else:
-            samples[(date, location, pathogen)]["non_dedup"] += 1
-            samples[(date, location, pathogen)]["dedup"] += 1
+            samples[key]["non_dedup"] += 1
+            samples[key]["dedup"] += 1
+
 
 
 # ---------------------------------------------------------------------
