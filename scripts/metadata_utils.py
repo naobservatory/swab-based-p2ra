@@ -46,6 +46,7 @@ def first_level_mapping(assignment):
         "Rhinovirus A94": "Rhinovirus A",
         "Rhinovirus B3": "Rhinovirus B",
         "Rhinovirus B37": "Rhinovirus B",
+        "Rhinovirus B101": "Rhinovirus B",
         "Rhinovirus B103": "Rhinovirus B",
         "Rhinovirus C": "Rhinovirus C",
         "Rhinovirus C1": "Rhinovirus C",

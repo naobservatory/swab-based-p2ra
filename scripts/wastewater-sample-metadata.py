@@ -6,6 +6,7 @@ from datetime import datetime
 import os
 from collections import Counter
 from dateutil import parser
+from metadata_utils import is_date_in_range
 
 # Constants and paths
 TABLE_DIR = "tables"
@@ -26,7 +27,6 @@ except FileNotFoundError:
     raise Exception("n_reads_per_ww_sample.tsv not found. Run fetch_readcounts.py first.")
 
 data = set()
-
 date_loc_read_counts = Counter()
 
 # Reading metadata
@@ -43,7 +43,7 @@ for delivery in target_deliveries:
             if fine_location not in ("DNI", "DSI"):
                 continue
 
-            if parser.parse(row["date"]) < datetime(2025, 1, 3):
+            if not is_date_in_range(parser.parse(row["date"])):
                 continue
 
             date = datetime.strptime(row["date"], "%Y-%m-%d")

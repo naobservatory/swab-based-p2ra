@@ -5,6 +5,7 @@ from datetime import datetime
 import os
 from collections import Counter, defaultdict
 import json
+from metadata_utils import is_date_in_range
 # Constants and paths
 TABLE_DIR = "tables"
 
@@ -35,7 +36,8 @@ for delivery in target_deliveries:
                 continue
             date = datetime.strptime(row["date"], "%Y-%m-%d")
             location = row["fine_location"]
-            treatment = row["notes"]
+            if not is_date_in_range(date):
+                continue
             date_loc_read_counts[(date, location)] += read_counts.get(sample, 0)
 
 
@@ -46,7 +48,7 @@ with open("[2024] Zephyr sample log - Sampling runs.tsv", "r") as f:
     for row in reader:
         sample_name = row["sample name"]
         sample_date = datetime.strptime(row["date collected"], "%Y-%m-%d")
-        if sample_date < datetime(2025, 1, 1) or sample_date > datetime(2025, 2, 25):
+        if not is_date_in_range(sample_date):
             continue
         sample_pool_size = int(row["total swabs"])
         location = row["sample source"]

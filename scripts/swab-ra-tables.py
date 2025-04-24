@@ -49,6 +49,8 @@ for delivery in target_deliveries:
                 continue
 
             date = datetime.strptime(row["date"], "%Y-%m-%d")
+            if not is_date_in_range(date):
+                continue
             location = row["fine_location"]
             treatment = row["notes"]
             sample_treatment[sample] = treatment
@@ -120,7 +122,6 @@ for (date, location, pathogen), counts in samples.items():
     samples[(date, location, pathogen)]["all_reads"] = n_reads
 
 for (date, location, pathogen, treatment), counts in treatment_samples.items():
-
     n_reads = treatment_read_counts[(date, location, treatment)]
     treatment_samples[(date, location, pathogen, treatment)]["all_reads"] = n_reads
 
