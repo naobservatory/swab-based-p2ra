@@ -66,30 +66,15 @@ for delivery in target_deliveries:
 samples = defaultdict(Counter)  # (date, location, pathogen) -> counts
 treatment_samples = defaultdict(Counter) # (date, location, pathogen, treatment) -> counts
 
+
 # Process classified reads
-with open(os.path.join(validation_output_dir, "swabs-classified-all-reads.tsv")) as f:
-    for row in csv.DictReader(f, delimiter="\t"):
-        date = datetime.strptime(row["date"], "%Y-%m-%d")
-        if not is_date_in_range(date):
-            continue
-
-        duplicate = row["is_duplicate"]
-        location = row["loc"]
-        pathogen = row["genome_name"]
-        sample = row["sample"]
-        treatment = sample_treatment[sample]
-        if duplicate == "True":
-            samples[(date, location, pathogen)]["non_dedup"] += 1
-            treatment_samples[(date, location, pathogen, treatment)]["non_dedup"] += 1
-        else:
-            samples[(date, location, pathogen)]["dedup"] += 1
-            samples[(date, location, pathogen)]["non_dedup"] += 1
-            treatment_samples[(date, location, pathogen, treatment)]["non_dedup"] += 1
-            treatment_samples[(date, location, pathogen, treatment)]["dedup"] += 1
-
+seen_reads = set()
 # Process non-validated reads
 with open(os.path.join(validation_output_dir, "swabs-non-validated-reads.tsv")) as f:
     for row in csv.DictReader(f, delimiter="\t"):
+        read_id = row["read_id"]
+        seen_reads.add(read_id)
+
         date = datetime.strptime(row["date"], "%Y-%m-%d")
         if not is_date_in_range(date):
             continue
@@ -101,6 +86,34 @@ with open(os.path.join(validation_output_dir, "swabs-non-validated-reads.tsv")) 
         pathogen = taxid_names[int(taxid)]
         treatment = sample_treatment[sample]
 
+        if duplicate == "True":
+            samples[(date, location, pathogen)]["non_dedup"] += 1
+            treatment_samples[(date, location, pathogen, treatment)]["non_dedup"] += 1
+        else:
+            samples[(date, location, pathogen)]["dedup"] += 1
+            samples[(date, location, pathogen)]["non_dedup"] += 1
+            treatment_samples[(date, location, pathogen, treatment)]["non_dedup"] += 1
+            treatment_samples[(date, location, pathogen, treatment)]["dedup"] += 1
+
+
+
+with open(os.path.join(validation_output_dir, "swabs-classified-all-reads.tsv")) as f:
+    for row in csv.DictReader(f, delimiter="\t"):
+        read_id = row["read_id"]
+        if read_id in seen_reads: # Some reads had multiple BLAST alignments to the same genome. We don't want to count those multiple times.
+            print(f"Warning: Read {read_id} appears multiple times in classified reads")
+            continue
+        seen_reads.add(read_id)
+
+        date = datetime.strptime(row["date"], "%Y-%m-%d")
+        if not is_date_in_range(date):
+            continue
+
+        duplicate = row["is_duplicate"]
+        location = row["loc"]
+        pathogen = row["genome_name"]
+        sample = row["sample"]
+        treatment = sample_treatment[sample]
         if duplicate == "True":
             samples[(date, location, pathogen)]["non_dedup"] += 1
             treatment_samples[(date, location, pathogen, treatment)]["non_dedup"] += 1

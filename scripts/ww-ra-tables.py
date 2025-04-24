@@ -62,8 +62,17 @@ for delivery in target_deliveries:
 samples = defaultdict(Counter)  # (date, location, pathogen) -> counts
 
 # Process classified reads
+seen_reads = Counter()
 with open(os.path.join(validation_output_dir, "ww-classified-all-reads.tsv")) as f:
     for row in csv.DictReader(f, delimiter="\t"):
+        read_id = row["read_id"]
+        genome_name = row["genome_name"]
+        if seen_reads[read_id] > 2:
+            print(f"Warning: Read {read_id} appears multiple times in classified reads")
+            continue
+        seen_reads[read_id] += 1
+
+
         date = datetime.strptime(row["date"], "%Y-%m-%d")
         if not is_date_in_range(date):
             continue

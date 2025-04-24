@@ -7,3 +7,5 @@ validation-work/*
 validation-output/
 figures/
 *cpython*
+one-off-scripts/
+fig_scripts/
