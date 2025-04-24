@@ -42,9 +42,5 @@ date	location	assignment	species	group	treatment	non_dedup	dedup	all_reads
 250204	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	Filtration, CP, Qiagen | cDNA input: = 771.2 ng	43	43	283834
 250204	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	Filtration, CP, Qiagen | cDNA input: = 33.74 ng	25	21	240475
 250204	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	Filtration, Qiagen | cDNA input: = < 32 ng	14	14	136929
-250204	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 771.2 ng	3	3	283834
-250204	BoDT	Rhinovirus C2	Rhinovirus C	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 771.2 ng	5	5	283834
-250204	BoDT	Rhinovirus C2	Rhinovirus C	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 33.74 ng	2	2	240475
-250204	BoDT	Rhinovirus C2	Rhinovirus C	Rhinoviruses	Filtration, Qiagen | cDNA input: = < 32 ng	1	1	136929
-250205	BoDT	Rhinovirus A34	Rhinovirus A	Rhinoviruses	Filtration, CP, Qiagen | DNAse	1	1	139820
-250212	BoDT	H1N1	H1N1	Influenza	Filtration, CP, Qiagen | DNAse	1	1	197085
+250205	BoDT	Rhinovirus A34	Rhinovirus A	Rhinoviruses	Filtration, CP, Qiagen | DNAse	1	1	149289
+250212	BoDT	H1N1	H1N1	Influenza	Filtration, CP, Qiagen | DNAse	1	1	202226
