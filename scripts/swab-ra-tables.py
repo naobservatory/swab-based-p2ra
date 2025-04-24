@@ -67,7 +67,6 @@ samples = defaultdict(Counter)  # (date, location, pathogen) -> counts
 treatment_samples = defaultdict(Counter) # (date, location, pathogen, treatment) -> counts
 
 
-# Process classified reads
 seen_reads = set()
 # Process non-validated reads
 with open(os.path.join(validation_output_dir, "swabs-non-validated-reads.tsv")) as f:
@@ -96,12 +95,13 @@ with open(os.path.join(validation_output_dir, "swabs-non-validated-reads.tsv")) 
             treatment_samples[(date, location, pathogen, treatment)]["dedup"] += 1
 
 
-
+# Process classified reads
 with open(os.path.join(validation_output_dir, "swabs-classified-all-reads.tsv")) as f:
     for row in csv.DictReader(f, delimiter="\t"):
         read_id = row["read_id"]
-        if read_id in seen_reads: # Some reads had multiple BLAST alignments to the same genome. We don't want to count those multiple times.
-            print(f"Warning: Read {read_id} appears multiple times in classified reads")
+        if read_id in seen_reads: # Some reads had multiple BLAST alignments
+                                  # to the same genome. We don't want to
+                                  # count those multiple times.
             continue
         seen_reads.add(read_id)
 
