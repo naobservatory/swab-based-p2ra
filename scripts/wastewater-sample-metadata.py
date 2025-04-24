@@ -38,9 +38,6 @@ for delivery in target_deliveries:
             fine_location = row["fine_location"]
             sample_id = row["sample"]
 
-            if "BCL" in sample_id:
-                continue
-
             if fine_location not in ("DNI", "DSI"):
                 continue
 

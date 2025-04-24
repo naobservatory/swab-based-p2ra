@@ -40,9 +40,6 @@ for delivery in target_deliveries:
         reader = csv.DictReader(f, delimiter="\t")
         for row in reader:
             sample = row["sample"]
-            if "BCL" in sample:
-                continue
-
             fine_location = row["fine_location"]
             if fine_location not in ("DNI", "DSI"):
                 continue
