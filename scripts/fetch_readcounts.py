@@ -79,21 +79,9 @@ def fetch_readcounts():
         for sample, reads in sorted(swab_reads.items()):
             writer.writerow([sample, reads])
 
-    return ww_reads, swab_reads
 
 def main():
-    ww_reads, swab_reads = fetch_readcounts()
-
-    # Write combined results if needed
-    with open("n_reads_per_all_samples.tsv", "wt") as outf:
-        writer = csv.writer(outf, delimiter="\t")
-        writer.writerow(["sample", "reads", "type"])
-
-        for sample, reads in sorted(ww_reads.items()):
-            writer.writerow([sample, reads, "wastewater"])
-
-        for sample, reads in sorted(swab_reads.items()):
-            writer.writerow([sample, reads, "swab"])
+    fetch_readcounts()
 
 if __name__ == "__main__":
     main()
