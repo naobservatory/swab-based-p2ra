@@ -22,5 +22,5 @@ date	location	assignment	species	group	non_dedup_hv	dedup_hv	all_reads
 250204	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	3	3	661238
 250204	BoDT	Rhinovirus C2	Rhinovirus C	Rhinoviruses	11	11	661238
 250204	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	82	78	661238
-250205	BoDT	Rhinovirus A34	Rhinovirus A	Rhinoviruses	1	1	175859
-250212	BoDT	H1N1	H1N1	Influenza	1	1	216826
+250205	BoDT	Rhinovirus A34	Rhinovirus A	Rhinoviruses	1	1	165046
+250212	BoDT	H1N1	H1N1	Influenza	1	1	211685

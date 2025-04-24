@@ -11,8 +11,7 @@ from metadata_utils import first_level_mapping, second_level_mapping, is_date_in
 
 # Constants and paths
 validation_output_dir = "validation-output"
-tables_dir = "tables"
-os.makedirs(tables_dir, exist_ok=True)
+TABLE_DIR = "tables"
 
 with open("deliveries.json") as f:
     deliveries = json.load(f)
@@ -27,9 +26,12 @@ target_deliveries = deliveries["swab-deliveries"]
 taxid_names = load_taxonomy_names()
 
 read_counts = {}
-with open(os.path.join("outputs", "n_reads_per_swab_sample.tsv")) as f:
-    for row in csv.DictReader(f, delimiter="\t"):
-        read_counts[row["sample"]] = int(row["reads"])
+try:
+    with open(os.path.join(TABLE_DIR, "n_reads_per_swab_sample.tsv")) as f:
+        for row in csv.DictReader(f, delimiter="\t"):
+            read_counts[row["sample"]] = int(row["reads"])
+except FileNotFoundError:
+    raise Exception("n_reads_per_swab_sample.tsv not found. Run fetch_readcounts.py first.")
 
 
 date_loc_read_counts = Counter()
@@ -128,7 +130,7 @@ for (date, location, pathogen, treatment), counts in treatment_samples.items():
 # ---------------------------------------------------------------------
 
 # Output results
-with open(os.path.join("tables", "swabs-ra-summary.tsv"), "w") as outf:
+with open(os.path.join(TABLE_DIR, "swabs-ra-summary.tsv"), "w") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow([
         "date",
@@ -157,7 +159,7 @@ with open(os.path.join("tables", "swabs-ra-summary.tsv"), "w") as outf:
             data["all_reads"],
         ])
 
-with open(os.path.join("tables", "swabs-ra-per-treatment-summary.tsv"), "w") as outf:
+with open(os.path.join(TABLE_DIR, "swabs-ra-per-treatment-summary.tsv"), "w") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow([
         "date",

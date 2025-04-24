@@ -13,6 +13,8 @@ with open("deliveries.json") as f:
 ww_deliveries = deliveries["ww-deliveries"]
 swab_deliveries = deliveries["swab-deliveries"]
 
+TABLE_DIR = "tables"
+
 def fetch_readcounts():
     """Fetch and process read counts from both wastewater and swab samples."""
     ww_reads = Counter()
@@ -43,7 +45,7 @@ def fetch_readcounts():
 
 
     # Write the wastewater results
-    with open("n_reads_per_ww_sample.tsv", "wt") as outf:
+    with open(os.path.join(TABLE_DIR, "n_reads_per_ww_sample.tsv"), "wt") as outf:
         writer = csv.writer(outf, delimiter="\t")
         writer.writerow(["sample", "reads"])
         for sample, reads in sorted(ww_reads.items()):
@@ -73,7 +75,7 @@ def fetch_readcounts():
             raise Exception(f"read_counts file not found for {delivery}")
 
     # Write the swab results
-    with open("n_reads_per_swab_sample.tsv", "wt") as outf:
+    with open(os.path.join(TABLE_DIR, "n_reads_per_swab_sample.tsv"), "wt") as outf:
         writer = csv.writer(outf, delimiter="\t")
         writer.writerow(["sample", "reads"])
         for sample, reads in sorted(swab_reads.items()):

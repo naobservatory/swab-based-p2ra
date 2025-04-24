@@ -8,8 +8,7 @@ from collections import Counter
 from dateutil import parser
 
 # Constants and paths
-tables_dir = "tables"
-os.makedirs(tables_dir, exist_ok=True)
+TABLE_DIR = "tables"
 
 with open("deliveries.json") as f:
     deliveries = json.load(f)
@@ -19,9 +18,12 @@ target_deliveries = deliveries["ww-deliveries"]
 
 # Load counts
 read_counts = {}
-with open(os.path.join("outputs", "n_reads_per_ww_sample.tsv")) as f:
-    for row in csv.DictReader(f, delimiter="\t"):
-        read_counts[row["sample"]] = int(row["reads"])
+try:
+    with open(os.path.join(TABLE_DIR, "n_reads_per_ww_sample.tsv")) as f:
+        for row in csv.DictReader(f, delimiter="\t"):
+            read_counts[row["sample"]] = int(row["reads"])
+except FileNotFoundError:
+    raise Exception("n_reads_per_ww_sample.tsv not found. Run fetch_readcounts.py first.")
 
 data = set()
 
@@ -50,7 +52,7 @@ for delivery in target_deliveries:
             data.add((sample, date, fine_location))
 
 # Writing metadata
-with open(os.path.join(tables_dir, "wastewater-sample-metadata.tsv"), "wt") as outf:
+with open(os.path.join(TABLE_DIR, "wastewater-sample-metadata.tsv"), "wt") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow(["sample", "date", "location", "all_reads"])
     for sample in sorted(data):

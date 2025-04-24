@@ -6,8 +6,7 @@ import os
 from collections import Counter, defaultdict
 import json
 # Constants and paths
-tables_dir = "tables"
-os.makedirs(tables_dir, exist_ok=True)
+TABLE_DIR = "tables"
 
 with open("deliveries.json") as f:
     deliveries = json.load(f)
@@ -17,9 +16,12 @@ target_deliveries = deliveries["swab-deliveries"]
 
 # Load counts
 read_counts = {}
-with open(os.path.join("outputs", "n_reads_per_swab_sample.tsv")) as f:
-    for row in csv.DictReader(f, delimiter="\t"):
-        read_counts[row["sample"]] = int(row["reads"])
+try:
+    with open(os.path.join(TABLE_DIR, "n_reads_per_swab_sample.tsv")) as f:
+        for row in csv.DictReader(f, delimiter="\t"):
+            read_counts[row["sample"]] = int(row["reads"])
+except FileNotFoundError:
+    raise Exception("n_reads_per_swab_sample.tsv not found. Run fetch_readcounts.py first.")
 
 date_loc_read_counts = Counter()
 for delivery in target_deliveries:
@@ -53,7 +55,7 @@ with open("[2024] Zephyr sample log - Sampling runs.tsv", "r") as f:
 
 
 # Writing metadata
-with open(os.path.join(tables_dir, "swab-sample-metadata.tsv"), "wt") as outf:
+with open(os.path.join(TABLE_DIR, "swab-sample-metadata.tsv"), "wt") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow(["sample", "date", "location", "pool_size", "all_reads"])
     for sample_info, sample_pool_size in sorted(sample_data.items()):
