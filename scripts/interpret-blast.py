@@ -23,25 +23,13 @@ args = parser.parse_args()
 # First, run scripts/summarize_validation_files.py on to_validate_{args.label}.fasta. After first run of blast.py, change to validation-work/{args.label}-not-accounted-for.fasta
 limit_to = f"validation-work/to_validate_{args.label}.fasta"
 
-
+with open("deliveries.json") as f:
+    deliveries = json.load(f)
 if args.label == "swabs":
-    target_deliveries = [
-        "NAO-ONT-20250120-Zephyr8",
-        "NAO-ONT-20250127-Zephyr9",
-        "NAO-ONT-20250213-Zephyr10",
-        "NAO-ONT-20250213-Zephyr10-QC",
-        "NAO-ONT-20250220-Zephyr11",
-        "NAO-ONT-20250226-Zephyr10-QC2",
-        "NAO-ONT-20250313-Zephyr12",
-    ]
+    target_deliveries = deliveries["swab-deliveries"]
 elif args.label == "ww":
-    target_deliveries = [
-        "NAO-BCL-2025-03-03",
-        "MJ-2025-01-20-a",
-        "MJ-2025-01-20-b",
-        "MJ-2025-03-01",
-        "MJ-2025-02-12",
-    ]
+    target_deliveries = deliveries["ww-deliveries"]
+
 
 
 limit_read_ids = set()

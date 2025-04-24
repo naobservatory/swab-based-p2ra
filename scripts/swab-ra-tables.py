@@ -2,6 +2,7 @@
 # Standard library imports
 import csv
 import os
+import json
 from collections import defaultdict, Counter
 from datetime import datetime
 from taxonomy import load_taxonomy_names
@@ -13,16 +14,10 @@ validation_output_dir = "validation-output"
 tables_dir = "tables"
 os.makedirs(tables_dir, exist_ok=True)
 
-target_deliveries = [
-    "NAO-ONT-20250120-Zephyr8",
-    "NAO-ONT-20250127-Zephyr9",
-    "NAO-ONT-20250213-Zephyr10",
-    "NAO-ONT-20250213-Zephyr10-QC",
-    "NAO-ONT-20250220-Zephyr11",
-    "NAO-ONT-20250226-Zephyr10-QC2",
-    "NAO-ONT-20250313-Zephyr12",
-    "NAO-ONT-20250328-Zephyr12b"
-]
+with open("deliveries.json") as f:
+    deliveries = json.load(f)
+
+target_deliveries = deliveries["swab-deliveries"]
 
 
 # ---------------------------------------------------------------------
