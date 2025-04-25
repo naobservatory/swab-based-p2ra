@@ -1,217 +1,217 @@
 date	location	assignment	species	group	non_dedup_hv	dedup_hv	all_reads
-250108	DSI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	4	10	1201312284
-250108	DNI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	21	42	1053867915
-250108	DSI	RSV-A	RSV-A	Mononegavirales	36	84	1201312284
-250108	DNI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	91	186	1053867915
-250108	DSI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	91	158	1201312284
-250108	DNI	Rhinovirus A	Rhinovirus A	Rhinoviruses	5	6	1053867915
-250108	DNI	Rhinovirus B3	Rhinovirus B	Rhinoviruses	3	4	1053867915
-250108	DNI	Rhinovirus A80	Rhinovirus A	Rhinoviruses	1	2	1053867915
-250108	DSI	H1N1	H1N1	Influenza	30	58	1201312284
-250108	DNI	H1N1	H1N1	Influenza	22	46	1053867915
 250108	DNI	Flu B	Flu B	Influenza	6	8	1053867915
-250108	DSI	Flu B	Flu B	Influenza	10	16	1201312284
-250108	DSI	H3N2	H3N2	Influenza	52	102	1201312284
+250108	DNI	H1N1	H1N1	Influenza	22	46	1053867915
 250108	DNI	H3N2	H3N2	Influenza	56	136	1053867915
-250108	DNI	Rhinovirus B103	Rhinovirus B	Rhinoviruses	5	14	1053867915
-250108	DSI	Rhinovirus A24	Rhinovirus A	Rhinoviruses	3	8	1201312284
-250108	DNI	Rhinovirus A24	Rhinovirus A	Rhinoviruses	7	14	1053867915
-250108	DNI	Rhinovirus A54	Rhinovirus A	Rhinoviruses	2	4	1053867915
-250108	DNI	Rhinovirus A40	Rhinovirus A	Rhinoviruses	7	16	1053867915
-250108	DSI	Rhinovirus A80	Rhinovirus A	Rhinoviruses	2	4	1201312284
 250108	DNI	HPIV1	HPIV1	Mononegavirales	3	10	1053867915
+250108	DNI	HPIV4b	HPIV4	Mononegavirales	4	4	1053867915
+250108	DNI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	21	42	1053867915
+250108	DNI	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	3	6	1053867915
+250108	DNI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	30	60	1053867915
+250108	DNI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	91	186	1053867915
 250108	DNI	RSV-A	RSV-A	Mononegavirales	45	95	1053867915
 250108	DNI	RSV-B	RSV-B	Mononegavirales	22	56	1053867915
-250108	DSI	RSV-B	RSV-B	Mononegavirales	9	20	1201312284
-250108	DNI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	30	60	1053867915
-250108	DSI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	19	26	1201312284
-250108	DNI	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	3	6	1053867915
-250108	DNI	Rhinovirus C	Rhinovirus C	Rhinoviruses	75	150	1053867915
-250108	DNI	Rhinovirus C34	Rhinovirus C	Rhinoviruses	5	8	1053867915
-250108	DSI	Rhinovirus C	Rhinovirus C	Rhinoviruses	17	20	1201312284
-250108	DNI	Rhinovirus C1	Rhinovirus C	Rhinoviruses	14	29	1053867915
-250108	DSI	Rhinovirus C1	Rhinovirus C	Rhinoviruses	2	6	1201312284
-250108	DSI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	16	21	1201312284
+250108	DNI	Rhinovirus A	Rhinovirus A	Rhinoviruses	5	6	1053867915
 250108	DNI	Rhinovirus A1	Rhinovirus A	Rhinoviruses	1	4	1053867915
-250108	DSI	Rhinovirus C2	Rhinovirus C	Rhinoviruses	5	12	1201312284
+250108	DNI	Rhinovirus A24	Rhinovirus A	Rhinoviruses	7	14	1053867915
+250108	DNI	Rhinovirus A40	Rhinovirus A	Rhinoviruses	7	16	1053867915
+250108	DNI	Rhinovirus A54	Rhinovirus A	Rhinoviruses	2	4	1053867915
+250108	DNI	Rhinovirus A80	Rhinovirus A	Rhinoviruses	1	2	1053867915
+250108	DNI	Rhinovirus B103	Rhinovirus B	Rhinoviruses	5	14	1053867915
+250108	DNI	Rhinovirus B3	Rhinovirus B	Rhinoviruses	3	4	1053867915
+250108	DNI	Rhinovirus C	Rhinovirus C	Rhinoviruses	75	150	1053867915
+250108	DNI	Rhinovirus C1	Rhinovirus C	Rhinoviruses	14	29	1053867915
+250108	DNI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	13	26	1053867915
+250108	DNI	Rhinovirus C19	Rhinovirus C	Rhinoviruses	12	22	1053867915
 250108	DNI	Rhinovirus C2	Rhinovirus C	Rhinoviruses	1	2	1053867915
 250108	DNI	Rhinovirus C3	Rhinovirus C	Rhinoviruses	2	14	1053867915
-250108	DSI	Rhinovirus C7	Rhinovirus C	Rhinoviruses	5	5	1201312284
-250108	DNI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	13	26	1053867915
-250108	DNI	Rhinovirus C8	Rhinovirus C	Rhinoviruses	5	14	1053867915
-250108	DNI	Rhinovirus C19	Rhinovirus C	Rhinoviruses	12	22	1053867915
-250108	DSI	Rhinovirus C19	Rhinovirus C	Rhinoviruses	9	24	1201312284
-250108	DSI	Rhinovirus C36	Rhinovirus C	Rhinoviruses	2	4	1201312284
-250108	DNI	Rhinovirus C56	Rhinovirus C	Rhinoviruses	10	20	1053867915
-250108	DSI	Rhinovirus C55	Rhinovirus C	Rhinoviruses	2	4	1201312284
-250108	DSI	HPIV2	HPIV2	Mononegavirales	6	14	1201312284
-250108	DNI	HPIV4b	HPIV4	Mononegavirales	4	4	1053867915
-250108	DSI	Rhinovirus B103	Rhinovirus B	Rhinoviruses	4	12	1201312284
-250108	DSI	Rhinovirus A12	Rhinovirus A	Rhinoviruses	2	2	1201312284
-250108	DSI	Rhinovirus A40	Rhinovirus A	Rhinoviruses	2	2	1201312284
-250108	DNI	Rhinovirus C7	Rhinovirus C	Rhinoviruses	2	6	1053867915
-250108	DSI	Rhinovirus C44	Rhinovirus C	Rhinoviruses	2	2	1201312284
+250108	DNI	Rhinovirus C34	Rhinovirus C	Rhinoviruses	5	8	1053867915
 250108	DNI	Rhinovirus C44	Rhinovirus C	Rhinoviruses	3	4	1053867915
-250108	DSI	Rhinovirus A	Rhinovirus A	Rhinoviruses	2	2	1201312284
+250108	DNI	Rhinovirus C56	Rhinovirus C	Rhinoviruses	10	20	1053867915
+250108	DNI	Rhinovirus C7	Rhinovirus C	Rhinoviruses	2	6	1053867915
+250108	DNI	Rhinovirus C8	Rhinovirus C	Rhinoviruses	5	14	1053867915
 250108	DNI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	312	324	1053867915
+250108	DSI	Flu B	Flu B	Influenza	10	16	1201312284
+250108	DSI	H1N1	H1N1	Influenza	30	58	1201312284
+250108	DSI	H3N2	H3N2	Influenza	52	102	1201312284
+250108	DSI	HPIV2	HPIV2	Mononegavirales	6	14	1201312284
+250108	DSI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	4	10	1201312284
+250108	DSI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	19	26	1201312284
+250108	DSI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	91	158	1201312284
+250108	DSI	RSV-A	RSV-A	Mononegavirales	36	84	1201312284
+250108	DSI	RSV-B	RSV-B	Mononegavirales	9	20	1201312284
+250108	DSI	Rhinovirus A	Rhinovirus A	Rhinoviruses	2	2	1201312284
+250108	DSI	Rhinovirus A12	Rhinovirus A	Rhinoviruses	2	2	1201312284
+250108	DSI	Rhinovirus A24	Rhinovirus A	Rhinoviruses	3	8	1201312284
+250108	DSI	Rhinovirus A40	Rhinovirus A	Rhinoviruses	2	2	1201312284
+250108	DSI	Rhinovirus A80	Rhinovirus A	Rhinoviruses	2	4	1201312284
+250108	DSI	Rhinovirus B103	Rhinovirus B	Rhinoviruses	4	12	1201312284
+250108	DSI	Rhinovirus C	Rhinovirus C	Rhinoviruses	17	20	1201312284
+250108	DSI	Rhinovirus C1	Rhinovirus C	Rhinoviruses	2	6	1201312284
+250108	DSI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	16	21	1201312284
+250108	DSI	Rhinovirus C19	Rhinovirus C	Rhinoviruses	9	24	1201312284
+250108	DSI	Rhinovirus C2	Rhinovirus C	Rhinoviruses	5	12	1201312284
+250108	DSI	Rhinovirus C36	Rhinovirus C	Rhinoviruses	2	4	1201312284
+250108	DSI	Rhinovirus C44	Rhinovirus C	Rhinoviruses	2	2	1201312284
+250108	DSI	Rhinovirus C55	Rhinovirus C	Rhinoviruses	2	4	1201312284
+250108	DSI	Rhinovirus C7	Rhinovirus C	Rhinoviruses	5	5	1201312284
 250108	DSI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	232	238	1201312284
-250115	DNI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	2	6	628858348
-250115	DSI	RSV-A	RSV-A	Mononegavirales	6	12	1012706733
-250115	DNI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	19	74	628858348
-250115	DSI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	22	59	1012706733
-250115	DNI	Rhinovirus B103	Rhinovirus B	Rhinoviruses	4	18	628858348
-250115	DSI	Rhinovirus B3	Rhinovirus B	Rhinoviruses	2	2	1012706733
-250115	DNI	Rhinovirus A54	Rhinovirus A	Rhinoviruses	2	10	628858348
-250115	DNI	Rhinovirus A	Rhinovirus A	Rhinoviruses	2	6	628858348
-250115	DSI	Rhinovirus A80	Rhinovirus A	Rhinoviruses	2	12	1012706733
-250115	DNI	RSV-A	RSV-A	Mononegavirales	1	2	628858348
-250115	DSI	H3N2	H3N2	Influenza	5	7	1012706733
-250115	DNI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	6	16	628858348
-250115	DSI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	8	28	1012706733
-250115	DSI	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	3	20	1012706733
-250115	DNI	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	2	14	628858348
-250115	DNI	H3N2	H3N2	Influenza	8	36	628858348
-250115	DNI	Rhinovirus C	Rhinovirus C	Rhinoviruses	12	38	628858348
-250115	DSI	Rhinovirus C	Rhinovirus C	Rhinoviruses	3	4	1012706733
 250115	DNI	H1N1	H1N1	Influenza	3	4	628858348
-250115	DSI	Rhinovirus C2	Rhinovirus C	Rhinoviruses	5	6	1012706733
-250115	DNI	Rhinovirus C2	Rhinovirus C	Rhinoviruses	2	4	628858348
-250115	DNI	Rhinovirus C7	Rhinovirus C	Rhinoviruses	1	1	628858348
-250115	DSI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	4	24	1012706733
+250115	DNI	H3N2	H3N2	Influenza	8	36	628858348
+250115	DNI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	2	6	628858348
+250115	DNI	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	2	14	628858348
+250115	DNI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	6	16	628858348
+250115	DNI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	19	74	628858348
+250115	DNI	RSV-A	RSV-A	Mononegavirales	1	2	628858348
+250115	DNI	Rhinovirus A	Rhinovirus A	Rhinoviruses	2	6	628858348
+250115	DNI	Rhinovirus A54	Rhinovirus A	Rhinoviruses	2	10	628858348
+250115	DNI	Rhinovirus B103	Rhinovirus B	Rhinoviruses	4	18	628858348
+250115	DNI	Rhinovirus C	Rhinovirus C	Rhinoviruses	12	38	628858348
 250115	DNI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	2	8	628858348
-250115	DSI	Rhinovirus C8	Rhinovirus C	Rhinoviruses	2	8	1012706733
 250115	DNI	Rhinovirus C19	Rhinovirus C	Rhinoviruses	1	2	628858348
+250115	DNI	Rhinovirus C2	Rhinovirus C	Rhinoviruses	2	4	628858348
 250115	DNI	Rhinovirus C20	Rhinovirus C	Rhinoviruses	4	24	628858348
-250115	DSI	Rhinovirus C34	Rhinovirus C	Rhinoviruses	3	10	1012706733
 250115	DNI	Rhinovirus C34	Rhinovirus C	Rhinoviruses	2	16	628858348
-250115	DSI	Rhinovirus B103	Rhinovirus B	Rhinoviruses	1	1	1012706733
-250115	DSI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	278	284	1012706733
+250115	DNI	Rhinovirus C7	Rhinovirus C	Rhinoviruses	1	1	628858348
 250115	DNI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	58	78	628858348
-250122	DSI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	8	32	983397280
-250122	DSI	HPIV4b	HPIV4	Mononegavirales	2	2	983397280
-250122	DNI	RSV-A	RSV-A	Mononegavirales	6	38	1077167119
-250122	DSI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	50	169	983397280
-250122	DNI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	20	137	1077167119
-250122	DNI	Rhinovirus B3	Rhinovirus B	Rhinoviruses	2	14	1077167119
-250122	DNI	H3N2	H3N2	Influenza	19	102	1077167119
-250122	DSI	Flu B	Flu B	Influenza	4	12	983397280
+250115	DSI	H3N2	H3N2	Influenza	5	7	1012706733
+250115	DSI	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	3	20	1012706733
+250115	DSI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	8	28	1012706733
+250115	DSI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	22	59	1012706733
+250115	DSI	RSV-A	RSV-A	Mononegavirales	6	12	1012706733
+250115	DSI	Rhinovirus A80	Rhinovirus A	Rhinoviruses	2	12	1012706733
+250115	DSI	Rhinovirus B103	Rhinovirus B	Rhinoviruses	1	1	1012706733
+250115	DSI	Rhinovirus B3	Rhinovirus B	Rhinoviruses	2	2	1012706733
+250115	DSI	Rhinovirus C	Rhinovirus C	Rhinoviruses	3	4	1012706733
+250115	DSI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	4	24	1012706733
+250115	DSI	Rhinovirus C2	Rhinovirus C	Rhinoviruses	5	6	1012706733
+250115	DSI	Rhinovirus C34	Rhinovirus C	Rhinoviruses	3	10	1012706733
+250115	DSI	Rhinovirus C8	Rhinovirus C	Rhinoviruses	2	8	1012706733
+250115	DSI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	278	284	1012706733
 250122	DNI	Flu B	Flu B	Influenza	1	2	1077167119
-250122	DSI	H1N1	H1N1	Influenza	8	30	983397280
-250122	DSI	Rhinovirus A24	Rhinovirus A	Rhinoviruses	3	18	983397280
-250122	DSI	Rhinovirus A	Rhinovirus A	Rhinoviruses	1	5	983397280
-250122	DNI	HPIV1	HPIV1	Mononegavirales	2	16	1077167119
-250122	DSI	RSV-A	RSV-A	Mononegavirales	3	6	983397280
-250122	DSI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	6	22	983397280
-250122	DNI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	2	4	1077167119
-250122	DSI	H3N2	H3N2	Influenza	26	100	983397280
-250122	DSI	Rhinovirus C	Rhinovirus C	Rhinoviruses	14	35	983397280
-250122	DNI	Rhinovirus C36	Rhinovirus C	Rhinoviruses	2	18	1077167119
-250122	DNI	Rhinovirus C	Rhinovirus C	Rhinoviruses	16	102	1077167119
 250122	DNI	H1N1	H1N1	Influenza	14	42	1077167119
-250122	DNI	Rhinovirus C7	Rhinovirus C	Rhinoviruses	3	12	1077167119
+250122	DNI	H3N2	H3N2	Influenza	19	102	1077167119
+250122	DNI	HPIV1	HPIV1	Mononegavirales	2	16	1077167119
+250122	DNI	HPIV2	HPIV2	Mononegavirales	2	4	1077167119
+250122	DNI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	2	4	1077167119
+250122	DNI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	20	137	1077167119
+250122	DNI	RSV-A	RSV-A	Mononegavirales	6	38	1077167119
+250122	DNI	Rhinovirus A80	Rhinovirus A	Rhinoviruses	1	1	1077167119
+250122	DNI	Rhinovirus B3	Rhinovirus B	Rhinoviruses	2	14	1077167119
+250122	DNI	Rhinovirus C	Rhinovirus C	Rhinoviruses	16	102	1077167119
 250122	DNI	Rhinovirus C1	Rhinovirus C	Rhinoviruses	5	42	1077167119
 250122	DNI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	2	10	1077167119
-250122	DSI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	3	6	983397280
-250122	DNI	Rhinovirus C8	Rhinovirus C	Rhinoviruses	2	16	1077167119
-250122	DSI	Rhinovirus C19	Rhinovirus C	Rhinoviruses	4	20	983397280
 250122	DNI	Rhinovirus C19	Rhinovirus C	Rhinoviruses	2	12	1077167119
-250122	DSI	Rhinovirus C34	Rhinovirus C	Rhinoviruses	5	8	983397280
+250122	DNI	Rhinovirus C36	Rhinovirus C	Rhinoviruses	2	18	1077167119
 250122	DNI	Rhinovirus C4	Rhinovirus C	Rhinoviruses	1	3	1077167119
+250122	DNI	Rhinovirus C7	Rhinovirus C	Rhinoviruses	3	12	1077167119
+250122	DNI	Rhinovirus C8	Rhinovirus C	Rhinoviruses	2	16	1077167119
+250122	DNI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	272	330	1077167119
+250122	DSI	Flu B	Flu B	Influenza	4	12	983397280
+250122	DSI	H1N1	H1N1	Influenza	8	30	983397280
+250122	DSI	H3N2	H3N2	Influenza	26	100	983397280
+250122	DSI	HPIV2	HPIV2	Mononegavirales	6	24	983397280
+250122	DSI	HPIV4b	HPIV4	Mononegavirales	2	2	983397280
+250122	DSI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	8	32	983397280
+250122	DSI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	6	22	983397280
+250122	DSI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	50	169	983397280
+250122	DSI	RSV-A	RSV-A	Mononegavirales	3	6	983397280
+250122	DSI	Rhinovirus A	Rhinovirus A	Rhinoviruses	1	5	983397280
+250122	DSI	Rhinovirus A24	Rhinovirus A	Rhinoviruses	3	18	983397280
+250122	DSI	Rhinovirus C	Rhinovirus C	Rhinoviruses	14	35	983397280
+250122	DSI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	3	6	983397280
+250122	DSI	Rhinovirus C19	Rhinovirus C	Rhinoviruses	4	20	983397280
+250122	DSI	Rhinovirus C34	Rhinovirus C	Rhinoviruses	5	8	983397280
 250122	DSI	Rhinovirus C44	Rhinovirus C	Rhinoviruses	2	6	983397280
 250122	DSI	Rhinovirus C55	Rhinovirus C	Rhinoviruses	2	6	983397280
-250122	DSI	HPIV2	HPIV2	Mononegavirales	6	24	983397280
-250122	DNI	HPIV2	HPIV2	Mononegavirales	2	4	1077167119
-250122	DNI	Rhinovirus A80	Rhinovirus A	Rhinoviruses	1	1	1077167119
 250122	DSI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	296	330	983397280
-250122	DNI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	272	330	1077167119
-250129	DSI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	6	8	816170175
+250129	DNI	H1N1	H1N1	Influenza	21	108	656678526
+250129	DNI	H3N2	H3N2	Influenza	23	138	656678526
+250129	DNI	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	4	24	656678526
+250129	DNI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	10	46	656678526
+250129	DNI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	19	98	656678526
 250129	DNI	RSV-A	RSV-A	Mononegavirales	12	44	656678526
 250129	DNI	RSV-B	RSV-B	Mononegavirales	2	10	656678526
-250129	DNI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	19	98	656678526
-250129	DSI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	43	122	816170175
-250129	DSI	Rhinovirus A54	Rhinovirus A	Rhinoviruses	4	10	816170175
-250129	DNI	H3N2	H3N2	Influenza	23	138	656678526
-250129	DSI	H1N1	H1N1	Influenza	24	75	816170175
-250129	DSI	Flu B	Flu B	Influenza	5	18	816170175
-250129	DNI	H1N1	H1N1	Influenza	21	108	656678526
-250129	DSI	Rhinovirus A12	Rhinovirus A	Rhinoviruses	2	16	816170175
+250129	DNI	Rhinovirus A	Rhinovirus A	Rhinoviruses	1	14	656678526
 250129	DNI	Rhinovirus A24	Rhinovirus A	Rhinoviruses	6	36	656678526
 250129	DNI	Rhinovirus A40	Rhinovirus A	Rhinoviruses	2	14	656678526
-250129	DNI	Rhinovirus B3	Rhinovirus B	Rhinoviruses	2	24	656678526
 250129	DNI	Rhinovirus A54	Rhinovirus A	Rhinoviruses	2	4	656678526
-250129	DSI	RSV-A	RSV-A	Mononegavirales	4	18	816170175
-250129	DSI	RSV-B	RSV-B	Mononegavirales	4	14	816170175
-250129	DSI	H3N2	H3N2	Influenza	37	112	816170175
-250129	DSI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	18	66	816170175
-250129	DNI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	10	46	656678526
-250129	DNI	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	4	24	656678526
-250129	DSI	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	1	2	816170175
-250129	DSI	Rhinovirus C	Rhinovirus C	Rhinoviruses	10	44	816170175
+250129	DNI	Rhinovirus B3	Rhinovirus B	Rhinoviruses	2	24	656678526
 250129	DNI	Rhinovirus C	Rhinovirus C	Rhinoviruses	10	60	656678526
-250129	DSI	Rhinovirus A1	Rhinovirus A	Rhinoviruses	2	8	816170175
-250129	DSI	HMPV-1	HMPV-1	Mononegavirales	2	18	816170175
-250129	DNI	Rhinovirus C2	Rhinovirus C	Rhinoviruses	2	16	656678526
-250129	DSI	Rhinovirus C2	Rhinovirus C	Rhinoviruses	4	18	816170175
-250129	DSI	Rhinovirus C44	Rhinovirus C	Rhinoviruses	2	12	816170175
 250129	DNI	Rhinovirus C1	Rhinovirus C	Rhinoviruses	3	24	656678526
 250129	DNI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	14	76	656678526
+250129	DNI	Rhinovirus C19	Rhinovirus C	Rhinoviruses	1	11	656678526
+250129	DNI	Rhinovirus C2	Rhinovirus C	Rhinoviruses	2	16	656678526
+250129	DNI	Rhinovirus C55	Rhinovirus C	Rhinoviruses	2	20	656678526
+250129	DNI	Rhinovirus C56	Rhinovirus C	Rhinoviruses	2	12	656678526
+250129	DNI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	232	284	656678526
+250129	DSI	Flu B	Flu B	Influenza	5	18	816170175
+250129	DSI	H1N1	H1N1	Influenza	24	75	816170175
+250129	DSI	H3N2	H3N2	Influenza	37	112	816170175
+250129	DSI	HMPV-1	HMPV-1	Mononegavirales	2	18	816170175
+250129	DSI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	6	8	816170175
+250129	DSI	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	1	2	816170175
+250129	DSI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	18	66	816170175
+250129	DSI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	43	122	816170175
+250129	DSI	RSV-A	RSV-A	Mononegavirales	4	18	816170175
+250129	DSI	RSV-B	RSV-B	Mononegavirales	4	14	816170175
+250129	DSI	Rhinovirus A1	Rhinovirus A	Rhinoviruses	2	8	816170175
+250129	DSI	Rhinovirus A12	Rhinovirus A	Rhinoviruses	2	16	816170175
+250129	DSI	Rhinovirus A54	Rhinovirus A	Rhinoviruses	4	10	816170175
+250129	DSI	Rhinovirus C	Rhinovirus C	Rhinoviruses	10	44	816170175
 250129	DSI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	4	8	816170175
 250129	DSI	Rhinovirus C19	Rhinovirus C	Rhinoviruses	2	6	816170175
-250129	DNI	Rhinovirus C19	Rhinovirus C	Rhinoviruses	1	11	656678526
+250129	DSI	Rhinovirus C2	Rhinovirus C	Rhinoviruses	4	18	816170175
 250129	DSI	Rhinovirus C4	Rhinovirus C	Rhinoviruses	2	4	816170175
-250129	DNI	Rhinovirus C56	Rhinovirus C	Rhinoviruses	2	12	656678526
-250129	DNI	Rhinovirus C55	Rhinovirus C	Rhinoviruses	2	20	656678526
-250129	DNI	Rhinovirus A	Rhinovirus A	Rhinoviruses	1	14	656678526
+250129	DSI	Rhinovirus C44	Rhinovirus C	Rhinoviruses	2	12	816170175
 250129	DSI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	148	170	816170175
-250129	DNI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	232	284	656678526
-250205	DNI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	4	14	1173286887
-250205	DSI	HPIV4b	HPIV4	Mononegavirales	2	2	750183501
-250205	DSI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	14	22	750183501
-250205	DNI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	18	48	1173286887
-250205	DSI	H3N2	H3N2	Influenza	9	16	750183501
 250205	DNI	H1N1	H1N1	Influenza	11	36	1173286887
 250205	DNI	H3N2	H3N2	Influenza	10	18	1173286887
-250205	DSI	H1N1	H1N1	Influenza	19	42	750183501
-250205	DSI	Rhinovirus A24	Rhinovirus A	Rhinoviruses	2	4	750183501
-250205	DNI	RSV-B	RSV-B	Mononegavirales	1	2	1173286887
-250205	DSI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	10	24	750183501
-250205	DNI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	2	2	1173286887
+250205	DNI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	4	14	1173286887
 250205	DNI	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	2	2	1173286887
-250205	DSI	Rhinovirus C56	Rhinovirus C	Rhinoviruses	4	4	750183501
-250205	DSI	Rhinovirus C1	Rhinovirus C	Rhinoviruses	1	4	750183501
-250205	DSI	Rhinovirus C	Rhinovirus C	Rhinoviruses	3	3	750183501
+250205	DNI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	2	2	1173286887
+250205	DNI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	18	48	1173286887
+250205	DNI	RSV-B	RSV-B	Mononegavirales	1	2	1173286887
+250205	DNI	Rhinovirus C	Rhinovirus C	Rhinoviruses	2	2	1173286887
 250205	DNI	Rhinovirus C1	Rhinovirus C	Rhinoviruses	2	2	1173286887
 250205	DNI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	2	2	1173286887
-250205	DNI	Rhinovirus C	Rhinovirus C	Rhinoviruses	2	2	1173286887
-250205	DSI	Rhinovirus C4	Rhinovirus C	Rhinoviruses	2	4	750183501
 250205	DNI	Rhinovirus C55	Rhinovirus C	Rhinoviruses	2	8	1173286887
-250205	DSI	Rhinovirus C55	Rhinovirus C	Rhinoviruses	2	10	750183501
-250205	DSI	RSV-A	RSV-A	Mononegavirales	3	15	750183501
-250205	DSI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	62	62	750183501
 250205	DNI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	80	82	1173286887
-250212	DNI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	38	115	1059731486
-250212	DNI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	7	18	1059731486
-250212	DSI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	7	16	1003451236
-250212	DSI	HPIV4b	HPIV4	Mononegavirales	2	4	1003451236
-250212	DNI	RSV-A	RSV-A	Mononegavirales	6	18	1059731486
-250212	DSI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	11	24	1003451236
-250212	DNI	H1N1	H1N1	Influenza	47	120	1059731486
-250212	DSI	H1N1	H1N1	Influenza	19	26	1003451236
+250205	DSI	H1N1	H1N1	Influenza	19	42	750183501
+250205	DSI	H3N2	H3N2	Influenza	9	16	750183501
+250205	DSI	HPIV4b	HPIV4	Mononegavirales	2	2	750183501
+250205	DSI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	10	24	750183501
+250205	DSI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	14	22	750183501
+250205	DSI	RSV-A	RSV-A	Mononegavirales	3	15	750183501
+250205	DSI	Rhinovirus A24	Rhinovirus A	Rhinoviruses	2	4	750183501
+250205	DSI	Rhinovirus C	Rhinovirus C	Rhinoviruses	3	3	750183501
+250205	DSI	Rhinovirus C1	Rhinovirus C	Rhinoviruses	1	4	750183501
+250205	DSI	Rhinovirus C4	Rhinovirus C	Rhinoviruses	2	4	750183501
+250205	DSI	Rhinovirus C55	Rhinovirus C	Rhinoviruses	2	10	750183501
+250205	DSI	Rhinovirus C56	Rhinovirus C	Rhinoviruses	4	4	750183501
+250205	DSI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	62	62	750183501
 250212	DNI	Flu B	Flu B	Influenza	2	2	1059731486
-250212	DSI	H3N2	H3N2	Influenza	17	34	1003451236
+250212	DNI	H1N1	H1N1	Influenza	47	120	1059731486
 250212	DNI	H3N2	H3N2	Influenza	28	99	1059731486
+250212	DNI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	7	18	1059731486
+250212	DNI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	10	26	1059731486
+250212	DNI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	38	115	1059731486
+250212	DNI	RSV-A	RSV-A	Mononegavirales	6	18	1059731486
+250212	DNI	RSV-B	RSV-B	Mononegavirales	4	4	1059731486
 250212	DNI	Rhinovirus A24	Rhinovirus A	Rhinoviruses	4	6	1059731486
 250212	DNI	Rhinovirus A40	Rhinovirus A	Rhinoviruses	2	8	1059731486
-250212	DNI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	10	26	1059731486
-250212	DSI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	5	10	1003451236
-250212	DSI	Rhinovirus C	Rhinovirus C	Rhinoviruses	2	4	1003451236
 250212	DNI	Rhinovirus C	Rhinovirus C	Rhinoviruses	11	42	1059731486
-250212	DNI	Rhinovirus C34	Rhinovirus C	Rhinoviruses	4	14	1059731486
+250212	DNI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	24	71	1059731486
 250212	DNI	Rhinovirus C2	Rhinovirus C	Rhinoviruses	4	12	1059731486
 250212	DNI	Rhinovirus C3	Rhinovirus C	Rhinoviruses	3	8	1059731486
-250212	DNI	Rhinovirus C11	Rhinovirus C	Rhinoviruses	24	71	1059731486
+250212	DNI	Rhinovirus C34	Rhinovirus C	Rhinoviruses	4	14	1059731486
 250212	DNI	Rhinovirus C36	Rhinovirus C	Rhinoviruses	1	1	1059731486
 250212	DNI	Rhinovirus C44	Rhinovirus C	Rhinoviruses	2	2	1059731486
-250212	DNI	RSV-B	RSV-B	Mononegavirales	4	4	1059731486
 250212	DNI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	120	136	1059731486
+250212	DSI	H1N1	H1N1	Influenza	19	26	1003451236
+250212	DSI	H3N2	H3N2	Influenza	17	34	1003451236
+250212	DSI	HPIV4b	HPIV4	Mononegavirales	2	4	1003451236
+250212	DSI	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	7	16	1003451236
+250212	DSI	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	5	10	1003451236
+250212	DSI	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	11	24	1003451236
+250212	DSI	Rhinovirus C	Rhinovirus C	Rhinoviruses	2	4	1003451236
 250212	DSI	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	60	74	1003451236
