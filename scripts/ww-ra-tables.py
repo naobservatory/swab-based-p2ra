@@ -130,7 +130,6 @@ with open(os.path.join(TABLE_DIR, "ww-ra-summary.tsv"), "w") as outf:
         "dedup_hv",
         "all_reads"
     ])
-    # Sort samples by date
     sorted_samples = sorted(samples.items())
     for (date, location, pathogen), data in sorted_samples:
         if pathogen in pathogens_to_ignore():
