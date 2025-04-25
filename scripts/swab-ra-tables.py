@@ -7,12 +7,11 @@ from collections import defaultdict, Counter
 from datetime import datetime
 from taxonomy import load_taxonomy_names
 
-from metadata_utils import first_level_mapping, second_level_mapping, is_date_in_range
+from metadata_utils import first_level_mapping, second_level_mapping, is_date_in_range, parse_count_table
 
 # Constants and paths
 validation_output_dir = "validation-output"
-tables_dir = "tables"
-os.makedirs(tables_dir, exist_ok=True)
+TABLE_DIR = "tables"
 
 with open("deliveries.json") as f:
     deliveries = json.load(f)
@@ -26,11 +25,7 @@ target_deliveries = deliveries["swab-deliveries"]
 
 taxid_names = load_taxonomy_names()
 
-read_counts = {}
-with open(os.path.join("outputs", "n_reads_per_swab_sample.tsv")) as f:
-    for row in csv.DictReader(f, delimiter="\t"):
-        read_counts[row["sample"]] = int(row["reads"])
-
+read_counts = parse_count_table("n_reads_per_swab_sample")
 
 date_loc_read_counts = Counter()
 treatment_read_counts = Counter()
@@ -47,6 +42,8 @@ for delivery in target_deliveries:
                 continue
 
             date = datetime.strptime(row["date"], "%Y-%m-%d")
+            if not is_date_in_range(date):
+                continue
             location = row["fine_location"]
             treatment = row["notes"]
             sample_treatment[sample] = treatment
@@ -118,7 +115,6 @@ for (date, location, pathogen), counts in samples.items():
     samples[(date, location, pathogen)]["all_reads"] = n_reads
 
 for (date, location, pathogen, treatment), counts in treatment_samples.items():
-
     n_reads = treatment_read_counts[(date, location, treatment)]
     treatment_samples[(date, location, pathogen, treatment)]["all_reads"] = n_reads
 
@@ -128,7 +124,7 @@ for (date, location, pathogen, treatment), counts in treatment_samples.items():
 # ---------------------------------------------------------------------
 
 # Output results
-with open(os.path.join("tables", "swabs-ra-summary.tsv"), "w") as outf:
+with open(os.path.join(TABLE_DIR, "swabs-ra-summary.tsv"), "w") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow([
         "date",
@@ -157,7 +153,7 @@ with open(os.path.join("tables", "swabs-ra-summary.tsv"), "w") as outf:
             data["all_reads"],
         ])
 
-with open(os.path.join("tables", "swabs-ra-per-treatment-summary.tsv"), "w") as outf:
+with open(os.path.join(TABLE_DIR, "swabs-ra-per-treatment-summary.tsv"), "w") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow([
         "date",

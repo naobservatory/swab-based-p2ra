@@ -1,4 +1,16 @@
 from datetime import datetime
+import csv
+
+def parse_count_table(table_name):
+    read_counts = {}
+    fname = f"tables/{table_name}.tsv"
+    try:
+        with open(fname) as f:
+            for row in csv.DictReader(f, delimiter="\t"):
+                read_counts[row["sample"]] = int(row["reads"])
+    except FileNotFoundError:
+        raise Exception(f"{fname} not found. Run fetch_readcounts.py first.")
+    return read_counts
 
 def is_date_in_range(date):
     return datetime(2025, 1, 3) <= date <= datetime(2025, 2, 15)
@@ -46,6 +58,7 @@ def first_level_mapping(assignment):
         "Rhinovirus A94": "Rhinovirus A",
         "Rhinovirus B3": "Rhinovirus B",
         "Rhinovirus B37": "Rhinovirus B",
+        "Rhinovirus B101": "Rhinovirus B",
         "Rhinovirus B103": "Rhinovirus B",
         "Rhinovirus C": "Rhinovirus C",
         "Rhinovirus C1": "Rhinovirus C",

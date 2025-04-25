@@ -7,12 +7,12 @@ from collections import defaultdict, Counter
 from datetime import datetime
 from taxonomy import load_taxonomy_names
 
-from metadata_utils import first_level_mapping, second_level_mapping, is_date_in_range, pathogens_to_ignore
+from metadata_utils import first_level_mapping, second_level_mapping, is_date_in_range, pathogens_to_ignore, parse_count_table
 
 # Constants and paths
 validation_output_dir = "validation-output"
-tables_dir = "tables"
-os.makedirs(tables_dir, exist_ok=True)
+TABLE_DIR = "tables"
+
 
 with open("deliveries.json") as f:
     deliveries = json.load(f)
@@ -25,10 +25,7 @@ target_deliveries = deliveries["ww-deliveries"]
 
 taxid_names = load_taxonomy_names()
 
-read_counts = {}
-with open(os.path.join("outputs", "n_reads_per_ww_sample.tsv")) as f:
-    for row in csv.DictReader(f, delimiter="\t"):
-        read_counts[row["sample"]] = int(row["reads"])
+read_counts = parse_count_table("n_reads_per_ww_sample")
 
 date_loc_read_counts = Counter()
 
@@ -40,9 +37,6 @@ for delivery in target_deliveries:
         reader = csv.DictReader(f, delimiter="\t")
         for row in reader:
             sample = row["sample"]
-            if "BCL" in sample:
-                continue
-
             fine_location = row["fine_location"]
             if fine_location not in ("DNI", "DSI"):
                 continue
@@ -112,7 +106,7 @@ for (date, location, pathogen), counts in samples.items():
 # Output results
 # ---------------------------------------------------------------------
 
-with open(os.path.join("tables", "ww-ra-summary.tsv"), "w") as outf:
+with open(os.path.join(TABLE_DIR, "ww-ra-summary.tsv"), "w") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow([
         "date",

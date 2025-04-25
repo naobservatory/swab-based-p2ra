@@ -5,3 +5,5 @@ genomes/
 index/
 validation-work/*
 validation-output/
+figures/
+*cpython*
