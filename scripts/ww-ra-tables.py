@@ -7,7 +7,7 @@ from collections import defaultdict, Counter
 from datetime import datetime
 from taxonomy import load_taxonomy_names
 
-from metadata_utils import first_level_mapping, second_level_mapping, is_date_in_range, pathogens_to_ignore
+from metadata_utils import first_level_mapping, second_level_mapping, is_date_in_range, pathogens_to_ignore, parse_count_table
 
 # Constants and paths
 validation_output_dir = "validation-output"
@@ -25,13 +25,7 @@ target_deliveries = deliveries["ww-deliveries"]
 
 taxid_names = load_taxonomy_names()
 
-read_counts = {}
-try:
-    with open(os.path.join(TABLE_DIR, "n_reads_per_ww_sample.tsv")) as f:
-        for row in csv.DictReader(f, delimiter="\t"):
-            read_counts[row["sample"]] = int(row["reads"])
-except FileNotFoundError:
-    raise Exception("n_reads_per_ww_sample.tsv not found. Run fetch_readcounts.py first.")
+read_counts = parse_count_table("n_reads_per_ww_sample")
 
 date_loc_read_counts = Counter()
 

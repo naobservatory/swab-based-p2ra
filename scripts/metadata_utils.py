@@ -1,4 +1,15 @@
 from datetime import datetime
+import csv
+
+def parse_count_table(table_name):
+    read_counts = {}
+    try:
+        with open(f"tables/{table_name}.tsv") as f:
+            for row in csv.DictReader(f, delimiter="\t"):
+                read_counts[row["sample"]] = int(row["reads"])
+    except FileNotFoundError:
+        raise Exception(f"{table_name}.tsv not found. Run fetch_readcounts.py first.")
+    return read_counts
 
 def is_date_in_range(date):
     return datetime(2025, 1, 3) <= date <= datetime(2025, 2, 15)

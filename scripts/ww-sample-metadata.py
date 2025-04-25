@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 from collections import Counter
 from dateutil import parser
-from metadata_utils import is_date_in_range
+from metadata_utils import is_date_in_range, parse_count_table
 
 # Constants and paths
 TABLE_DIR = "tables"
@@ -16,15 +16,8 @@ with open("deliveries.json") as f:
 
 target_deliveries = deliveries["ww-deliveries"]
 
-
 # Load counts
-read_counts = {}
-try:
-    with open(os.path.join(TABLE_DIR, "n_reads_per_ww_sample.tsv")) as f:
-        for row in csv.DictReader(f, delimiter="\t"):
-            read_counts[row["sample"]] = int(row["reads"])
-except FileNotFoundError:
-    raise Exception("n_reads_per_ww_sample.tsv not found. Run fetch_readcounts.py first.")
+read_counts = parse_count_table("n_reads_per_ww_sample")
 
 data = set()
 date_loc_read_counts = Counter()
