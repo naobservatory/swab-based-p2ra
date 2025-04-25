@@ -10,40 +10,6 @@ options(ggplot2.discrete.fill = function() scale_fill_manual(values = wong_eight
 
 options(mc.cores = parallel::detectCores())
 
-# Prior shapes
-
-beta_priors <- crossing(
-  alpha = c(0.5, 0.25, 0.15, 0.1, 0.05),
-  beta = c(5, 10, 100),
-) %>%
-  mutate(
-    gm = exp(digamma(alpha) - digamma(alpha + beta)),
-    gstd = exp(sqrt(trigamma(alpha) - trigamma(alpha + beta))),
-    log10gm = log10(gm),
-    log10gstd = log10(gstd),
-  ) %>%
-  print
-
-beta_densities <- function(x){
-  crossing(beta_priors, x=x) %>%
-    mutate(
-      density = dbeta(x, alpha, beta),
-      density_log10 = density * x * log(10),
-      across(c(alpha, beta), factor),
-    )
-}
-  
-beta_densities(seq(0.01, .5, length.out = 1000)) %>%
-  filter(alpha == 0.5) %>%
-  ggplot(aes(x, density, color = beta)) +
-  geom_line() 
-
-beta_densities(10^seq(-10, 0, length.out = 1000)) %>%
-  ggplot(aes(x, density_log10, color = alpha)) +
-  geom_line() +
-  scale_x_continuous(transform = "log10", breaks=10^seq(-10,0,2)) +
-  facet_grid(rows = vars(beta))
-
 # Model
 
 ## Hyperparameters
@@ -53,50 +19,58 @@ alpha_p <- 0.5
 beta_p <- 10
 prior_p <- function(x) dbeta(x, alpha_p, beta_p)
 
-### swab: mu_1
-alpha_mu_1 <- 0.5
-beta_mu_1 <- 10
-prior_mu_1 <- function(x) dbeta(x, alpha_mu_1, beta_mu_1)
+### swab: logit(mu_1)
+mean_logit_mu_1 <- -7  # Prior mean on logit scale
+sd_logit_mu_1 <- 3     # Prior standard deviation on logit scale
+prior_logit_mu_1 <- function(x) dnorm(x, mean_logit_mu_1, sd_logit_mu_1)
 
 ### swab: phi_1
 shape_phi_1 <- 2
 rate_phi_1 <- 2
 prior_phi_1 <- function(x) dgamma(x, shape_phi_1, rate_phi_1)
- 
-### wastewater: mu_ww
-alpha_mu_ww <- 0.25
-beta_mu_ww <- 100
-prior_mu_ww <- function(x) dbeta(x, alpha_mu_ww, beta_mu_ww)
 
-### swab: phi_ww
+### wastewater: logit(mu_ww)
+mean_logit_mu_ww <- -11  # Prior mean on logit scale
+sd_logit_mu_ww <- 3      # Prior standard deviation on logit scale
+prior_logit_mu_ww <- function(x) dnorm(x, mean_logit_mu_ww, sd_logit_mu_ww)
+
+### wastewater: phi_ww
 shape_phi_ww <- 2
 rate_phi_ww <- 2
 prior_phi_ww <- function(x) dgamma(x, shape_phi_ww, rate_phi_ww)
 
-## Plot priors
+## Plot priors (in transformed space)
 
 crossing(
   datatype = factor(c("swab", "wastewater")),
-  mu = 10^seq(-10,0,length.out=1000),
+  logit_mu = seq(-18, 2, length.out=1000),
 ) %>%
   mutate(
-    prior = if_else(datatype == "swab", prior_mu_1(mu), prior_mu_ww(mu)),
-    prior_log10 = prior * mu,
-    ) %>%
-  ggplot(aes(mu, prior_log10, color=datatype)) +
+    mu = plogis(logit_mu),
+    prior = if_else(datatype == "swab", 
+                    prior_logit_mu_1(logit_mu), 
+                    prior_logit_mu_ww(logit_mu)),
+  ) %>%
+  ggplot(aes(logit_mu, prior, color=datatype)) +
   geom_line() +
-  scale_x_log10()
-  
+  labs(title = "Prior distributions on logit(mu)")
+
+## Plot priors (in original space)
 crossing(
   datatype = factor(c("swab", "wastewater")),
-  mu = seq(0,0.5,length.out=1000),
+  logit_mu = seq(-20, 4, length.out=1000),
 ) %>%
   mutate(
-    prior = if_else(datatype == "swab", prior_mu_1(mu), prior_mu_ww(mu)),
-    prior_log10 = prior * mu,
-    ) %>%
+    mu = plogis(logit_mu),
+    prior = if_else(datatype == "swab", 
+                          prior_logit_mu_1(logit_mu), 
+                          prior_logit_mu_ww(logit_mu)),
+    prior_log10 = prior * mu * log(10),
+  ) %>%
   ggplot(aes(mu, prior, color=datatype)) +
-  geom_line()
+  geom_line() +
+  scale_x_log10(breaks = 10^seq(-8, 0, 1)) +
+  labs(title = "Implied prior distributions on mu")
 
 ## Model code
 
@@ -117,22 +91,27 @@ data {
 parameters {
   real<lower=0, upper=1> p;       // prevalence
   
-  // Swab parameters
-  real<lower=0, upper=1> mu_1;    // expected viral fraction in a pool containing only a single positive swab
+  // Swab parameters (using logit transformation)
+  real logit_mu_1;                // logit of expected viral fraction in a pool containing a single positive swab
   real<lower=0> phi_1;            // inverse-dispersion in a pool containing a single positive swab
   
-  // Wastewater MGS parameters
-  real<lower=0, upper=1> mu_ww;   // expected viral fraction in wastewater if everyone were infected
+  // Wastewater MGS parameters (using logit transformation)
+  real logit_mu_ww;               // logit of expected viral fraction in wastewater if everyone were infected
   real<lower=0> phi_ww;           // inverse-dispersion in wastewater MGS
+}
+
+transformed parameters {
+  real<lower=0, upper=1> mu_1 = inv_logit(logit_mu_1);    // back-transform to [0,1] scale
+  real<lower=0, upper=1> mu_ww = inv_logit(logit_mu_ww);  // back-transform to [0,1] scale
 }
   
 model {
   // Priors
   p ~ beta(${alpha_p}, ${beta_p});
-  mu_1 ~ beta(${alpha_mu_1}, ${beta_mu_1});
+  logit_mu_1 ~ normal(${mean_logit_mu_1}, ${sd_logit_mu_1});
   phi_1 ~ gamma(${shape_phi_1}, ${rate_phi_1});
-  mu_ww ~ beta(${alpha_mu_ww}, ${beta_mu_ww});
-  phi_ww ~ gamma(${shape_phi_ww}, ${rate_phi_ww});
+  logit_mu_ww ~ normal(${mean_logit_mu_ww}, ${sd_logit_mu_ww});
+  phi_ww ~ gamma(${shape_phi_ww}, ${rate_phi_ww});  // Updated from placeholder
   
   // Marginalized likelihood for pooled testing data
   for (i in 1:N_pools) {
@@ -237,25 +216,26 @@ species_data <- full_join(
     suffix = c(".swab", ".wastewater")
 )
 
+create_stan_data <- function(df.sw, df.ww) {
+  list(
+    N_pools = nrow(df.sw),
+    n_swabs = df.sw$pool_size,
+    r_total_pool = df.sw$all_reads,
+    r_viral_pool = df.sw$viral_reads,
+    N_ww = nrow(df.ww),
+    r_total_ww = df.ww$all_reads,
+    r_viral_ww = df.ww$viral_reads
+  )
+}
+
+fit_model <- function(d) {
+  sampling(stan_model, d, iter = 4000, warmup = 1000, chains = 4, cores = 4, seed = 381928)
+}
+
 fits <- species_data %>%
   mutate(
-    stan_data = map2(
-      data.swab,
-      data.wastewater,
-      \(df.sw, df.ww) list(
-        N_pools = nrow(df.sw),
-        n_swabs = df.sw$pool_size,
-        r_total_pool = df.sw$all_reads,
-        r_viral_pool = df.sw$viral_reads,
-        N_ww = nrow(df.ww),
-        r_total_ww = df.ww$all_reads,
-        r_viral_ww = df.ww$viral_reads
-        )
-    ),
-    fit = map(
-      stan_data,
-      \(d) sampling(stan_model, d, iter = 4000, warmup = 1000, chains = 4, cores = 4, seed = 381928)
-    ),
+    stan_data = map2(data.swab, data.wastewater, create_stan_data),
+    fit = map(stan_data, fit_model)
   )
 
 # Diagnostics
@@ -310,14 +290,20 @@ left_join(
 
 #  Plot posteriors
 
-prior_log10 <- function(x, density_function){
-  data <- tibble(
-    x = x,
-    density = density_function(x),
-    density_log10 = density * x * log(10),
-  ) 
+prior_density <- function(x, density_function, log10x = FALSE){
+  if (log10x){
+    data <- tibble(
+      x = x,
+      density = density_function(x) * x * log(10),
+    )
+  } else {
+    data <- tibble(
+      x = x,
+      density = density_function(x),
+    )
+  }
   geom_line(
-    aes(x, density_log10),
+    aes(x, density),
     data = data,
     color="grey",
     linetype="dashed",
@@ -328,54 +314,61 @@ prior_log10 <- function(x, density_function){
 posteriors %>%
   ggplot(aes(p, color=group)) +
   geom_density() +
-  prior_log10(10^seq(-8, 0, length.out=100), prior_p) +
+  prior_density(10^seq(-8, 0, length.out=100), prior_p, log10x = TRUE) +
   scale_x_log10(limits = c(1e-8, 1), name = "prevalence") +
   scale_y_continuous(name = "") +
   facet_wrap(vars(species))
 
 posteriors %>%
-  ggplot(aes(mu_1, color=group)) +
+  ggplot(aes(logit_mu_1, color=group)) +
   geom_density() +
-  prior_log10(10^seq(-8, 0, length.out=100), prior_mu_1) +
-  scale_x_log10(limits = c(1e-8, 1)) +
+  prior_density(seq(-20, 4, length.out=100), prior_logit_mu_1) +
   scale_y_continuous(name = "") +
   facet_wrap(vars(species))
 
 posteriors %>%
   ggplot(aes(phi_1, color=group)) +
   geom_density() +
-  prior_log10(10^seq(-1.5, 1.5, length.out=100), prior_phi_1) +
-  geom_vline(xintercept=1) +
+  prior_density(10^seq(-3, 3, length.out=100), prior_phi_1, log10x = TRUE) +
   scale_x_log10() +
   scale_y_continuous(name = "") +
   facet_wrap(vars(species))
 
 posteriors %>%
-  ggplot(aes(mu_ww, color=group)) +
+  ggplot(aes(logit_mu_ww, color=group)) +
   geom_density() +
-  prior_log10(10^seq(-10, 0, length.out=100), prior_mu_ww) +
-  scale_x_log10() +
+  prior_density(seq(-20, 0, length.out=100), prior_logit_mu_ww) +
   scale_y_continuous(name = "") +
   facet_wrap(vars(species))
 
 posteriors %>%
   ggplot(aes(phi_ww, color=group)) +
   geom_density() +
-  prior_log10(10^seq(-1.5, 1.5, length.out=100), prior_phi_ww) +
-  geom_vline(xintercept=1) +
-  scale_x_log10() +
+  prior_density(10^seq(-3, 3, length.out=100), prior_phi_ww, log10x = TRUE) +
+  scale_x_log10(limits = c(1e-3, 1e3)) +
   facet_wrap(vars(species))
 
 # Joint posteriors
-# TODO: more combinations
+
+## Effects on prevalence estimates
 
 posteriors %>%
   ggplot(aes(mu_1, p)) +
   geom_point(alpha = 0.05, size = 0.1) +
   geom_smooth() +
+  scale_x_log10(limits = c(1e-7, 1)) +
+  scale_y_log10(limits = c(1e-6, 1)) +
+  facet_wrap(~species)
+
+posteriors %>%
+  ggplot(aes(phi_1, p)) +
+  geom_point(alpha = 0.05, size = 0.1) +
+  geom_smooth() +
   scale_x_log10() +
-  scale_y_log10() +
-  facet_wrap(~species , scales="free")
+  scale_y_log10(limits = c(1e-6, 1)) +
+  facet_wrap(~species)
+
+## Effects on P2RA estimates
 
 posteriors %>%
   ggplot(aes(p, mu_ww)) +
@@ -383,7 +376,7 @@ posteriors %>%
   geom_smooth() +
   scale_x_log10() +
   scale_y_log10() +
-  facet_wrap(~species , scales="free")
+  facet_wrap(~species)
 
 posteriors %>%
   ggplot(aes(mu_1, mu_ww)) +
@@ -391,31 +384,23 @@ posteriors %>%
   geom_smooth() +
   scale_x_log10() +
   scale_y_log10() +
-  facet_wrap(~species , scales="free")
+  facet_wrap(~species)
 
 posteriors %>%
-  ggplot(aes(phi_1, p)) +
+  ggplot(aes(phi_1, mu_ww)) +
   geom_point(alpha = 0.05, size = 0.1) +
   geom_smooth() +
   scale_x_log10() +
   scale_y_log10() +
-  facet_wrap(~species , scales="free_y")
+  facet_wrap(~species)
 
 posteriors %>%
-  ggplot(aes(phi_1, mu_1)) +
+  ggplot(aes(phi_ww, mu_ww)) +
   geom_point(alpha = 0.05, size = 0.1) +
   geom_smooth() +
   scale_x_log10() +
   scale_y_log10() +
-  facet_wrap(~species , scales="free_y")
-
-posteriors %>%
-  ggplot(aes(phi_1, mu_1 * p)) +
-  geom_point(alpha = 0.05, size = 0.1) +
-  geom_smooth() +
-  scale_x_log10() +
-  scale_y_log10() +
-  facet_wrap(~species , scales="free_y")
+  facet_wrap(~species)
 
 # Posterior predictive distributions
 
@@ -462,24 +447,36 @@ posterior_predictive_swab_summary %>%
   scale_x_continuous(breaks = seq(0, 12, 2), name = "positive pools")
 
 posterior_predictive_swab_summary %>%
-  ggplot(aes(x = viral_reads_total, y = species, color = group)) +
+  ggplot(aes(x = viral_reads_total, y = species, fill = group)) +
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
   geom_point(data = species_swab_summary) +
-  scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000, 10000, 100000), name = "total viral read count") +
+  scale_x_log10(
+    breaks = 10^seq(0, 4),
+    name = "total viral read count (conditional on > 0)",
+    oob = scales::oob_keep,
+  ) +
   scale_y_discrete(limits = rev(species_order))
 
 posterior_predictive_swab_summary %>%
-  ggplot(aes(x = viral_reads_max, y = species, color = group)) +
+  ggplot(aes(x = viral_reads_max, y = species, fill = group)) +
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
   geom_point(data = species_swab_summary) +
-  scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000, 10000), name = "largest viral read count") +
+  scale_x_log10(
+    breaks = 10^seq(0, 4),
+    name = "largest viral read count (conditional on > 0)",
+    oob = scales::oob_keep,
+  ) +
   scale_y_discrete(limits = rev(species_order))
 
 posterior_predictive_swab_summary %>%
-  ggplot(aes(x = viral_reads_sd, y = species, color = group)) +
+  ggplot(aes(x = viral_reads_sd, y = species, fill = group)) +
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
   geom_point(data = species_swab_summary) +
-  scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000), name = "stdev(viral read count)") +
+  scale_x_log10(
+    breaks = 10^seq(0, 4),
+    name = "stdev viral read count (conditional on > 0)",
+    oob = scales::oob_keep,
+  ) +
   scale_y_discrete(limits = rev(species_order))
 
 posterior_predictive_swab_summary %>%
@@ -537,31 +534,47 @@ posterior_predictive_ww_summary %>%
   scale_x_continuous(breaks = seq(0, 12, 2), name = "positive samples")
 
 posterior_predictive_ww_summary %>%
-  ggplot(aes(x = viral_reads_total, y = species, color = group)) +
+  ggplot(aes(x = viral_reads_total, y = species, fill = group)) +
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
   geom_point(data = species_ww_summary) +
-  scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000, 10000, 100000), name = "total viral read count") +
+  scale_x_log10(
+    breaks = 10^seq(0, 4),
+    name = "total viral read count (conditional on > 0)",
+    oob = scales::oob_keep,
+  ) +
   scale_y_discrete(limits = rev(species_order))
 
 posterior_predictive_ww_summary %>%
-  ggplot(aes(x = viral_reads_expected, y = species, color = group)) +
+  ggplot(aes(x = viral_reads_expected, y = species, fill = group)) +
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
   geom_point(data = species_ww_summary, mapping = aes(x = viral_reads_total)) +
-  scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000, 10000, 100000), name = "total viral read count") +
+  scale_x_log10(
+    breaks = 10^seq(0, 4),
+    name = "total viral reads expected (observed)",
+    oob = scales::oob_keep,
+  ) +
   scale_y_discrete(limits = rev(species_order))
 
 posterior_predictive_ww_summary %>%
-  ggplot(aes(x = viral_reads_max, y = species, color = group)) +
+  ggplot(aes(x = viral_reads_max, y = species, fill = group)) +
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
   geom_point(data = species_ww_summary) +
-  scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000, 10000), name = "largest viral read count") +
+  scale_x_log10(
+    breaks = 10^seq(0, 4),
+    name = "largest viral read count (conditional on > 0)",
+    oob = scales::oob_keep,
+  ) +
   scale_y_discrete(limits = rev(species_order))
 
 posterior_predictive_ww_summary %>%
-  ggplot(aes(x = viral_reads_sd, y = species, color = group)) +
+  ggplot(aes(x = viral_reads_sd, y = species, fill = group)) +
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
   geom_point(data = species_ww_summary) +
-  scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000), name = "stdev(viral read count)") +
+  scale_x_log10(
+    breaks = 10^seq(0, 4),
+    name = "stdev viral read count (conditional on > 0)",
+    oob = scales::oob_keep,
+  ) +
   scale_y_discrete(limits = rev(species_order))
 
 # RA_i(1%) and related quantities
