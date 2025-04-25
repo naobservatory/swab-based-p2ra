@@ -137,7 +137,7 @@ with open(os.path.join(TABLE_DIR, "swabs-ra-summary.tsv"), "w") as outf:
         "all_reads"
     ])
     # Sort samples by date
-    sorted_samples = sorted(samples.items(), key=lambda x: x[0][0])
+    sorted_samples = sorted(samples.items())
     for (date, location, pathogen), data in sorted_samples:
         species = first_level_mapping(pathogen)
         group = second_level_mapping(species)
@@ -167,7 +167,7 @@ with open(os.path.join(TABLE_DIR, "swabs-ra-per-treatment-summary.tsv"), "w") as
         "all_reads"
     ])
     # Sort samples by date
-    sorted_samples = sorted(treatment_samples.items(), key=lambda x: x[0][0])
+    sorted_samples = sorted(treatment_samples.items())
 
     for (date, location, pathogen, treatment), data in sorted_samples:
         species = first_level_mapping(pathogen)
