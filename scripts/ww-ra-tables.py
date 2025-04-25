@@ -56,8 +56,20 @@ for delivery in target_deliveries:
 samples = defaultdict(Counter)  # (date, location, pathogen) -> counts
 
 # Process classified reads
+seen = set()
+read_genomes = defaultdict(set)
 with open(os.path.join(validation_output_dir, "ww-classified-all-reads.tsv")) as f:
     for row in csv.DictReader(f, delimiter="\t"):
+        read_id = row["read_id"]
+        genome_name = row["genome_name"]
+        read_genomes[read_id].add(genome_name)
+        if len(read_genomes[read_id]) > 1:
+            raise Exception(f"Warning: Read {read_id} has more than one genome match. Maybe read pairs aligned to different genomes?")
+        # We should avoid double-counting both read pairs and multiple
+        # alignments of a single read to the same genome.
+        if read_id in seen:
+            continue
+        seen.add(read_id)
         date = datetime.strptime(row["date"], "%Y-%m-%d")
         if not is_date_in_range(date):
             continue
