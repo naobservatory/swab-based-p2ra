@@ -5,40 +5,40 @@ date	location	assignment	species	group	treatment	non_dedup	dedup	all_reads
 250113	BoDT	Rhinovirus A94	Rhinovirus A	Rhinoviruses	Filtration, CP, Qiagen, Polyadenylated	1	1	299089
 250113	BoDT	Rhinovirus A94	Rhinovirus A	Rhinoviruses	Filtration, Qiagen	5	4	108589
 250115	BoDT	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	Filtration, Qiagen	12	12	708774
-250116	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, Qiagen	1	1	40750
-250116	BoDT	RSVA	RSV-A	Mononegavirales	Filtration, Amicon, Qiagen	7	7	185349
 250116	BoDT	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	Filtration, Amicon, Qiagen	6	6	185349
 250116	BoDT	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	Filtration, Qiagen	1	1	40750
-250116	BoDT	Rhinovirus B101	Rhinovirus B	Rhinoviruses	Filtration, Amicon, Qiagen	1	1	185349
+250116	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, Qiagen	1	1	40750
+250116	BoDT	RSVA	RSV-A	Mononegavirales	Filtration, Amicon, Qiagen	7	7	185349
 250116	BoDT	RSVA	RSV-A	Mononegavirales	Filtration, Qiagen	1	0	40750
+250116	BoDT	Rhinovirus B101	Rhinovirus B	Rhinoviruses	Filtration, Amicon, Qiagen	1	1	185349
 250123	BoDT	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	Filtration, Qiagen	24	24	439809
 250123	BoDT	Human coronavirus HKU1	HCoV-HKU1	Coronaviruses (seasonal)	Filtration, Amicon, Qiagen	1	1	313957
+250123	BoDT	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	Filtration, Qiagen	1	1	439809
 250123	BoDT	Rhinovirus C42	Rhinovirus C	Rhinoviruses	Filtration, Qiagen	5	4	439809
 250123	BoDT	Rhinovirus C42	Rhinovirus C	Rhinoviruses	Filtration, Amicon, Qiagen	2	2	313957
-250123	BoDT	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	Filtration, Qiagen	1	1	439809
 250127	BoDT	HPIV4	HPIV4	Mononegavirales	Filtration, CP, Qiagen | cDNA input: = 44.17 ng	1	1	131889
+250127	BoDT	HPIV4	HPIV4	Mononegavirales	Filtration, CP, Qiagen | cDNA input: = 1009.6 ng	1	1	395488
+250127	BoDT	HPIV4	HPIV4	Mononegavirales	Filtration, Qiagen | cDNA input: = 44.64 ng	1	1	161683
 250127	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 1009.6 ng	2	2	395488
 250127	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, Qiagen | cDNA input: = 44.64 ng	1	1	161683
+250127	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, CP, Qiagen	2	2	128548
+250127	BoDT	Rhinovirus A34	Rhinovirus A	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 1009.6 ng	2	2	395488
+250127	BoDT	Rhinovirus A34	Rhinovirus A	Rhinoviruses	Filtration, CP, Qiagen	1	1	128548
 250127	BoDT	Rhinovirus B37	Rhinovirus B	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 1009.6 ng	15	14	395488
 250127	BoDT	Rhinovirus B37	Rhinovirus B	Rhinoviruses	Filtration, Qiagen | cDNA input: = 44.64 ng	2	2	161683
 250127	BoDT	Rhinovirus B37	Rhinovirus B	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 44.17 ng	2	2	131889
-250127	BoDT	Rhinovirus A34	Rhinovirus A	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 1009.6 ng	2	2	395488
-250127	BoDT	HPIV4	HPIV4	Mononegavirales	Filtration, CP, Qiagen | cDNA input: = 1009.6 ng	1	1	395488
-250127	BoDT	HPIV4	HPIV4	Mononegavirales	Filtration, Qiagen | cDNA input: = 44.64 ng	1	1	161683
-250127	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, CP, Qiagen	2	2	128548
 250127	BoDT	Rhinovirus B37	Rhinovirus B	Rhinoviruses	Filtration, CP, Qiagen	1	1	128548
-250127	BoDT	Rhinovirus A34	Rhinovirus A	Rhinoviruses	Filtration, CP, Qiagen	1	1	128548
+250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 30.6 ng	1830	1232	351910
+250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	Filtration, Qiagen | cDNA input: = < 32 ng	3746	3242	599313
+250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 816 ng	1643	1534	287006
+250129	BoDT	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	Filtration, Qiagen | cDNA input: = < 32 ng	2	2	599313
 250129	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 30.6 ng	46	30	351910
 250129	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, Qiagen | cDNA input: = < 32 ng	90	82	599313
 250129	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 816 ng	39	36	287006
-250129	BoDT	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	Filtration, Qiagen | cDNA input: = < 32 ng	2	2	599313
-250129	BoDT	Rhinovirus C42	Rhinovirus C	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 816 ng	1	1	287006
-250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 30.6 ng	1830	1232	351910
 250129	BoDT	Rhinovirus C36	Rhinovirus C	Rhinoviruses	Filtration, Qiagen | cDNA input: = < 32 ng	39	33	599313
 250129	BoDT	Rhinovirus C36	Rhinovirus C	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 816 ng	36	34	287006
 250129	BoDT	Rhinovirus C36	Rhinovirus C	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 30.6 ng	4	4	351910
-250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	Filtration, Qiagen | cDNA input: = < 32 ng	3746	3242	599313
-250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 816 ng	1643	1534	287006
+250129	BoDT	Rhinovirus C42	Rhinovirus C	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 816 ng	1	1	287006
 250204	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 771.2 ng	3	3	283834
 250204	BoDT	Rhinovirus C2	Rhinovirus C	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 771.2 ng	5	5	283834
 250204	BoDT	Rhinovirus C2	Rhinovirus C	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 33.74 ng	2	2	240475
