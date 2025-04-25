@@ -60,9 +60,17 @@ samples = defaultdict(Counter)  # (date, location, pathogen) -> counts
 treatment_samples = defaultdict(Counter) # (date, location, pathogen, treatment) -> counts
 
 # Process classified reads
+seen_reads = set()
 with open(os.path.join(validation_output_dir, "swabs-classified-all-reads.tsv")) as f:
     for row in csv.DictReader(f, delimiter="\t"):
         date = datetime.strptime(row["date"], "%Y-%m-%d")
+        read_id = row["read_id"]
+
+        # Some reads had multiple BLAST alignments to the same genome. We
+        # don't want to count those multiple times.
+        if read_id in seen_reads:
+            continue
+        seen_reads.add(read_id)
         if not is_date_in_range(date):
             continue
 
