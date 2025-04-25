@@ -6,25 +6,20 @@ from datetime import datetime
 import os
 from collections import Counter
 from dateutil import parser
+from metadata_utils import is_date_in_range, parse_count_table
 
 # Constants and paths
-tables_dir = "tables"
-os.makedirs(tables_dir, exist_ok=True)
+TABLE_DIR = "tables"
 
 with open("deliveries.json") as f:
     deliveries = json.load(f)
 
 target_deliveries = deliveries["ww-deliveries"]
 
-
 # Load counts
-read_counts = {}
-with open(os.path.join("outputs", "n_reads_per_ww_sample.tsv")) as f:
-    for row in csv.DictReader(f, delimiter="\t"):
-        read_counts[row["sample"]] = int(row["reads"])
+read_counts = parse_count_table("n_reads_per_ww_sample")
 
 data = set()
-
 date_loc_read_counts = Counter()
 
 # Reading metadata
@@ -38,13 +33,10 @@ for delivery in target_deliveries:
             fine_location = row["fine_location"]
             sample_id = row["sample"]
 
-            if "BCL" in sample_id:
-                continue
-
             if fine_location not in ("DNI", "DSI"):
                 continue
 
-            if parser.parse(row["date"]) < datetime(2025, 1, 3):
+            if not is_date_in_range(parser.parse(row["date"])):
                 continue
 
             date = datetime.strptime(row["date"], "%Y-%m-%d")
@@ -53,7 +45,7 @@ for delivery in target_deliveries:
             data.add((sample, date, fine_location))
 
 # Writing metadata
-with open(os.path.join(tables_dir, "wastewater-sample-metadata.tsv"), "wt") as outf:
+with open(os.path.join(TABLE_DIR, "wastewater-sample-metadata.tsv"), "wt") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow(["sample", "date", "location", "all_reads"])
     for sample in sorted(data):

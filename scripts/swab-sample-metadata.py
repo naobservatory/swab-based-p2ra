@@ -5,9 +5,9 @@ from datetime import datetime
 import os
 from collections import Counter, defaultdict
 import json
+from metadata_utils import is_date_in_range, parse_count_table
 # Constants and paths
-tables_dir = "tables"
-os.makedirs(tables_dir, exist_ok=True)
+TABLE_DIR = "tables"
 
 with open("deliveries.json") as f:
     deliveries = json.load(f)
@@ -16,10 +16,7 @@ target_deliveries = deliveries["swab-deliveries"]
 
 
 # Load counts
-read_counts = {}
-with open(os.path.join("outputs", "n_reads_per_swab_sample.tsv")) as f:
-    for row in csv.DictReader(f, delimiter="\t"):
-        read_counts[row["sample"]] = int(row["reads"])
+read_counts = parse_count_table("n_reads_per_swab_sample")
 
 date_loc_read_counts = Counter()
 for delivery in target_deliveries:
@@ -33,7 +30,8 @@ for delivery in target_deliveries:
                 continue
             date = datetime.strptime(row["date"], "%Y-%m-%d")
             location = row["fine_location"]
-            treatment = row["notes"]
+            if not is_date_in_range(date):
+                continue
             date_loc_read_counts[(date, location)] += read_counts.get(sample, 0)
 
 
@@ -44,7 +42,7 @@ with open("[2024] Zephyr sample log - Sampling runs.tsv", "r") as f:
     for row in reader:
         sample_name = row["sample name"]
         sample_date = datetime.strptime(row["date collected"], "%Y-%m-%d")
-        if sample_date < datetime(2025, 1, 1) or sample_date > datetime(2025, 2, 25):
+        if not is_date_in_range(sample_date):
             continue
         sample_pool_size = int(row["total swabs"])
         location = row["sample source"]
@@ -53,7 +51,7 @@ with open("[2024] Zephyr sample log - Sampling runs.tsv", "r") as f:
 
 
 # Writing metadata
-with open(os.path.join(tables_dir, "swab-sample-metadata.tsv"), "wt") as outf:
+with open(os.path.join(TABLE_DIR, "swab-sample-metadata.tsv"), "wt") as outf:
     writer = csv.writer(outf, delimiter="\t")
     writer.writerow(["sample", "date", "location", "pool_size", "all_reads"])
     for sample_info, sample_pool_size in sorted(sample_data.items()):

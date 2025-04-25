@@ -8,3 +8,5 @@ validation-output/
 .Rproj.user
 *.Rhistory
 *.Rproj
+figures/
+*cpython*
