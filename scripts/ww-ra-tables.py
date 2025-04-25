@@ -71,7 +71,9 @@ with open(os.path.join(validation_output_dir, "ww-classified-all-reads.tsv")) as
         read_genomes[read_id].add(genome_name)
         if len(read_genomes[read_id]) > 1:
             raise Exception(f"Warning: Read {read_id} has more than one genome match. Maybe read pairs aligned to different genomes?")
-        if read_id in seen: # We should avoid double-counting both read pairs and multiple alignments of a single read to the same genome.
+        # We should avoid double-counting both read pairs and multiple
+        # alignments of a single read to the same genome.
+        if read_id in seen:
             continue
         seen.add(read_id)
         date = datetime.strptime(row["date"], "%Y-%m-%d")
