@@ -3,12 +3,13 @@ import csv
 
 def parse_count_table(table_name):
     read_counts = {}
+    fname = f"tables/{table_name}.tsv"
     try:
-        with open(f"tables/{table_name}.tsv") as f:
+        with open(fname) as f:
             for row in csv.DictReader(f, delimiter="\t"):
                 read_counts[row["sample"]] = int(row["reads"])
     except FileNotFoundError:
-        raise Exception(f"{table_name}.tsv not found. Run fetch_readcounts.py first.")
+        raise Exception(f"{fname} not found. Run fetch_readcounts.py first.")
     return read_counts
 
 def is_date_in_range(date):
