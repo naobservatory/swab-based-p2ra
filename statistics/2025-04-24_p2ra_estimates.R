@@ -383,6 +383,14 @@ posteriors %>%
   facet_wrap(~species , scales="free")
 
 posteriors %>%
+  ggplot(aes(mu_1, mu_ww)) +
+  geom_point(alpha = 0.05, size = 0.1) +
+  geom_smooth() +
+  scale_x_log10() +
+  scale_y_log10() +
+  facet_wrap(~species , scales="free")
+
+posteriors %>%
   ggplot(aes(phi_1, p)) +
   geom_point(alpha = 0.05, size = 0.1) +
   geom_smooth() +
@@ -408,7 +416,9 @@ posteriors %>%
 
 # Posterior predictive distributions
 
-posterior_predictive <- posteriors %>%
+## Swabs 
+
+posterior_predictive_swab <- posteriors %>%
   mutate(rep = 1:n(), .by=species) %>%
   cross_join(swab_metadata) %>%
   mutate(
@@ -419,62 +429,131 @@ posterior_predictive <- posteriors %>%
     false_negative = n_pos > 0 & viral_reads == 0,
   )
 
-posterior_predictive_summary <- posterior_predictive %>%
+posterior_predictive_swab_summary <- posterior_predictive_swab %>%
   summarise(
     pos_pools = sum(viral_reads > 0),
     viral_reads_total = sum(viral_reads),
     viral_reads_max = max(viral_reads),
+    viral_reads_sd = sd(viral_reads),
     false_negative_pools = sum(false_negative),
     across(c(p, mu_1, phi_1), first),
     .by = c(species, group, rep),
   )
 
-species_summary <- swab_reads_complete %>%
+species_swab_summary <- swab_reads_complete %>%
   summarise(
     pos_pools = sum(viral_reads > 0),
     viral_reads_total = sum(viral_reads),
     viral_reads_max = max(viral_reads),
+    viral_reads_sd = sd(viral_reads),
     .by = c(species, group),
   ) %>%
   arrange(species) %>%
   print
 
-posterior_predictive_summary %>%
+posterior_predictive_swab_summary %>%
   ggplot(aes(x = pos_pools, fill = group, after_stat(density))) +
   geom_histogram(binwidth = 1, center = 0, color = "grey") +
-  geom_vline(data = species_summary, mapping = aes(xintercept=pos_pools)) +
+  geom_vline(data = species_swab_summary, mapping = aes(xintercept=pos_pools)) +
   facet_wrap(vars(species)) +
   scale_x_continuous(breaks = seq(0, 12, 2), name = "positive pools")
 
-posterior_predictive_summary %>%
+posterior_predictive_swab_summary %>%
   ggplot(aes(x = viral_reads_total, y = species, color = group)) +
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_point(data = species_summary) +
+  geom_point(data = species_swab_summary) +
   scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000, 10000, 100000), name = "total viral read count") +
   scale_y_discrete(limits = rev(species_order))
 
-posterior_predictive_summary %>%
+posterior_predictive_swab_summary %>%
   ggplot(aes(x = viral_reads_max, y = species, color = group)) +
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_point(data = species_summary) +
+  geom_point(data = species_swab_summary) +
   scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000, 10000), name = "largest viral read count") +
   scale_y_discrete(limits = rev(species_order))
 
-posterior_predictive_summary %>%
+posterior_predictive_swab_summary %>%
+  ggplot(aes(x = viral_reads_sd, y = species, color = group)) +
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_point(data = species_swab_summary) +
+  scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000), name = "stdev(viral read count)") +
+  scale_y_discrete(limits = rev(species_order))
+
+posterior_predictive_swab_summary %>%
   ggplot(aes(x = false_negative_pools, fill = group, after_stat(density))) +
   geom_histogram(binwidth = 1, center = 0, color = "grey") +
   facet_wrap(vars(species)) +
   scale_x_continuous(breaks = seq(0, 10), limits = c(-1, 8)) +
   theme_minimal()
 
-posterior_predictive_summary %>%
+posterior_predictive_swab_summary %>%
   ggplot(aes(phi_1, pos_pools, color = group)) +
+  geom_point(alpha = 0.05, size = 0.1) +
   geom_smooth() +
-  geom_hline(data = species_summary, mapping = aes(yintercept=pos_pools)) +
+  geom_hline(data = species_swab_summary, mapping = aes(yintercept=pos_pools)) +
   scale_x_log10() +
   facet_wrap(vars(species))
 
-# RA_i(1%)
+## Wastewater
+
+posterior_predictive_ww <- posteriors %>%
+  mutate(rep = 1:n(), .by=species) %>%
+  cross_join(wastewater_metadata) %>%
+  mutate(
+    mu = p * mu_ww * all_reads,
+    viral_reads = map2_int(mu, phi_ww, ~ifelse(.x > 0, rnbinom(1, size = .y, mu = .x), 0)),
+  )
+
+posterior_predictive_ww_summary <- posterior_predictive_ww %>%
+  summarise(
+    pos_samples = sum(viral_reads > 0),
+    viral_reads_total = sum(viral_reads),
+    viral_reads_max = max(viral_reads),
+    viral_reads_sd = sd(viral_reads),
+    across(c(p, mu_ww, phi_ww), first),
+    .by = c(species, group, rep),
+  )
+
+species_ww_summary <- wastewater_reads_complete %>%
+  summarise(
+    pos_samples = sum(viral_reads > 0),
+    viral_reads_total = sum(viral_reads),
+    viral_reads_max = max(viral_reads),
+    viral_reads_sd = sd(viral_reads),
+    .by = c(species, group),
+  ) %>%
+  arrange(species) %>%
+  print
+
+posterior_predictive_ww_summary %>%
+  ggplot(aes(x = pos_samples, fill = group, after_stat(density))) +
+  geom_histogram(binwidth = 1, center = 0, color = "grey") +
+  geom_vline(data = species_ww_summary, mapping = aes(xintercept = pos_samples)) +
+  facet_wrap(vars(species)) +
+  scale_x_continuous(breaks = seq(0, 12, 2), name = "positive samples")
+
+posterior_predictive_ww_summary %>%
+  ggplot(aes(x = viral_reads_total, y = species, color = group)) +
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_point(data = species_ww_summary) +
+  scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000, 10000, 100000), name = "total viral read count") +
+  scale_y_discrete(limits = rev(species_order))
+
+posterior_predictive_ww_summary %>%
+  ggplot(aes(x = viral_reads_max, y = species, color = group)) +
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_point(data = species_ww_summary) +
+  scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000, 10000), name = "largest viral read count") +
+  scale_y_discrete(limits = rev(species_order))
+
+posterior_predictive_ww_summary %>%
+  ggplot(aes(x = viral_reads_sd, y = species, color = group)) +
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_point(data = species_ww_summary) +
+  scale_x_continuous(transform = "pseudo_log", breaks=c(0, 1, 10, 100, 1000), name = "stdev(viral read count)") +
+  scale_y_discrete(limits = rev(species_order))
+
+# RA_i(1%) and related quantities
 
 posteriors %>%
   mutate(ra01 = mu_ww * 0.01) %>%
@@ -487,7 +566,7 @@ posteriors %>%
   mutate(ratio = mu_1 / mu_ww) %>%
   ggplot(aes(ratio, species, fill=group)) +
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  scale_x_log10(name = "swab RA / wastewater RA", limits=c(1e-2,1e8)) +
+  scale_x_log10(name = "swab RA / wastewater RA", limits=c(1e-2,1e8), breaks=10^seq(0,6,2)) +
   scale_y_discrete(limits=rev(species_order))
 
 posteriors %>%
