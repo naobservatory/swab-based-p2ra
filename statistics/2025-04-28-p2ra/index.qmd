@@ -4,7 +4,9 @@ format:
   html:
     code-fold: true
     toc: true
-editor: visual
+  pdf:
+    toc: true
+editor: source 
 author: dan
 ---
 
@@ -166,6 +168,10 @@ crossing(
   scale_x_log10(breaks = 10^seq(-8, 0, 1)) +
   labs(title = "Prior distributions on mu")
 ```
+
+Note that previously, we tried Beta distributions for these priors.
+We found that the Jeffrey's left tail ($\text{Beta}(\alpha = 1/2, \beta)$) put too little weight on small values.
+We explored various smaller `\alpha` parameters, but found that Beta priors that put significant weight on values like 1e-6 were almost flat in log space, which puts too much weight on very small numbers and led to numerical instabilities.
 
 ### Overdispersion
 
