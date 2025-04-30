@@ -145,9 +145,9 @@ For the viral fraction parameters (mu_1 and mu_ww), we use logit-normal priors t
 -   $\text{logit}(\mu_1) \sim \text{Normal}(-7, 3)$
 -   $\text{logit}(\mu_{ww}) \sim \text{Normal}(-11, 3)$
 
-Because we do not have much a prior information about these parameters, we chose the hyperparameters, which set the mean and standard deviation of $\text{logit}(\mu)$, iteratively so that the priors only weakly constrain the posteriors in cases with observed reads. We also included the following considerations:
+Because we do not have much prior information about these parameters, we chose the hyperparameters, which set the mean and standard deviation of $\text{logit}(\mu)$, iteratively so that the priors only weakly constrain the posteriors in cases with observed reads. We also included the following considerations:
 
--   Because we are looking at respiratory viruses, we expect a prior the viral fraction at a given prevalence to be higher in swabs than in wastewater.
+-   Because we are looking at respiratory viruses, we expect a priori the viral fraction at a given prevalence to be higher in swabs than in wastewater.
 -   We want the wastewater prior to be consistent with our previous P2RA estimates.
 -   It seems unlikely that the expected viral fraction in a positive swab is O(1). We don't want to totally exclude this possibility, but a single very high count in a single pool seems more likely to be lucky than reflective of the average.
 
@@ -217,7 +217,7 @@ Now we'll define the Stan model code.
 
 ```{r}
 #| label: model
-#| code-fold: true
+#| code-fold: false
 #| cache: true
 
 model_code = "
@@ -449,7 +449,7 @@ fits %>%
 The only warning sign here is that we have 5 divergent transitions for `HMPV-`.
 However, this is one of the viruses with zero observations in the pooled swab data, so I'm not too concerned about this.
 
-We extract the posterior samples for further analysis:
+We extract the posterior samples for further analysis, and write to text for later:
 
 ```{r}
 #| code-fold: false
@@ -460,6 +460,8 @@ posteriors <- fits %>%
   mutate(
     across(-c(species, group), as.double),
     )
+
+write_tsv(posteriors, "posteriors.tsv")
 ```
 
 # Posterior distributions
@@ -729,11 +731,11 @@ posteriors %>%
   facet_wrap(~species, ncol = 6)
 ```
 
-There appears to be a relationship between the swab inverse overdispersion and the prevalence estimates, suggesting that if we used a prior that allowed smaller $phi_1$, we might get larger prevalence estimates for some viruses.
+There appears to be a relationship between the swab inverse overdispersion and the prevalence estimates, suggesting that if we used a prior that allowed smaller $\phi_1$, we might get larger prevalence estimates for some viruses.
 
 This makes sense because if we only see a virus a few times and overdispersion is very large, the true prevalence might be lower than we think and our observations are lucky outliers.
 
-We should consider whether we like the current prior on $phi_1$ or want to allow it to be broader.
+We should consider whether we like the current prior on $\phi_1$ or want to allow it to be broader.
 
 On the other hand, the relationship is pretty weak compared to the spread of the $p$ samples, so it may not matter very much.
 
