@@ -130,13 +130,20 @@ We want to constrain the prevalence to (0, 1) and we think it's unlikely that th
 $$p \sim \text{Beta}(0.5, 10)$$
 
 ```{r}
-p_prior_df <- tibble(p = 10^seq(-5, 0, length.out=1000), density=prior_p(p), density_log10=density * p)
-
-p_prior_df%>%
+tibble(
+  p = 10^seq(-5, 0, length.out = 1000),
+  density = prior_p(p),
+  density_log10 = density * p
+) %>%
   ggplot(aes(p, density_log10)) +
   geom_line() +
   scale_x_log10()
 ```
+
+This distribution has a mean of ~4.8% which Evan suggests might be high (though Katherine in all-hands seemed to think this might be reasonable).
+Geometric mean is only 1.5% though and the distribution is looks reasonable to me in log space.
+
+Looking at the posteriors below, all the posterior modes are shifted to the left relative to the prior, so we might want to consider adjusting accordingly.
 
 ### Expected viral fractions
 
@@ -145,27 +152,33 @@ For the viral fraction parameters (mu_1 and mu_ww), we use logit-normal priors t
 -   $\text{logit}(\mu_1) \sim \text{Normal}(-7, 3)$
 -   $\text{logit}(\mu_{ww}) \sim \text{Normal}(-11, 3)$
 
-Because we do not have much prior information about these parameters, we chose the hyperparameters, which set the mean and standard deviation of $\text{logit}(\mu)$, iteratively so that the priors only weakly constrain the posteriors in cases with observed reads. We also included the following considerations:
+Because we do not have much prior information about these parameters, we chose the hyperparameters, which set the mean and standard deviation of $\text{logit}(\mu)$, iteratively so that the priors only weakly constrain the posteriors in cases with observed reads.
+Namely, we: (1) proposed some priors, (2) fit the model, (3) saw whether the priors were significantly constraining the posteriors for the cases where we have swab reads, (4) if yes, proposed broader priors.
+
+We also included the following considerations:
 
 -   Because we are looking at respiratory viruses, we expect a priori the viral fraction at a given prevalence to be higher in swabs than in wastewater.
 -   We want the wastewater prior to be consistent with our previous P2RA estimates.
 -   It seems unlikely that the expected viral fraction in a positive swab is O(1). We don't want to totally exclude this possibility, but a single very high count in a single pool seems more likely to be lucky than reflective of the average.
 
 ```{r}
-crossing(
-  datatype = factor(c("swab", "wastewater")),
-  logit_mu = seq(-20, 4, length.out=1000),
-) %>%
+crossing(datatype = factor(c("swab", "wastewater")),
+         logit_mu = seq(-20, 4, length.out = 1000),) %>%
   mutate(
     mu = plogis(logit_mu),
-    prior = if_else(datatype == "swab", 
-                          prior_logit_mu_1(logit_mu), 
-                          prior_logit_mu_ww(logit_mu)),
-    prior_log10 = prior * mu * log(10),
+    prior = if_else(
+      datatype == "swab",
+      prior_logit_mu_1(logit_mu),
+      prior_logit_mu_ww(logit_mu)
+    ),
   ) %>%
-  ggplot(aes(mu, prior, color=datatype)) +
+  ggplot(aes(mu, prior, color = datatype)) +
   geom_line() +
-  scale_x_log10(breaks = 10^seq(-8, 0, 1)) +
+  scale_x_continuous(
+    transform = "logit",
+    breaks = c(10^seq(-8, -1, 1), 0.5, 0.9),
+    name = "mu (logistic scale)"
+  ) +
   labs(title = "Prior distributions on mu")
 ```
 
@@ -527,7 +540,7 @@ prior_density <- function(x, density_function, log10x = FALSE){
   if (log10x){
     data <- tibble(
       x = x,
-      density = density_function(x) * x * log(10),
+      density = density_function(x) * x * log(10), # Jacobian adjustment
     )
   } else {
     data <- tibble(
@@ -716,10 +729,16 @@ posteriors %>%
   facet_wrap(~species, ncol=6)
 ```
 
-For small $\mu$, the prevalence must be large to account for detection.
-For larger $\mu$, this relationship declines because observing a virus in a swab puts a lower bound on the possible prevalences.
-(I'm not sure why you also see this pattern in the unobserved viruses, though.)
+It looks like:
 
+- For small $\mu$, prevalence grows as $\mu$ decreases.
+- For larger $\mu$, this relationship flattens.
+
+For observed viruses, this makes sense because low $\mu$ requires high prevalence to observe the virus since each positive swab is likely to go unobserved, while with high $\mu$ positive swabs are usually observed, so the prevalence is determined by the number of positive pools.
+
+For unobserved viruses, low $\mu$ means explains the lack of reads by itself so $p$ reverts to its prior.
+High $\mu$ requires low $p$ to explain the lack of reads, but it only has to be low enough for that $n_pos$ is likely to be zero.
+Since the total swabs is ~500, the distribution of $p$ is capped at $\sim 1/500$ for high $\mu$.
 
 ```{r}
 posteriors %>%
@@ -733,7 +752,7 @@ posteriors %>%
 
 There appears to be a relationship between the swab inverse overdispersion and the prevalence estimates, suggesting that if we used a prior that allowed smaller $\phi_1$, we might get larger prevalence estimates for some viruses.
 
-This makes sense because if we only see a virus a few times and overdispersion is very large, the true prevalence might be lower than we think and our observations are lucky outliers.
+This makes sense because if we only see a virus a few times and overdispersion is very large, the true prevalence might be higher than we think but we have a lot of false negatives and our observations are lucky outliers.
 
 We should consider whether we like the current prior on $\phi_1$ or want to allow it to be broader.
 
@@ -975,6 +994,8 @@ posterior_predictive_ww_summary %>%
   scale_x_log10(
     breaks = 10^seq(0, 4),
     limits = c(1, 2e4),
+    # The log scale implicitly censors zero counts, so the violins 
+    # are only calculated from the non-zero counts
     name = "total viral read count (conditional on > 0)",
     oob = scales::oob_keep,
   ) +
@@ -1006,6 +1027,9 @@ Here the model might be systematically slightly overestimating the maximum viral
 This cuts against the "too little overdispersion" hypothesis for the excess positive samples.
 Perhaps $\mu_{ww}$ is slightly too high, perhaps because the prior is pushing the estimates up?
 
+Reviewing the posteriors by eye, roughly 13/17 shift left compared to the prior, only 2/17 shift right.
+If there's a subtle bias on a logit scale it might be enough to explain the deficit of zeros, which is noticeable but not large and the bias in the posterior predictive count stats, which is small.
+
 ```{r}
 posterior_predictive_ww_summary %>%
   ggplot(aes(x = viral_reads_sd, y = species, fill = group)) +
@@ -1022,7 +1046,10 @@ posterior_predictive_ww_summary %>%
 This plot compares the observed standard deviation of viral reads in wastewater with the distribution from our model.
 
 Here the model might also be systematically slightly too high.
-This is more support for the $\mu_{ww}$ too high explanation.
+This is more support for the $\mu_{ww}$ too high explanation
+because higher mean count implies higher standard deviation in the negative binomial model.
+
+Another interpretation is too much overdispersion, which would account for high standard deviation and high maximum count.
 
 ## Computing RA_p(1%) Estimates
 
@@ -1054,6 +1081,12 @@ posteriors %>%
 This plot shows the ratio of swab relative abundance to wastewater relative abundance for a fixed prevalence.
 Vertical lines represent quartiles of the posterior.
 
+One striking result here is that the posteriors put significant weight (>25%) on
+the possibility that H3N2 has higher RA in wastewater than in swabs.
+Given the data that we have, this seems plausible: it appears in all the wastewater samples and none of the swabs
+and has the fourth-highest total read count in wastewater.
+On the other hand, maybe this suggests a bioinformatics issue identifying H3N2 in the ONT data.
+
 ```{r}
 posteriors %>%
   mutate(ra01 = mu_ww * 0.01) %>%
@@ -1061,9 +1094,10 @@ posteriors %>%
     q25 = quantile(ra01, 0.25),
     median = median(ra01),
     q75 = quantile(ra01, 0.75),
+    interquartile_ratio = format(q75 / q25, digits = 2),
     .by = c(species, group)
   ) %>%
-  mutate(across(-c(species, group), ~format(.x, scientific=TRUE, digits = 2))) %>%
+  mutate(across(-c(species, group, interquartile_ratio), ~format(.x, scientific=TRUE, digits = 2))) %>%
   kable
 ```
 
@@ -1090,6 +1124,16 @@ This table provides quantiles of the ratio of swab to wastewater sensitivity for
 2. I would put least faith on the estimates where we don't observe the virus in the swabs. However, I think there is some information here since the swabs put an upper bound on the prevalence, which becomes a lower bound on RA_p(1%).
 3. Posterior predictive checks suggest that we may want to broaden the prior on $\mu_{ww}$ or shift it to the left a bit.
 4. We might gain more information about the overdispersion ($\phi$) parameters with a hierarchical model that uses information across viruses to estimate the overdispersion. However, it's not clear that doing so will give us better estimates of RA_p.
+A potentially serious difficulty with implementing a hierarchical model is that you'd have to sum over all combinations of n_pos for each virus. The size of this calculation blows up exponentially in the number of viruses. There's probably some trick to be done (maybe there's smarter algorithm, maybe we can use the fact that most of the pools are negative and the prevalences are small to constrain the sum to the corner where the n_pos are small?) but it might be fiddly.
+
+I suspect this is not worth trying to implement for this project.
+
+## Other things we might want to check
+
+- Is there any information transfer from wastewater to swabs? How much?
+- Log-normal poisson read counts to model multiplicative sources of noise
+- Sensitivity to prior on $p$ especially since all the posteriors are shifted left relative to the prior
+- 
 
 ## Claude's suggestions:
 
@@ -1103,6 +1147,7 @@ This table provides quantiles of the ratio of swab to wastewater sensitivity for
 
 1. The wastewater PPCs show some systematic deviations (overestimation of positive samples, slight overestimation of counts). This might indicate model misspecification rather than just parameter misspecification.
 2. The model seems to be systematically overestimating the number of positive wastewater samples. The author attributes this to either phi_ww being too large or mu_ww being too high, but doesn't consider the possibility that the relationship between prevalence and wastewater detection might be non-linear or require additional covariates.
+[EF note: this change would make the parameters less interpretable and probably isn't worth it for slightly better posterior predictive checks.]
 
 ### Potential improvements 
 
