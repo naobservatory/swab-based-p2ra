@@ -35,9 +35,24 @@ library(knitr)
 theme_set(theme_minimal())
 
 # Colors borrowed from https://github.com/JLSteenwyk/ggpubfigs
-wong_eight <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#000000")
-options(ggplot2.discrete.colour = function() scale_colour_manual(values = wong_eight))
-options(ggplot2.discrete.fill = function() scale_fill_manual(values = wong_eight))
+wong_eight <- c(
+  "#E69F00",
+  "#56B4E9",
+  "#009E73",
+  "#F0E442",
+  "#0072B2",
+  "#D55E00",
+  "#CC79A7",
+  "#000000"
+)
+options(
+  ggplot2.discrete.colour = function()
+    scale_colour_manual(values = wong_eight)
+)
+options(
+  ggplot2.discrete.fill = function()
+    scale_fill_manual(values = wong_eight)
+)
 
 options(mc.cores = parallel::detectCores())
 ```
@@ -317,7 +332,7 @@ Now we'll load and prepare the data for our analysis:
 # Swab data
 
 swab_metadata <- read_tsv("../../tables/swab-sample-metadata.tsv") %>%
-  mutate(date = ymd(paste0("20", date))) 
+  mutate(date = ymd(paste0("20", date)))
 
 # Use the per-day data. Caveat about the different treatments
 swab_reads <- read_tsv("../../tables/swabs-ra-summary.tsv") %>%
@@ -327,7 +342,7 @@ swab_reads <- read_tsv("../../tables/swabs-ra-summary.tsv") %>%
 # Wastewater data
 
 wastewater_metadata <- read_tsv("../../tables/wastewater-sample-metadata.tsv") %>%
-  mutate(date = ymd(paste0("20", date))) 
+  mutate(date = ymd(paste0("20", date)))
 
 wastewater_reads <- read_tsv("../../tables/ww-ra-summary.tsv") %>%
   mutate(date = ymd(paste0("20", date))) %>%
@@ -356,28 +371,36 @@ species_order <- all_species %>%
 # Fill in zero counts
 swab_reads_complete <- crossing(all_species, swab_metadata) %>%
   left_join(
-    summarise(swab_reads, .by = c(date, location, species, group), viral_reads = sum(dedup_hv)),
+    summarise(
+      swab_reads,
+      .by = c(date, location, species, group),
+      viral_reads = sum(dedup_hv)
+    ),
     by = join_by(date, location, species, group),
   ) %>%
   arrange(group, species) %>%
   mutate(
-    viral_reads= replace_na(viral_reads, 0),
+    viral_reads = replace_na(viral_reads, 0),
     species = fct_inorder(species),
     group = fct_inorder(group)
-    )
+  )
 
 wastewater_reads_complete <- wastewater_metadata %>%
   crossing(all_species) %>%
   left_join(
-    summarise(wastewater_reads, .by = c(date, location, species, group), viral_reads = sum(dedup_hv)),
+    summarise(
+      wastewater_reads,
+      .by = c(date, location, species, group),
+      viral_reads = sum(dedup_hv)
+    ),
     by = join_by(date, location, species, group),
   ) %>%
   arrange(group, species) %>%
   mutate(
-    viral_reads= replace_na(viral_reads, 0),
+    viral_reads = replace_na(viral_reads, 0),
     species = fct_inorder(species),
     group = fct_inorder(group)
-    )
+  )
 ```
 
 This data preparation ensures we have complete data for all species across all samples, filling in zeros where necessary. We organize the data by virus species and group for easier analysis.
@@ -441,7 +464,8 @@ get_diagnostics <- function(f) {
   
   n_divergent <- sum(do.call(rbind, sampler_params)[, "divergent__"])
   max_treedepth <- max(do.call(rbind, sampler_params)[, "treedepth__"])
-  n_max_treedepth <- sum(do.call(rbind, sampler_params)[, "treedepth__"] == 10)  # Assuming max_treedepth of 10
+  # Stan default max_treedepth = 10
+  n_max_treedepth <- sum(do.call(rbind, sampler_params)[, "treedepth__"] == 10)
   rhat_max <- max(check[, "Rhat"], na.rm = TRUE)
   
   list(
@@ -575,18 +599,23 @@ This plot shows that under our model, the swab data can place an upper bound on 
 The right tails of the posterior distributions fall off faster than the prior.
 
 However, it's hard to see whether the lower bound is driven more by the prior or the posterior.
-To remedy this, we can plot the density on a log scale:
+To remedy this, we can plot the log density:
 
 ```{r}
 posteriors %>%
-  ggplot(aes(p, color=group)) +
+  ggplot(aes(p, color = group)) +
   geom_density() +
-  prior_density(10^seq(-8, 0, length.out=100), prior_p, log10x = TRUE) +
+  prior_density(10^seq(-8, 0, length.out = 100), prior_p, log10x = TRUE) +
   scale_x_log10(limits = c(1e-7, 1), labels = scientific) +
   facet_wrap(vars(species), ncol = 4) +
-  scale_y_continuous(transform = "log10", limits = c(1e-3, 10), breaks = 10^c(0, -2), labels = scientific) +
+  scale_y_continuous(
+    transform = "log10",
+    limits = c(1e-3, 10),
+    breaks = 10^c(0, -2),
+    labels = scientific
+  ) +
   labs(x = "prevalence", y = "") +
-  theme(legend.position = "") #, axis.text.y = element_blank()) 
+  theme(legend.position = "")
 ```
 
 On a log scale, it's clear that the left tail is also being constrained by the data rather than the prior.
@@ -605,10 +634,14 @@ With linear y-scale:
 ```{r}
 breaks <- 10^seq(-5, -1, 2)
 posteriors %>%
-  ggplot(aes(logit_mu_1, color=group)) +
+  ggplot(aes(logit_mu_1, color = group)) +
   geom_density() +
-  prior_density(seq(-16, 2, length.out=100), prior_logit_mu_1) +
-  scale_x_continuous(limits = c(-14, 2), breaks = qlogis(breaks), labels = scientific(breaks)) +
+  prior_density(seq(-16, 2, length.out = 100), prior_logit_mu_1) +
+  scale_x_continuous(
+    limits = c(-14, 2),
+    breaks = qlogis(breaks),
+    labels = scientific(breaks)
+  ) +
   facet_wrap(vars(species), ncol = 4) +
   labs(y = "", x = "mu_1") +
   theme(legend.position = "", axis.text.y = element_blank()) 
@@ -618,14 +651,18 @@ And log y-scale:
 
 ```{r}
 posteriors %>%
-  ggplot(aes(logit_mu_1, color=group)) +
+  ggplot(aes(logit_mu_1, color = group)) +
   geom_density() +
-  prior_density(seq(-16, 2, length.out=100), prior_logit_mu_1) +
-  scale_x_continuous(limits = c(-14, 2), breaks = qlogis(breaks), labels = scientific(breaks)) +
+  prior_density(seq(-16, 2, length.out = 100), prior_logit_mu_1) +
+  scale_x_continuous(
+    limits = c(-14, 2),
+    breaks = qlogis(breaks),
+    labels = scientific(breaks)
+  ) +
   facet_wrap(vars(species), ncol = 4) +
   scale_y_continuous(transform = "log10", limits = c(1e-3, 1)) +
   labs(y = "", x = "mu_1") +
-  theme(legend.position = "")#  , axis.text.y = element_blank()) 
+  theme(legend.position = "")
 ```
 
 For species with multiple positive pools, (e.g. the Rhinoviruses), there is information to constrain the expected viral fraction in a positive swab.
@@ -643,10 +680,14 @@ Same plots but for $\mu_{ww}$:
 ```{r}
 breaks <- 10^seq(-7, -3, 2)
 posteriors %>%
-  ggplot(aes(logit_mu_ww, color=group)) +
+  ggplot(aes(logit_mu_ww, color = group)) +
   geom_density() +
-  prior_density(seq(-18, -5, length.out=100), prior_logit_mu_ww) +
-  scale_x_continuous(limits = c(-18, -5), breaks = qlogis(breaks), labels = scientific(breaks)) +
+  prior_density(seq(-18, -5, length.out = 100), prior_logit_mu_ww) +
+  scale_x_continuous(
+    limits = c(-18, -5),
+    breaks = qlogis(breaks),
+    labels = scientific(breaks)
+  ) +
   scale_y_continuous(name = "") +
   facet_wrap(vars(species), ncol = 4) +
   labs(y = "", x = "mu_ww") +
@@ -655,10 +696,14 @@ posteriors %>%
 
 ```{r}
 posteriors %>%
-  ggplot(aes(logit_mu_ww, color=group)) +
+  ggplot(aes(logit_mu_ww, color = group)) +
   geom_density() +
-  prior_density(seq(-18, -5, length.out=100), prior_logit_mu_ww) +
-  scale_x_continuous(limits = c(-18, -5), breaks = qlogis(breaks), labels = scientific(breaks)) +
+  prior_density(seq(-18, -5, length.out = 100), prior_logit_mu_ww) +
+  scale_x_continuous(
+    limits = c(-18, -5),
+    breaks = qlogis(breaks),
+    labels = scientific(breaks)
+  ) +
   facet_wrap(vars(species), ncol = 4) +
   scale_y_continuous(transform = "log10", limits = c(1e-3, 1)) +
   labs(y = "", x = "mu_ww") +
@@ -823,18 +868,17 @@ The following table gives the summary statistics for the data.
 ```{r}
 #| label: swab-ppd
 #| cache: true
-# Posterior predictive distributions
-
-## Swabs 
 
 posterior_predictive_swab <- posteriors %>%
-  mutate(rep = 1:n(), .by=species) %>%
+  mutate(rep = 1:n(), .by = species) %>%
   cross_join(swab_metadata) %>%
   mutate(
     n_pos = map2_int(pool_size, p, ~ rbinom(1, .x, .y)),
     mu = n_pos * mu_1 * all_reads / pool_size,
     phi = n_pos * phi_1,
-    viral_reads = map2_int(mu, phi, ~ifelse(.x > 0, rnbinom(1, size = .y, mu = .x), 0)),
+    viral_reads = map2_int(mu, phi, ~ ifelse(.x > 0, rnbinom(
+      1, size = .y, mu = .x
+    ), 0)),
     false_negative = n_pos > 0 & viral_reads == 0,
   )
 
@@ -936,14 +980,13 @@ Now we'll perform similar posterior predictive checks for the wastewater data:
 ```{r}
 #| label: wastewater-ppd
 #| cache: true
-## Wastewater
 
 posterior_predictive_ww <- posteriors %>%
   mutate(rep = 1:n(), .by=species) %>%
   cross_join(wastewater_metadata) %>%
   mutate(
     mu = p * mu_ww * all_reads,
-    viral_reads = map2_int(mu, phi_ww, ~ifelse(.x > 0, rnbinom(1, size = .y, mu = .x), 0)),
+    viral_reads = map2_int(mu, phi_ww, ~ ifelse(.x > 0, rnbinom(1, size = .y, mu = .x), 0)), 
   )
 
 posterior_predictive_ww_summary <- posterior_predictive_ww %>%
@@ -1074,7 +1117,11 @@ posteriors %>%
   mutate(ratio = mu_1 / mu_ww) %>%
   ggplot(aes(ratio, species, fill=group)) +
   geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  scale_x_log10(name = "swab RA / wastewater RA", limits=c(1e-2,1e8), breaks=10^seq(0,6,2)) +
+  scale_x_log10(
+    name = "swab RA / wastewater RA",
+    limits = c(1e-2, 1e8),
+    breaks = 10^seq(0, 6, 2)
+  ) +
   scale_y_discrete(limits=rev(species_order))
 ```
 
@@ -1097,7 +1144,10 @@ posteriors %>%
     interquartile_ratio = format(q75 / q25, digits = 2),
     .by = c(species, group)
   ) %>%
-  mutate(across(-c(species, group, interquartile_ratio), ~format(.x, scientific=TRUE, digits = 2))) %>%
+  mutate(across(
+    -c(species, group, interquartile_ratio),
+    ~ format(.x, scientific = TRUE, digits = 2)
+  )) %>% 
   kable
 ```
 
