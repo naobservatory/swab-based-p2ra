@@ -1,0 +1,13 @@
+sample,pool_size,HPIV4,Human coronavirus 229E,Human coronavirus HKU1,Human coronavirus NL63,Human coronavirus OC43,RSVA,RSVB,Rhinovirus A34,Rhinovirus A94,Rhinovirus B37,Rhinovirus C2,Rhinovirus C36,Rhinovirus C42,Rhinovirus C56,Severe acute respiratory syndrome coronavirus 2,Coronaviruses (SARS-CoV-2),Coronaviruses (seasonal),HCoV-229E,HCoV-HKU1,HCoV-NL63,HCoV-OC43,HPIV4,Mononegavirales,RSV-A,RSV-B,Rhinovirus A,Rhinovirus B,Rhinovirus C,Rhinoviruses,SARS-CoV-2
+250107-BoDT-NAS,37,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0
+250109-BoDT-NAS,25,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0
+250113-BoDT-NAS,33,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,1,0
+250115-BoDT-NAS,58,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0
+250116-BoDT-NAS,60,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,1,1,0,0,0,0,0,0
+250122-BoDT-NAS,37,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+250123-BoDT-NAS,33,0,0,1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,0,0,0,1,1,0
+250127-BoDT-NAS,44,1,0,0,0,1,0,0,1,0,1,0,0,0,0,0,0,1,0,0,0,1,1,1,0,0,1,1,0,1,0
+250129-BoDT-NAS,60,0,1,0,1,1,0,0,0,0,0,0,1,1,0,0,0,1,1,0,1,1,0,0,0,0,0,0,1,1,0
+250204-BoDT-NAS,57,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,1,0,0,0,1,0,0,0,0,0,0,1,1,1
+250205-BoDT-NAS,33,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0
+250212-BoDT-NAS,47,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
