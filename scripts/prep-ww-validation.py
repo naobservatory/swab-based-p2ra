@@ -47,6 +47,9 @@ taxids_to_include = [
     12059,  # Enterovirus (Rhinoviruses)
     11308,  # Orthomyxoviridae (Influenza)
     10508,  # Adenoviridae (but we don't include mastadenovirus F)
+    10292,  # Herpesviridae (HSV, VZV, EBV, CMV)
+    151340, # Papillomaviridae (HPV)
+    151341, # Polyomaviridae (Merkel cell polyomavirus, BK virus, JC virus)
 ]
 
 def descends_from_target(taxid, cache={}):

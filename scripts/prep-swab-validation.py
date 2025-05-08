@@ -78,13 +78,13 @@ for delivery in target_deliveries:
             "aws",
             "s3",
             "sync",
-            f"s3://nao-mgs-simon/v2.8.3.2/{delivery}/output/results",
+            f"s3://nao-mgs-simon/v2.9.0.0/{delivery}/output/results",
             f"deliveries/{delivery}/output/results",
         ]
     )
     os.makedirs(f"delivery_analyses/{delivery}", exist_ok=True)
 
-    with gzip.open(f"deliveries/{delivery}/output/results/hv.tsv.gz", "rt") as inf:
+    with gzip.open(f"deliveries/{delivery}/output/results/virus_hits_final.tsv.gz", "rt") as inf:
         for row in csv.DictReader(inf, delimiter="\t"):
             taxid = int(row["minimap2_taxid_primary"])
             genome_id = row["minimap2_genome_id_primary"]

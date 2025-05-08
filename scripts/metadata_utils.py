@@ -13,7 +13,7 @@ def parse_count_table(table_name):
     return read_counts
 
 def is_date_in_range(date):
-    return datetime(2025, 1, 3) <= date <= datetime(2025, 2, 15)
+    return datetime(2025, 1, 3) <= date <= datetime(2025, 3, 1)
 
 def first_level_mapping(assignment):
     mapping = {
@@ -47,6 +47,8 @@ def first_level_mapping(assignment):
         "Poliovirus 2": "Poliovirus",
 
         # Rhinoviruses
+        "Human rhinovirus 25": "Rhinovirus A",
+        "Human rhinovirus 62": "Rhinovirus A",
         "Rhinovirus A": "Rhinovirus A",
         "Rhinovirus A1": "Rhinovirus A",
         "Rhinovirus A12": "Rhinovirus A",
@@ -97,6 +99,20 @@ def first_level_mapping(assignment):
         "Human mastadenovirus B114": "Human mastadenovirus B114",
         "Human adenovirus 5": "Human adenovirus 5",
 
+        "Human alphaherpesvirus 1": "HSV-1",
+
+        "Gammapapillomavirus type 22": "HPV-22",
+        "Gammapapillomavirus type 123": "HPV-123",
+        "Human papillomavirus type 38": "HPV-38",
+        "Human papillomavirus type 50": "HPV-50",
+        "Human papillomavirus type 57": "HPV-57",
+        "Human papillomavirus type 75": "HPV-75",
+        "Human papillomavirus type 109": "HPV-109",
+        "Human papillomavirus type 194": "HPV-194",
+        "Human papillomavirus type 168": "HPV-168",
+
+        "Merkel cell polyomavirus": "Merkel cell polyomavirus",
+
         # Other
         "Apodemus agrarius picornavirus strain Longwan-Rn37 polyprotein": "Apodemus agrarius picornavirus"
     }
@@ -145,6 +161,23 @@ def second_level_mapping(assignment):
         "Human mastadenovirus A": "Adenoviruses",
         "Human mastadenovirus B114": "Adenoviruses",
         "Human adenovirus 5": "Adenoviruses",
+
+        # Herpesviruses
+        "HSV-1": "Herpesviruses",
+
+        # Papillomaviruses
+        "HPV-22": "Papillomaviruses",
+        "HPV-123": "Papillomaviruses",
+        "HPV-38": "Papillomaviruses",
+        "HPV-50": "Papillomaviruses",
+        "HPV-57": "Papillomaviruses",
+        "HPV-75": "Papillomaviruses",
+        "HPV-109": "Papillomaviruses",
+        "HPV-194": "Papillomaviruses",
+        "HPV-168": "Papillomaviruses",
+
+        # Polyomaviruses
+        "Merkel cell polyomavirus": "Polyomaviruses",
 
         # Other
         "Apodemus agrarius picornavirus": "Other"
