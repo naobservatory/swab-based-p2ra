@@ -59,7 +59,7 @@ def fetch_readcounts():
         # Use sync with include flag to get only read_counts files
         subprocess.run([
             "aws", "s3", "sync",
-            f"s3://nao-mgs-simon/v2.8.3.2/{delivery}/output/results/",
+            f"s3://nao-mgs-simon/v2.9.0.0/{delivery}/output/results/",
             f"deliveries/{delivery}/output/results/",
             "--exclude", "*",
             "--include", "read_counts.tsv.gz"

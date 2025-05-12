@@ -5,34 +5,9 @@ import json
 import os
 from datetime import datetime
 from collections import defaultdict
+from metadata_utils import first_level_mapping, second_level_mapping, is_date_in_range
 
 validation_output_dir = "validation-output"
-
-# Create virus clade groupings
-clade_mapping = {
-    # Coronaviruses (seasonal)
-    "Human coronavirus OC43": "Coronaviruses (seasonal)",
-    "Human coronavirus 229E": "Coronaviruses (seasonal)",
-    "Human coronavirus HKU1": "Coronaviruses (seasonal)",
-    "Human coronavirus NL63": "Coronaviruses (seasonal)",
-
-    # Coronaviruses (SARS-CoV-2)
-    "Severe acute respiratory syndrome coronavirus 2": "Coronaviruses (SARS-CoV-2)",
-
-    # Rhinoviruses
-    "Rhinovirus B37": "Rhinoviruses",
-    "Rhinovirus A34": "Rhinoviruses",
-    "Rhinovirus C42": "Rhinoviruses",
-    "Rhinovirus C2": "Rhinoviruses",
-    "Rhinovirus C56": "Rhinoviruses",
-    "Rhinovirus A94": "Rhinoviruses",
-    "Rhinovirus C36": "Rhinoviruses",
-
-    # Mononegavirales
-    "RSVA": "Mononegavirales",
-    "RSVB": "Mononegavirales",
-    "HPIV4": "Mononegavirales"
-}
 
 # Load taxonomy names
 taxid_names = {}
@@ -50,7 +25,9 @@ with open("[2024] Zephyr sample log - Sampling runs.tsv", "r") as f:
     reader = csv.DictReader(f, delimiter="\t")
     for row in reader:
         sample_date = datetime.strptime(row["date collected"], "%Y-%m-%d")
-        if sample_date < datetime(2025, 1, 1) or sample_date > datetime(2025, 2, 25):
+        if not is_date_in_range(sample_date):
+            continue
+        if "SAL" in row["sample name"]:
             continue
         sample_pool_size[row["sample name"]] = row["total swabs"]
 
@@ -58,9 +35,6 @@ with open("[2024] Zephyr sample log - Sampling runs.tsv", "r") as f:
 # Parsing virus reads (both those that we didn't validate on purpose and those that we validated)
 pooled_data = {}
 pathogens = set()
-
-def is_date_in_range(date):
-    return datetime(2025, 1, 7) <= date <= datetime(2025, 2, 25)
 
 for sample in sample_pool_size:
     pooled_data[sample] = defaultdict(bool)
@@ -87,7 +61,8 @@ for row in csv.DictReader(open(os.path.join(validation_output_dir, "swabs-non-va
 
 
 # Creating virus clade groupings
-clades = set(clade_mapping.values())
+first_level_pathogens = set(first_level_mapping(pathogen) for pathogen in pathogens)
+clades = set(second_level_mapping(pathogen) for pathogen in first_level_pathogens)
 
 # Sorting pathogens and clades
 pathogens = sorted(list(pathogens))
@@ -105,7 +80,8 @@ with open("pathogen_presence.tsv", "w") as f:
         for pathogen in pathogens:
             status = pooled_data[sample].get(pathogen, False)
             row.append("1" if status else "0")
-            clade = clade_mapping[pathogen]
+            first_level_pathogen = first_level_mapping(pathogen)
+            clade = second_level_mapping(first_level_pathogen)
             if status:
                 clade_positivity[clade] = True
 

@@ -47,6 +47,8 @@ with open("[2024] Zephyr sample log - Sampling runs.tsv", "r") as f:
         sample_pool_size = int(row["total swabs"])
         location = row["sample source"]
         read_number = date_loc_read_counts[(sample_date, location)]
+        if "SAL" in sample_name:
+            continue
         sample_data[sample_name,sample_date, location, read_number] += sample_pool_size
 
 

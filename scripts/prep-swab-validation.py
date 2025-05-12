@@ -20,7 +20,6 @@ with open("deliveries.json") as f:
 
 target_deliveries = deliveries["swab-deliveries"]
 
-
 HCOV_299E_TAXID = 11137
 SARS_COV_2_TAXID = 2697049
 
@@ -96,6 +95,8 @@ for delivery in target_deliveries:
 
             sample_id = row["sample"]
             sample_metadata = metadata_samples[sample_id]
+            if sample_metadata.get("collection") == "saliva":
+                continue
             date = sample_metadata["date"]
             fine_location = sample_metadata["fine_location"]
 

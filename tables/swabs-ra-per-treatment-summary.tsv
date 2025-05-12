@@ -1,5 +1,5 @@
 date	location	assignment	species	group	treatment	non_dedup	dedup	all_reads
-250107	BoDT	Rhinovirus C56	Rhinovirus C	Rhinoviruses	Filtration, CP, Zymo, Polyadenylated	15	14	328894
+250107	BoDT	Rhinovirus C56	Rhinovirus C	Rhinoviruses	Filtration, CP, Zymo, Polyadenylated	14	13	328894
 250109	BoDT	RSVB	RSV-B	Mononegavirales	Filtration, CP, Qiagen, Polyadenylated	1	1	243294
 250113	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, Qiagen	4	3	108589
 250113	BoDT	Rhinovirus A94	Rhinovirus A	Rhinoviruses	Filtration, CP, Qiagen, Polyadenylated	1	1	299089
@@ -28,9 +28,9 @@ date	location	assignment	species	group	treatment	non_dedup	dedup	all_reads
 250127	BoDT	Rhinovirus B37	Rhinovirus B	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 1009.6 ng	15	14	395488
 250127	BoDT	Rhinovirus B37	Rhinovirus B	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 44.17 ng	2	2	131889
 250127	BoDT	Rhinovirus B37	Rhinovirus B	Rhinoviruses	Filtration, Qiagen | cDNA input: = 44.64 ng	2	2	161683
-250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 30.6 ng	1830	1232	351910
-250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 816 ng	1643	1534	287006
-250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	Filtration, Qiagen | cDNA input: = < 32 ng	3746	3242	599313
+250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 30.6 ng	1830	1223	351910
+250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 816 ng	1641	1535	287006
+250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	Filtration, Qiagen | cDNA input: = < 32 ng	3746	3243	599313
 250129	BoDT	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	Filtration, Qiagen | cDNA input: = < 32 ng	2	2	599313
 250129	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 30.6 ng	46	30	351910
 250129	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	Filtration, CP, Qiagen | cDNA input: = 816 ng	39	36	287006
@@ -43,8 +43,35 @@ date	location	assignment	species	group	treatment	non_dedup	dedup	all_reads
 250204	BoDT	Rhinovirus C2	Rhinovirus C	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 33.74 ng	2	2	240475
 250204	BoDT	Rhinovirus C2	Rhinovirus C	Rhinoviruses	Filtration, CP, Qiagen | cDNA input: = 771.2 ng	5	5	283834
 250204	BoDT	Rhinovirus C2	Rhinovirus C	Rhinoviruses	Filtration, Qiagen | cDNA input: = < 32 ng	1	1	136929
-250204	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	Filtration, CP, Qiagen | cDNA input: = 33.74 ng	25	21	240475
-250204	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	Filtration, CP, Qiagen | cDNA input: = 771.2 ng	43	43	283834
+250204	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	Filtration, CP, Qiagen | cDNA input: = 33.74 ng	25	22	240475
+250204	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	Filtration, CP, Qiagen | cDNA input: = 771.2 ng	43	42	283834
 250204	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	Filtration, Qiagen | cDNA input: = < 32 ng	14	14	136929
-250205	BoDT	Rhinovirus A34	Rhinovirus A	Rhinoviruses	Filtration, CP, Qiagen | DNAse	1	1	139820
-250212	BoDT	H1N1	H1N1	Influenza	Filtration, CP, Qiagen | DNAse	1	1	197085
+250205	BoDT	Human rhinovirus 25	Rhinovirus A	Rhinoviruses	Filtration, CP, Qiagen | DNAse	1	1	160481
+250212	BoDT	H1N1	H1N1	Influenza	Filtration, CP, Qiagen | DNAse	1	1	209148
+250226	BoDT	Human papillomavirus type 109	HPV-109	Papillomaviruses	Filtration, CP, Qiagen | No DNase	1	1	518738
+250226	BoDT	Human papillomavirus type 109	HPV-109	Papillomaviruses	Filtration, Qiagen | No DNase	1	1	557260
+250226	BoDT	Human papillomavirus type 194	HPV-194	Papillomaviruses	Filtration, Qiagen | No DNase	3	1	557260
+250226	BoDT	Rhinovirus C44	Rhinovirus C	Rhinoviruses	Filtration, Qiagen | DNAse	3	3	126604
+250226	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	Filtration, CP, Qiagen | DNAse	2	2	102722
+250226	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	Filtration, Qiagen | DNAse	52	45	126604
+250226	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	Filtration, Qiagen | No DNase	9	8	557260
+250318	BoDT	Gammapapillomavirus type 123	HPV-123	Papillomaviruses	Filtration, CP, Qiagen | DNase	6	3	1052287
+250318	BoDT	Gammapapillomavirus type 22	HPV-22	Papillomaviruses	Filtration, CP, Qiagen | DNase	7	5	1052287
+250318	BoDT	Human papillomavirus type 109	HPV-109	Papillomaviruses	Filtration, CP, Qiagen | DNase	1	1	1052287
+250318	BoDT	Human papillomavirus type 168	HPV-168	Papillomaviruses	Filtration, CP, Qiagen | DNase	6	3	1052287
+250318	BoDT	Human papillomavirus type 38	HPV-38	Papillomaviruses	Filtration, CP, Qiagen | DNase	15	10	1052287
+250318	BoDT	Human papillomavirus type 50	HPV-50	Papillomaviruses	Filtration, CP, Qiagen | DNase	1	1	1052287
+250318	BoDT	Human papillomavirus type 57	HPV-57	Papillomaviruses	Filtration, CP, Qiagen | DNase	1	1	1052287
+250318	BoDT	Merkel cell polyomavirus	Merkel cell polyomavirus	Polyomaviruses	Filtration, CP, Qiagen | DNase	5	1	1052287
+250318	BoDT	Rhinovirus C36	Rhinovirus C	Rhinoviruses	Filtration, CP, Qiagen | DNase	1	1	1052287
+250318	BoDT	Rhinovirus C36	Rhinovirus C	Rhinoviruses	Filtration, Qiagen | DNase	2	2	87847
+250319	BoDT	Human alphaherpesvirus 1	HSV-1	Herpesviruses	Filtration, CP, Qiagen | No DNase	1	1	500282
+250319	BoDT	Human papillomavirus type 75	HPV-75	Papillomaviruses	Filtration, CP, Qiagen | DNase	3	3	1317751
+250319	BoDT	Human rhinovirus 25	Rhinovirus A	Rhinoviruses	Filtration, Qiagen | DNase	2	2	137010
+250319	BoDT	Human rhinovirus 62	Rhinovirus A	Rhinoviruses	Filtration, CP, Qiagen | DNase	1	0	1317751
+250319	BoDT	Human rhinovirus 62	Rhinovirus A	Rhinoviruses	Filtration, CP, Qiagen | No DNase	1	0	500282
+250319	BoDT	Human rhinovirus 62	Rhinovirus A	Rhinoviruses	Filtration, Qiagen | DNase	1	1	137010
+250319	BoDT	Rhinovirus A80	Rhinovirus A	Rhinoviruses	Filtration, Qiagen | DNase	1	1	137010
+250319	BoDT	Rhinovirus C11	Rhinovirus C	Rhinoviruses	Filtration, Qiagen | DNase	1	1	137010
+250319	BoDT	Rhinovirus C36	Rhinovirus C	Rhinoviruses	Filtration, CP, Qiagen | DNase	2	2	1317751
+250319	BoDT	Rhinovirus C36	Rhinovirus C	Rhinoviruses	Filtration, Qiagen | DNase	3	3	137010

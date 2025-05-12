@@ -1,5 +1,5 @@
 date	location	assignment	species	group	non_dedup_hv	dedup_hv	all_reads
-250107	BoDT	Rhinovirus C56	Rhinovirus C	Rhinoviruses	15	14	328894
+250107	BoDT	Rhinovirus C56	Rhinovirus C	Rhinoviruses	14	13	328894
 250109	BoDT	RSVB	RSV-B	Mononegavirales	1	1	243294
 250113	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	4	3	407678
 250113	BoDT	Rhinovirus A94	Rhinovirus A	Rhinoviruses	6	5	407678
@@ -15,7 +15,7 @@ date	location	assignment	species	group	non_dedup_hv	dedup_hv	all_reads
 250127	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	5	5	817608
 250127	BoDT	Rhinovirus A34	Rhinovirus A	Rhinoviruses	3	3	817608
 250127	BoDT	Rhinovirus B37	Rhinovirus B	Rhinoviruses	20	19	817608
-250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	7219	6008	1238229
+250129	BoDT	Human coronavirus 229E	HCoV-229E	Coronaviruses (seasonal)	7217	6001	1238229
 250129	BoDT	Human coronavirus NL63	HCoV-NL63	Coronaviruses (seasonal)	2	2	1238229
 250129	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	175	148	1238229
 250129	BoDT	Rhinovirus C36	Rhinovirus C	Rhinoviruses	79	71	1238229
@@ -23,5 +23,25 @@ date	location	assignment	species	group	non_dedup_hv	dedup_hv	all_reads
 250204	BoDT	Human coronavirus OC43	HCoV-OC43	Coronaviruses (seasonal)	3	3	661238
 250204	BoDT	Rhinovirus C2	Rhinovirus C	Rhinoviruses	8	8	661238
 250204	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	82	78	661238
-250205	BoDT	Rhinovirus A34	Rhinovirus A	Rhinoviruses	1	1	165046
-250212	BoDT	H1N1	H1N1	Influenza	1	1	211685
+250205	BoDT	Human rhinovirus 25	Rhinovirus A	Rhinoviruses	1	1	197667
+250212	BoDT	H1N1	H1N1	Influenza	1	1	240461
+250226	BoDT	Human papillomavirus type 109	HPV-109	Papillomaviruses	2	2	1305324
+250226	BoDT	Human papillomavirus type 194	HPV-194	Papillomaviruses	3	1	1305324
+250226	BoDT	Rhinovirus C44	Rhinovirus C	Rhinoviruses	3	3	1305324
+250226	BoDT	Severe acute respiratory syndrome coronavirus 2	SARS-CoV-2	Coronaviruses (SARS-CoV-2)	63	55	1305324
+250318	BoDT	Gammapapillomavirus type 123	HPV-123	Papillomaviruses	6	3	1150603
+250318	BoDT	Gammapapillomavirus type 22	HPV-22	Papillomaviruses	7	5	1150603
+250318	BoDT	Human papillomavirus type 109	HPV-109	Papillomaviruses	1	1	1150603
+250318	BoDT	Human papillomavirus type 168	HPV-168	Papillomaviruses	6	3	1150603
+250318	BoDT	Human papillomavirus type 38	HPV-38	Papillomaviruses	15	10	1150603
+250318	BoDT	Human papillomavirus type 50	HPV-50	Papillomaviruses	1	1	1150603
+250318	BoDT	Human papillomavirus type 57	HPV-57	Papillomaviruses	1	1	1150603
+250318	BoDT	Merkel cell polyomavirus	Merkel cell polyomavirus	Polyomaviruses	5	1	1150603
+250318	BoDT	Rhinovirus C36	Rhinovirus C	Rhinoviruses	3	3	1150603
+250319	BoDT	Human alphaherpesvirus 1	HSV-1	Herpesviruses	1	1	1955043
+250319	BoDT	Human papillomavirus type 75	HPV-75	Papillomaviruses	3	3	1955043
+250319	BoDT	Human rhinovirus 25	Rhinovirus A	Rhinoviruses	2	2	1955043
+250319	BoDT	Human rhinovirus 62	Rhinovirus A	Rhinoviruses	3	1	1955043
+250319	BoDT	Rhinovirus A80	Rhinovirus A	Rhinoviruses	1	1	1955043
+250319	BoDT	Rhinovirus C11	Rhinovirus C	Rhinoviruses	1	1	1955043
+250319	BoDT	Rhinovirus C36	Rhinovirus C	Rhinoviruses	5	5	1955043
