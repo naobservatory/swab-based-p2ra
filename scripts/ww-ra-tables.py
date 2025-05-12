@@ -79,7 +79,7 @@ with open(os.path.join(validation_output_dir, "ww-classified-all-reads.tsv")) as
 
         key = date, row["loc"], row["genome_name"]
         if duplicate == "True":
-            samples[key]["dedup"] += 1
+            samples[key]["non_dedup"] += 1
         else:
             samples[key]["non_dedup"] += 1
             samples[key]["dedup"] += 1
@@ -99,7 +99,7 @@ with open(os.path.join(validation_output_dir, "ww-non-validated-reads.tsv")) as 
 
         key = date, row["loc"], pathogen
         if duplicate == "True":
-            samples[key]["dedup"] += 1
+            samples[key]["non_dedup"] += 1
         else:
             samples[key]["non_dedup"] += 1
             samples[key]["dedup"] += 1
