@@ -13,7 +13,7 @@ def parse_count_table(table_name):
     return read_counts
 
 def is_date_in_range(date):
-    return datetime(2025, 1, 3) <= date <= datetime(2025, 3, 1)
+    return datetime(2025, 1, 3) <= date <= datetime(2025, 4, 1)
 
 def first_level_mapping(assignment):
     mapping = {
@@ -57,6 +57,7 @@ def first_level_mapping(assignment):
         "Rhinovirus A40": "Rhinovirus A",
         "Rhinovirus A54": "Rhinovirus A",
         "Rhinovirus A80": "Rhinovirus A",
+        "Rhinovirus A89": "Rhinovirus A",
         "Rhinovirus A94": "Rhinovirus A",
         "Rhinovirus B3": "Rhinovirus B",
         "Rhinovirus B37": "Rhinovirus B",
@@ -97,10 +98,12 @@ def first_level_mapping(assignment):
         # Adenoviruses
         "Human mastadenovirus A": "Human mastadenovirus A",
         "Human mastadenovirus B114": "Human mastadenovirus B114",
+        "Human mastadenovirus F": "Human mastadenovirus F",
         "Human adenovirus 5": "Human adenovirus 5",
 
         "Human alphaherpesvirus 1": "HSV-1",
 
+        # Papillomaviruses
         "Gammapapillomavirus type 22": "HPV-22",
         "Gammapapillomavirus type 123": "HPV-123",
         "Human papillomavirus type 38": "HPV-38",
@@ -110,8 +113,42 @@ def first_level_mapping(assignment):
         "Human papillomavirus type 109": "HPV-109",
         "Human papillomavirus type 194": "HPV-194",
         "Human papillomavirus type 168": "HPV-168",
+        "Human papillomavirus 2": "HPV-2",
+        "Human papillomavirus 5": "HPV-5",
+        "Human papillomavirus 8": "HPV-8",
+        "Human papillomavirus 12": "HPV-12",
+        "Human papillomavirus 17": "HPV-17",
+        "Human papillomavirus 19": "HPV-19",
+        "Human papillomavirus 20": "HPV-20",
+        "Human papillomavirus 22": "HPV-22",
+        "Human papillomavirus 23": "HPV-23",
+        "Human papillomavirus 24": "HPV-24",
+        "Human papillomavirus 37": "HPV-37",
+        "Human papillomavirus 38": "HPV-38",
+        "Human papillomavirus 49": "HPV-49",
+        "Human papillomavirus 65": "HPV-65",
+        "Human papillomavirus 98": "HPV-98",
+        "Human papillomavirus 100": "HPV-100",
+        "Human papillomavirus 104": "HPV-104",
+        "Human papillomavirus 105": "HPV-105",
+        "Human papillomavirus 107": "HPV-107",
+        "Human papillomavirus 110": "HPV-110",
+        "Human papillomavirus 111": "HPV-111",
+        "Human papillomavirus 115": "HPV-115",
+        "Human papillomavirus 118": "HPV-118",
+        "Human papillomavirus 122": "HPV-122",
+        "Human papillomavirus 124": "HPV-124",
+        "Human papillomavirus 145": "HPV-145",
+        "Human papillomavirus 182": "HPV-182",
 
+        # Polyomaviruses
         "Merkel cell polyomavirus": "Merkel cell polyomavirus",
+        "Betapolyomavirus hominis": "Betapolyomavirus hominis",
+        "JC polyomavirus": "JC polyomavirus",
+        "Human polyomavirus 6": "Human polyomavirus 6",
+
+        # Noroviruses
+        "Norovirus GII.4": "Norovirus GII.4",
 
         # Other
         "Apodemus agrarius picornavirus strain Longwan-Rn37 polyprotein": "Apodemus agrarius picornavirus"
@@ -160,33 +197,59 @@ def second_level_mapping(assignment):
         # Adenoviruses
         "Human mastadenovirus A": "Adenoviruses",
         "Human mastadenovirus B114": "Adenoviruses",
+        "Human mastadenovirus F": "Adenoviruses",
         "Human adenovirus 5": "Adenoviruses",
 
         # Herpesviruses
         "HSV-1": "Herpesviruses",
 
         # Papillomaviruses
+        "HPV-2": "Papillomaviruses",
+        "HPV-5": "Papillomaviruses",
+        "HPV-8": "Papillomaviruses",
+        "HPV-12": "Papillomaviruses",
+        "HPV-17": "Papillomaviruses",
+        "HPV-19": "Papillomaviruses",
+        "HPV-20": "Papillomaviruses",
         "HPV-22": "Papillomaviruses",
-        "HPV-123": "Papillomaviruses",
+        "HPV-23": "Papillomaviruses",
+        "HPV-24": "Papillomaviruses",
+        "HPV-37": "Papillomaviruses",
         "HPV-38": "Papillomaviruses",
+        "HPV-49": "Papillomaviruses",
         "HPV-50": "Papillomaviruses",
         "HPV-57": "Papillomaviruses",
+        "HPV-65": "Papillomaviruses",
         "HPV-75": "Papillomaviruses",
+        "HPV-98": "Papillomaviruses",
+        "HPV-100": "Papillomaviruses",
+        "HPV-104": "Papillomaviruses",
+        "HPV-105": "Papillomaviruses",
+        "HPV-107": "Papillomaviruses",
         "HPV-109": "Papillomaviruses",
-        "HPV-194": "Papillomaviruses",
+        "HPV-110": "Papillomaviruses",
+        "HPV-111": "Papillomaviruses",
+        "HPV-115": "Papillomaviruses",
+        "HPV-118": "Papillomaviruses",
+        "HPV-122": "Papillomaviruses",
+        "HPV-123": "Papillomaviruses",
+        "HPV-124": "Papillomaviruses",
+        "HPV-145": "Papillomaviruses",
         "HPV-168": "Papillomaviruses",
+        "HPV-182": "Papillomaviruses",
+        "HPV-194": "Papillomaviruses",
 
         # Polyomaviruses
         "Merkel cell polyomavirus": "Polyomaviruses",
-
-        # Other
-        "Apodemus agrarius picornavirus": "Other"
+        "Betapolyomavirus hominis": "Polyomaviruses",
+        "JC polyomavirus": "Polyomaviruses",
+        "Human polyomavirus 6": "Polyomaviruses",
     }
     return mapping[assignment]
 
 
 def pathogens_to_ignore():
-    # We're restricting our analysis to RNA respiratory pathogens. Our goal is to make a comparison between wastewater and swabs, and our swab protocol includes a DNase step.
+    # Dropping viruses that aren't respiratory or skin pathogens.
     return [
         "Apodemus agrarius picornavirus strain Longwan-Rn37 polyprotein",
         "Coxsackievirus A1",
