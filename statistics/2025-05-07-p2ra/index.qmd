@@ -38,6 +38,7 @@ First, we'll load the necessary libraries and set up our analysis environment:
 library(tidyverse)
 library(rstan)
 library(knitr)
+library(kableExtra)
 theme_set(theme_minimal())
 
 # Colors borrowed from https://github.com/JLSteenwyk/ggpubfigs
@@ -131,6 +132,7 @@ Let's try to reason about plausible upper and lower bounds for $p$:
 - Because we see all of these viruses in our wastewater sequencing, we can probably assume 
 that at least one person in Boston was infected and shedding.
 There are 5 million people in Greater Boston, so that suggests a lower bound of ~2e-7.
+(There are fewer people living in the DITP sewershed but this accounts for commuters, etc.)
 
 - On the other end, consider a virus that everyone gets over the course of a three-month outbreak
 and that detectable shedding lasts for a month. Then something like half of people will be contribute
@@ -167,26 +169,18 @@ tibble(
 
 This is a very broad prior.
 It implies 4% probability on more than half of people being positive (blue dotted line)
-and 2% of no one in Greater Boston being positive (red dotted line).
+and 2% of fewer than one person in Greater Boston being positive in expectation (red dotted line).
 
 The median $p$ is at $\text{logit}^{-1}(-7) = 9 \times 10^{-4}$ (solid grey line).
 For comparison, there were 547 swabs, so one positive swab would have a positive fraction of 1.8e-3.
 
 About 70% of the prior probability is between 1.6e-5 and 0.047 (grey dashed lines).
 
-A possible criticism is that this prior puts roughly half of its weight on
-prevalences that would be hard to observe in this swab dataset.
-If we think of the data as a priori restricted to things that were observed
-in at least one pool, this might be inappropriate.
-But if we think of the universe of possible viruses as including things that could
-be very rare, I think it's reasonable.
-
-An alternative approach, that could be more appropriate for "common viruses" would be:
-
-- People have colds somewhere between 5% and 50% of the time.
-- There are somewhere between 10 and 100 cold viruses
-- This suggests a prior centered around 5e-3, but with a lot of uncertainty to account for the
-  burstiness of outbreaks. Maybe $\text{logit}(p) \sim \text{Normal}(-5, 3)$.
+This prior thus assumes that the virus is probably present in Boston,
+but does not assume that it’s at a prevalence that’s detectable in the swab data.
+The current analysis does not include the viruses that were detected in wastewater
+but not swabs, but if we added them back in, we would want a prior that takes the possibility
+of very low prevalence seriously.
 
 ### Expected viral fractions
 
@@ -260,7 +254,7 @@ crossing(
 ### Overdispersion
 
 Our final parameters are the inverse-overdispersion parameters for the read counts ($\phi_1$ and $\phi_{ww}$).
-A useful intuition for these parameters is that, as the read depth gets very large so that poisson counting noise becomes unimportant relative to other sources of variance, the coefficient of variation in read counts goes to $\phi^{-1/2}$.
+A useful intuition for these parameters is that, as the read depth gets very large so that Poisson counting noise becomes unimportant relative to other sources of variance, the coefficient of variation in read counts goes to $\phi^{-1/2}$.
 
 We have little prior information about this parameter except that it must be greater than zero, and we expect significant overdispersion in both sample sources.
 Another complication is that we don't expect our data, especially the swab data, to give us much information about $\phi$ because you need multiple non-zero observations to estimate overdispersion.
@@ -274,9 +268,9 @@ This relates to a major source of overdispersion: variation in how well subjects
 From field observations, Simon estimates that roughly 20% of people take a bad sample.
 We can use this to get a sense of the reasonable range of $\phi_{swab}$.
 
-Consider a case where you sampled deeply enough that you expect to see roughly 100 reads
-from a positive swab in your pool, conditional on getting any at all (as a proxy for a getting a good swab).
-Let $\lambda$ be the expected number of reads from a positive swab.
+Consider a case where you have a single positive swab in the pool,
+and where sampled deeply enough that you expect to see roughly 100 viral reads, conditional on getting any at all (as a proxy for a getting a good swab).
+Let $\lambda$ be the expected number of viral reads from a positive swab.
 Then if the probability of getting zero viral reads is dominated by a 20% chance of getting a bad swab,
 $$\lambda = 0 \times P(r_{viral} = 0 | \lambda, \phi_1) + 100 \times P(r_{viral} > 0 | \lambda, \phi_1) = 80$$
 In our negative binomial model,
@@ -842,7 +836,7 @@ suggesting that, as expected the data contains very little information about $\p
 
 There is a slight leftward shift for HCoV-OC43, which has the most positive pools (5).
 
-Posteriors for wastewater inverse-overdispersion $\phi_ww$.
+Posteriors for wastewater inverse-overdispersion $\phi_{ww}$.
 
 ```{r}
 posteriors %>%
@@ -889,7 +883,7 @@ It looks like:
 
 This makes sense because low $\mu$ requires high prevalence to observe the virus since each positive swab is likely to go unobserved, while with high $\mu$ positive swabs are usually observed, so the prevalence is determined by the number of positive pools.
 
-TODO: Explain these in light of theoretical calculation.
+TODO: Add maximum likelihood calculation here.
 
 ```{r}
 posteriors %>%
@@ -901,28 +895,70 @@ posteriors %>%
   facet_wrap(~species)
 ```
 
-
-There appears to be a relationship between the swab inverse overdispersion and the prevalence estimates, suggesting that if we used a prior that allowed smaller $\phi_1$, we might get larger prevalence estimates for some viruses.
-
-This makes sense because if we only see a virus a few times and overdispersion is very large, the true prevalence might be higher than we think but we have a lot of false negatives and our observations are lucky outliers.
-
-We should consider whether we like the current prior on $\phi_1$ or want to allow it to be broader.
-
-On the other hand, the relationship is pretty weak compared to the spread of the $p$ samples, so it may not matter very much.
-
-TODO: Explain in light of theoretical calculation
+Smaller $\phi_1$ implies a higher probability of failing to get viral reads a positive swab.
+Thus, the inferred prevalence conditional on $phi_1$ is inversely related to $phi_1$.
 
 ```{r}
 posteriors %>%
-  mutate(p0 = (phi_1 / (mu_swab * 538402.2 + phi_1))^phi_1) %>%
-  ggplot(aes(1 - p0, p)) +
+  summarise(
+    corr_log_p_phi_1 = cor(log(p), log(phi_1), method = "spearman"),
+    corr_p_phi_1 = cor(p, phi_1, method = "spearman"),
+    corr_p_mu_ww = cor(log(p), log(mu_swab), method = "spearman"),
+    .by = species,
+  )
+```
+
+To encapsulate the relationship between $p$, $\mu_{swab}$, and $\phi_1$,
+we can approximate $\hat{p}$, the maximum likelihood $p$ conditional on known $\mu_{swab}$ and
+$\phi_1$.
+(The approximation is in the the limit where most pools are expected to be negative.)
+
+```{r}
+posteriors %>%
+  mutate(posterior_sample = seq(nrow(.))) %>%
+  left_join(swab_reads_complete, relationship = "many-to-many", by = join_by(species, group)) %>%
+  mutate(
+    lambda = mu_swab * all_reads / pool_size,
+    p0 = (phi_1 / (lambda + phi_1)) ^ phi_1,
+  ) %>%
+  summarise(
+    p = first(p),
+    pos_pools = sum(viral_reads > 0),
+    p_hat = pos_pools / sum(pool_size[viral_reads == 0] * (1 - p0[viral_reads == 0])),
+    mean_p0 = mean(p0),
+    .by = c(species, group, posterior_sample),
+  ) %>%
+  ggplot(aes(p_hat, p)) +
   geom_point(alpha = 0.05, size = 0.1) +
-  geom_smooth() +
-  geom_line(data = tibble(p0 = 1 - 10^seq(-2,0,.1), p = 1 / (547 * (1-p0)))) + 
-  scale_x_log10(limits = c(1e-2, 1), labels=scientific) +
-  scale_y_log10(limits = c(1e-5, 0.5), labels = scientific) +
+  geom_smooth() + 
+  geom_abline(slope = 1, intercept = 0, color = "blue") +
+  scale_x_log10(limits = c(2e-3, 1)) +
+  scale_y_log10() +
   facet_wrap(~species)
 ```
+```{r}
+posteriors %>%
+  mutate(posterior_sample = seq(nrow(.))) %>%
+  left_join(swab_reads_complete, relationship = "many-to-many", by = join_by(species, group)) %>%
+  mutate(
+    lambda = mu_swab * all_reads / pool_size,
+    p0 = (phi_1 / (lambda + phi_1)) ^ phi_1,
+  ) %>%
+  summarise(
+    p = first(p),
+    pos_pools = sum(viral_reads > 0),
+    p_hat = pos_pools / sum(pool_size[viral_reads == 0] * (1 - p0[viral_reads == 0])),
+    mean_p0 = mean(p0),
+    .by = c(species, group, posterior_sample),
+  ) %>%
+  summarise(
+    corr_sp = cor(log(mean_p0), log(p), method = "spearman"),
+    corr_pe = cor(log(mean_p0), log(p), method = "pearson"),
+    .by = c(species),
+  )
+```
+
+The approximate maximum likelihood and posterior $p$ qualitatively agree.
 
 ### Relationships with expected wastewater viral fraction
 
@@ -938,7 +974,16 @@ posteriors %>%
   facet_wrap(~species)
 ```
 
-As you might expect, there is a very tight relationship between prevalence and estimated wastewater viral fraction (per prevalence).
+```{r}
+posteriors %>%
+  summarise(
+    cor_sp = cor(p, mu_ww, method = "spearman"),
+    cor_log = cor(log(p), log(mu_ww), method = "pearson"),
+    .by = species,
+  )
+```
+
+As expected, there is a very tight relationship between prevalence and estimated wastewater viral fraction (per prevalence).
 Often, strong correlations between parameters suggest that we should reparameterize the model so the parameters are more independent.
 However, in this case, I think this is appropriate. We need a distinct $p$ parameter to make use of the discreteness of the swab pools.
 
@@ -975,11 +1020,10 @@ posteriors %>%
   facet_wrap(~species)
 ```
 
-The relationships are all pretty weak, especially between $\mu_{ww}$ and the $\phi$ parameters.
-This is encouraging because it suggests that if our primary goal is to estimate $\mu_{ww}$, we don't have to worry too much about the accuracy of our other inferences. This is especially important for the $\phi$ parameters where the data does not constrain our estimates very much.
-(Caveat that this weak relationship may be an artifact of artificially constraining priors on $\phi$. Maybe if we used a very broad prior we'd find a stronger relationship with $\mu_{ww}$ driven by extreme values.)
+The relationships with $\mu_{swab}$ and $\phi_1$ are mediated by $p$ and are not surprising.
 
-TODO: Quantify with R^2
+The relationship with $\phi_{ww}$ suggests that the posteriors are uncorrelated,
+which is encouraging because we don't have any real information about this parameter.
 
 # Posterior Predictive Checks
 
@@ -1150,7 +1194,7 @@ posterior_predictive_ww_summary %>%
 This plot compares the observed number of positive wastewater samples (vertical line) with the distribution generated from our model.
 It looks like the model systematically overestimates the number of wastewater samples with viral reads (though not by a lot in any one case).
 This may be a sign that $\phi_{ww}$ is too large: too little overdispersion leading to too few zero counts given a mean relative abundance.
-Or it could be that $\mu_{ww}$ is too slightly high, perhaps because of the prior.
+It could also mean that the negative binomial model is slightly misspecified.
 
 ```{r}
 posterior_predictive_ww_summary %>%
@@ -1166,8 +1210,6 @@ posterior_predictive_ww_summary %>%
 
 This plot compares the observed total viral reads in wastewater (points) with the distribution predicted by our model.
 The observations here are all very close to the posterior median.
-I'm not sure if this is a problem or not.
-I'm inclined to think that it's not, given that the posteriors are widely dispersed.
 
 ```{r}
 posterior_predictive_ww_summary %>%
@@ -1185,10 +1227,6 @@ This plot compares the observed maximum viral reads in wastewater with the distr
 
 Here the model might be systematically slightly overestimating the maximum viral reads.
 This cuts against the "too little overdispersion" hypothesis for the excess positive samples.
-Perhaps $\mu_{ww}$ is slightly too high, perhaps because the prior is pushing the estimates up?
-
-Reviewing the posteriors by eye, roughly 13/17 shift left compared to the prior, only 2/17 shift right.
-If there's a subtle bias on a logit scale it might be enough to explain the deficit of zeros, which is noticeable but not large and the bias in the posterior predictive count stats, which is small.
 
 ```{r}
 posterior_predictive_ww_summary %>%
@@ -1205,10 +1243,13 @@ posterior_predictive_ww_summary %>%
 This plot compares the observed standard deviation of viral reads in wastewater with the distribution from our model.
 
 Here the model might also be systematically slightly too high.
-This is more support for the $\mu_{ww}$ too high explanation
-because higher mean count implies higher standard deviation in the negative binomial model.
 
-Another interpretation is too much overdispersion, which would account for high standard deviation and high maximum count.
+Taking these together, it could be that the negative binomial model can't simultaneously fit the number
+of positive samples and the dispersion of reads because these are controlled by a single parameter.
+
+I don't think this is a major issue for trusting the results.
+The observed values are all well within the posterior predictive distributions
+and it probably makes sense to be conservative with respect to the possibility of seeing anomalously large counts. 
 
 # Results 
 
@@ -1222,66 +1263,93 @@ posteriors %>%
   scale_y_discrete(limits=rev(species_order))
 ```
 
-Let's compare these results to what we'd get with perfect sensitivity.
-In that case, we can estimate the maximum likelihood $p$ and the Fisher information for $log p$,
-which gives an estimate of the posterior posterior mode and variance of $log p$ if we had a flat prior.
-
 ```{r}
 left_join(
   swab_reads_complete %>%
     summarise(
-      n_pos = sum(viral_reads > 0),
-      swabs_in_neg_pools = sum(pool_size[viral_reads == 0]),
-      swabs_in_pos_pools = sum(pool_size[viral_reads > 0]),
-      p_hat = n_pos / (swabs_in_neg_pools + swabs_in_pos_pools / 2),
-      log_p_hat = log(p_hat),
-      var_log_p = 1 / n_pos,
-      .by = c(species, group),
-    ) %>%
-    select(-c(group, starts_with("swabs"))),
+      `+ pools` = sum(viral_reads > 0),
+      `viral reads` = sum(viral_reads),
+      .by = species,
+    ),
   posteriors %>%
     summarise(
+      q15 = quantile(p, .15),
       median = median(p),
-      var_log_p = var(log(p)),
-      .by = c(species, group),
-    ) %>%
-    select(-group),
-  by = join_by(species),
-  suffix = c(".perf", ".post"),
-)  %>%
+      q85 = quantile(p, .85),
+      `q85 / q15` = q85 / q15,
+      .by = species,
+    ),
+  ) %>%
+  kable(digits = c(NA, 0, 0, 4, 4, 4, 2)) %>%
+  column_spec(2:7, monospace = TRUE)
+```
+```{r}
+posteriors %>%
+  mutate(posterior_sample = seq(nrow(.))) %>%
+  left_join(swab_reads_complete, relationship = "many-to-many", by = join_by(species, group)) %>%
   mutate(
-    across(where(is_double), ~format(.x, digits=2)),
-  )
+    lambda = mu_swab * all_reads / pool_size,
+    p0 = (phi_1 / (lambda + phi_1)) ^ phi_1,
+  ) %>%
+  summarise(
+    p = first(p),
+    mu_swab = first(mu_swab),
+    pos_pools = sum(viral_reads > 0),
+    p_hat = pos_pools / sum(pool_size[viral_reads == 0] * (1 - p0[viral_reads == 0])),
+    mean_p0 = mean(p0),
+    .by = c(species, group, posterior_sample),
+  ) %>%
+  summarise(
+    median_mu_swab = median(mu_swab),
+    median_p0 = median(mean_p0),
+    .by = species,
+  ) 
 ```
 
+Let's compare these results to what we'd get with perfect sensitivity.
+In that case, we can estimate the maximum likelihood $p$ and the Fisher information for $\log p$,
+which gives an estimate of the posterior posterior mode and inverse variance of $\log p$ if we had a flat prior on $\log p$.
+
+Comparison with perfect sensitivity maximum likelihood estimate: 
+
+```{r}
+perfect_sensitivity <- swab_reads_complete %>%
+    summarise(
+      pos_pools = sum(viral_reads > 0),
+      p = pos_pools / (sum(pool_size[viral_reads == 0]) + sum(pool_size[viral_reads >0]) / 2),
+      sd_logp = 1 / sqrt(pos_pools),
+      viral_reads = sum(viral_reads),
+      .by = c(species, group),
+      )
+
+posteriors %>%
+  summarise(median(p), sd(log(p)), .by = c(species, group)) %>%
+  left_join(
+    perfect_sensitivity,
+  ) %>%
+  mutate(
+    p_ratio = `median(p)` / p,
+    sd_ratio = `sd(log(p))` / sd_logp,
+    .keep = "unused",
+  ) %>%
+  kable(digits = 1)
+```
 
 ```{r}
 posteriors %>%
-  summarise(
-    q15 = quantile(p, 0.15),
-    q25 = quantile(p, 0.25),
-    median = median(p),
-    q75 = quantile(p, 0.75),
-    q85 = quantile(p, 0.85),
-    # ratio_q75q25 = q75 / q25,
-    ratio_q85q15 = q85 / q15,
-    var_log_p = var(log(p)),
-    gsd_sq = exp(2 * sd(log(p))),
-    .by = c(species, group),
-  ) %>%
-  mutate(
-    across(
-      c(starts_with("q"), "median"),
-      ~ format(.x, scientific = TRUE, digits = 2)
-    ),
-    across(
-      c(starts_with("ratio_"), var_log_p, gsd_sq),
-      ~ format(.x, digits = 2)
-    )
-  ) %>% 
-  select(-group) %>%
-  kable
+  ggplot(aes(x = p, y = species, fill = group)) +
+  geom_vline(xintercept = plogis(mean_logit_p), color = "grey") +
+  geom_vline(xintercept = plogis(mean_logit_p + sd_logit_p * c(1, -1)), color = "grey", linetype = "dashed") +
+  geom_violin(draw_quantiles = c(0.15, .5, 0.85)) + 
+  geom_point(aes(x = p), data = perfect_sensitivity, color = "white") +
+  geom_errorbarh(aes(xmin = p / exp(sd_logp), xmax = p * exp(sd_logp)), data = perfect_sensitivity, color = "white") +
+  scale_x_log10() +
+  scale_y_discrete(limits=rev(species_order))
 ```
+
+Here, the violins show posteriors with median, 15-th, and 85-th percentiles as black lines.
+The white dots are the maximum likelihood estimates with error bars $\log \hat{p} \pm {\mathcal{I_{\log p}}}^{-1/2}$.
+Solid grey line is the prior median and dashed grey lines are the prior 15th and 85th percentiles.
 
 ## RA_p(1%)
 
@@ -1331,13 +1399,55 @@ posteriors %>%
 
 This table provides quantiles of the RA_p(1%) estimates for each virus species, representing the uncertainty in these values.
 
+```{r}
+posteriors %>%
+  mutate(ra01 = mu_ww * 0.01) %>%
+  summarise(
+    q15 = quantile(ra01, .15),
+    median = median(ra01),
+    q85 = quantile(ra01, .85),
+    `q85 / q15` = q85 / q15,
+    .by = c(species)
+  ) %>%
+  mutate(
+    across(
+      c(q15, median, q85),
+      ~ format(.x, scientific = TRUE, digits = 2)
+    ),
+    across(
+      c(`q85 / q15`),
+      ~ format(.x, digits = 2)
+    )
+  ) %>% 
+  kable(align = "lrrrr") %>%
+  column_spec(2:5, monospace = TRUE)
+```
+
+```{r}
+posteriors %>%
+  mutate(ra01 = mu_ww * 0.01) %>%
+  summarise(
+    q15 = quantile(ra01, .15),
+    median = median(ra01),
+    q85 = quantile(ra01, .85),
+    sd = exp(sd(log(ra01))),
+    `q85 / q15` = q85 / q15,
+    .by = c(species)
+  ) %>%
+  summarise(
+    exp(sd(log(median))),
+    median(sd),
+  )
+```
+
+
 ## RA swab / RA wastewater
 
 ```{r}
 posteriors %>%
   mutate(ratio = mu_swab / mu_ww) %>%
   ggplot(aes(ratio, species, fill=group)) +
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_violin(draw_quantiles = c(0.15, 0.5, 0.85)) +
   scale_x_log10(
     name = "swab RA / wastewater RA",
     limits = c(1e-2, 1e8),
@@ -1377,7 +1487,7 @@ naive_ra_ratios <- left_join(
 posteriors %>%
   mutate(ratio = mu_swab / mu_ww) %>%
   ggplot(aes(ratio, species, fill=group)) +
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_violin(draw_quantiles = c(0.15, 0.5, 0.85)) +
   geom_point(aes(ratio_by_read, species), naive_ra_ratios, shape = "x") +
   geom_point(aes(ratio_by_sample, species), naive_ra_ratios, shape = "o") +
   scale_x_log10(
@@ -1389,100 +1499,3 @@ posteriors %>%
 ```
 
 I don't see a systematic bias here, which suggests that the priors aren't influencing the ratio too much.
-
-# Conclusions
-
-- The posterior certainty in RA(p) appears to be comming from the prior on $p$, which constrains small values.
-- The ratio of swab RA to wastewater RA looks reasonably distributed around the naive average.
-
-
-# Appendix
-
-```{r}
-posteriors %>%
-  filter(species == "H1N1") %>%
-  summarise(q15 = quantile(phi_1, 0.15), median = quantile(phi_1, 0.5), q85 = quantile(phi_1, 0.85), ratio = q85 / q15, sl = exp(2 * sd(log(phi_1))))
-```
-```{r}
-swab_reads_complete %>%
-  filter(species == "H1N1") %>%
-  glimpse %>%
-  group_by(viral_reads) %>%
-  summarise(n_swabs = sum(pool_size))
-```
-
-```{r}
-posteriors %>%
-  filter(species == "SARS-CoV-2") %>%
-  summarise(q15 = quantile(p, 0.15), median = quantile(p, 0.5), q85 = quantile(p, 0.85), ratio = q85 / q15, error = exp(2 * sd(log(p))))
-```
-
-```{r}
-swab_reads_complete %>%
-  filter(species == "H1N1") %>%
-  glimpse %>%
-  group_by(viral_reads) %>%
-  summarise(n_swabs = sum(pool_size))
-```
-```{r}
-posteriors %>%
-  filter(species == "H1N1") %>%
-  summarise(q15 = quantile(p, 0.15), median = quantile(p, 0.5), q85 = quantile(p, 0.85), ratio = q85 / q15, vlp = var(log(p)), sl = exp(2 * sd(log(p))))
-```
-
-```{r}
-p0 <- function(lam, phi) (phi / (lam + phi))^phi
-fn <- function(lam, phi, rv, npos){
-  lam - (rv / npos) * (1 - p0(lam, phi))
-}
-find_lam <- function(phi, rv, npos){
-  fn <- \(lam) lam - (rv / npos) * (1 - p0(lam, phi))
-  uniroot(fn, c(1e-3,100))$root
-}
-var_ln_p <- function(lam, phi, npos){
-  p0 <- p0(lam, phi)
-  (1/ npos) * (phi + lam - lam * phi * p0) / (phi + lam - lam * phi * p0 / (1 - p0))
-}
-
-n_pool <- 12
-n_swab <- 45
-tibble(rv = c(2, 80, 20), n_pos = c(1, 1, 2)) %>%
-  crossing(
-    phi = c(0.3, 0.75, 1.6),
-  ) %>%
-  mutate(
-    lam = pmap_dbl(list(phi, rv, n_pos), find_lam),
-    p0 = p0(lam, phi),
-    p_hat = n_pos / (n_swab * (n_pool - n_pos)) / (1 - p0),
-    vlp = var_ln_p(lam, phi, n_pos),
-    err = exp(2 * sqrt(vlp))
-  ) %>%
-  print(n = Inf)
-```
-```{r}
-get_phi <- function(lam, p0){
-  uniroot(\(phi) log(p0) - phi * log(phi / lam), c(0.001, 1))$root
-}
-crossing(
-  lam = c(100, 200, 6000),
-  p0 = c(0.2, 0.5),
-) %>%
-  mutate(
-    phi = map2_dbl(lam, p0, get_phi)
-  ) %>%
-  arrange(p0)
-```
-```{r}
-mean(swab_metadata$all_reads)
-1 / mean(swab_metadata$all_reads)
-1 / mean(wastewater_metadata$all_reads)
-qlogis(1e-9)
-plogis(-10)
-```
-
-```{r}
-r <- 0.28
-mu <- 5000
-pnbinom(6000, p = r / mu, size = r, lower.tail = FALSE)
-```
-
