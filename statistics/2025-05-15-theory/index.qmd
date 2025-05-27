@@ -1,0 +1,251 @@
+---
+title: "Theoretical analysis of the precision to estimate prevalence"
+format:
+  html:
+    code-fold: true
+    toc: true
+execute: 
+  cache: true
+editor: source
+author: dan
+date: 2025-05-15
+---
+
+An important question about our model is: why does our model estimate
+the viral prevalence with finite precision given the fact that a pool
+can have no viral reads because of low prevalence or low expected relative abundance?
+
+We will try to establish that this precision comes from the combination of two things:
+
+1. The likelihood
+2. The prior on $\phi_1$, the inverse overdispersion for viral reads from a single positive swab,
+through its control of the probability of getting zero viral reads from a positive swab.
+
+Importantly, the precision does not depend on having a narrow prior on $p$ or
+on $\mu_{swab}$, the expected relative abundunce in a positive swab.
+
+# Analysis plan
+
+To show that the precision comes from the likelihood, we will examine the likelihood function
+alone without looking at a prior.
+We will calculate the maximum likelihood estimate (MLE) and the Hessian (matrix of second derivatives)
+of the log likelihood evaluated at the MLE,
+which gives an estimate of the precision.
+To lowest order, the likelihood function is approximately a Gaussian function with its maximum at the MLE
+and its precision matrix (inverse covariance) given by the Hessian.
+
+To simplify our calculations, we will assume $\phi_1$ known.
+Our posterior samples show that the data we have does not constrain $\phi_1$.
+We can then vary the value of $\phi_1$ and study how it changes the MLE and the precision.
+
+# The likelihood
+
+Consider a set of pools indexed by $i$.
+In each pool, we observe $r_i \in Z^+$ viral reads.
+For simplicity, assume that each pool contains $s$ swabs and that each is sequenced to the same depth $d$.
+To avoid carrying around constants,
+let $\lambda = \frac{d}{s} \mu_{swab}$ be the expected number of viral reads in a pool if one swab is positive.
+Estimating $\lambda$ is equivalent to estimating $\mu_{swab}$.
+
+Let $p$ be the prevalence.
+Let $\phi_1$ be the inverse-overdispersion of viral read counts from a single infected swab.
+
+Assuming the pools are independent, the log likelihood is a sum over pools:
+
+$$\log L(p, \lambda, \phi_1 | r) = \sum_i \log Pr(r_i | p, \lambda, \phi_1)$$ {#eq-likelihood}
+
+It is convenient to marginalize over the number of swabs
+contributing viral reads to the pool, which we'll call $S_{>0}$:
+
+$$P(r_i | p, \lambda, \phi_1) = \mathbb{E}[Pr(r_i | S_{>0}) | p, \lambda, \phi_1]$$ {#eq-marginalize}
+
+(Note that $S_{>0}$ is less than or equal to the number of swabs from infected people.)
+Assuming that swabs are independent,
+$$S_{>0} \sim \text{Binomial}\left(s, p (1 - P(0 | \lambda, \phi_1))\right),$$
+where $P(0 | \lambda, \phi_1)$ is the probability that a single swab from an infected person contributes zero reads.
+(A note on notation: throughout, we use $Pr$ to represent a generic probability and $P$ to be the
+probability mass function of read counts from a single positive swab.)
+
+From our data, we observe that most of the pools have zero reads.
+This implies that 
+$$\mathbb{E}(S_{>0}) = s p (1 - P(0 | \lambda, \phi_1)) < 1.$$
+
+Thus, we can simplify our calculation with the approxmation that
+$$S_{>0} \sim \text{Bernoulli}(s p (1 - P(0|\lambda, \phi_1))).$$
+
+Applying this to @eq-marginalize, gives
+$$P(r_i) = \begin{cases}
+1 - s p (1 - P(0 | \lambda, \phi_1))\;\text{if}\;r_i = 0,\\
+s p P(r_i | \lambda, \phi_i)\;\text{if}\;r_i > 0.
+\end{cases}$$
+
+Substituting into @eq-likelihood, and denoting the number of pools with zero and non-zero
+viral reads as $n_0$ and $n_{>0}$ respectively, we get
+$$\begin{align}
+\log L & = n_0 \log(1 - sp(1 - P(0|\lambda, \phi_1))) + \sum_{\{i: r_i > 0\}} \log(sp P(r_i|\lambda, \phi_1))\\
+       & \approx - n_0 s p (1 - P(0|\lambda, \phi_1)) + n_{>0} \log p + \sum_{\{i: r_i > 0\}} \log P(r_i|\lambda, \phi_1) + \text{const.}\\
+\end{align}$$
+where in the approximation we've kept only terms of order $sp(1-P(0))$ to be consistent with our Bernoulli approximation.
+
+In our negative binomial model,
+$$P(r) = \binom{r + \phi_1 - 1}{r} {\left(\frac{\lambda}{\lambda + \phi_1}\right)}^r {\left(\frac{\phi_1}{\lambda + \phi_1}\right)}^{\phi_1}$$ {#eq-nb}
+so that
+$$P(0 | \lambda, \phi_1) = {\left(\frac{\phi_1}{\lambda + \phi_1}\right)}^{\phi_1}.$$ {#eq-p0}
+
+# Choosing values of $\phi_1$
+
+We have to choose some values of $\phi_1$ to investigate.
+We don't have much prior information about overdispersion in swab reads,
+and fitting our model the data is not very informative either.
+(Presumably this is because you need a lot of observation of counts to estimate overdispersion,
+and we typically have only one or a few pools with viral reads.)
+
+As we will see below, the primary way that $\phi_1$ influences the inference of $p$
+is through $P(r = 0 | \lambda, \phi_1)$, the probability that a swab from an infected person
+contributes zero reads.
+So it makes sense to consider a range $\phi_1$ that span different values of $P(0)$.
+
+One effect we would like to capture is that we expect to sometimes get
+zero viral reads *even when we sequence deeply enough that we expect to observe the virus*.
+For example, if an infected participant swabs badly, they may contribute no viral reads to the pool
+even at very high sequencing depth.
+We don't know how often this happens, but Simon has observed that roughly 20%
+of participants appear to swab badly.
+The rate could be higher or lower, but it's probably not close to 100% or swab sampling
+would be useless.
+Thus, we would like to allow for a wide range of values of $P(r = 0)$ on a linear scale between 0 and 1.
+
+To calculate $P(r = 0 | \lambda, \phi_1)$, we also have to specify a $\lambda$.
+We'll define "deep sequencing" to be depth such that $E(r | r > 0) = 100$
+and for each $\phi_1$ find the value of $\lambda$ that meets this condition.
+This is deep enough that without significant overdispersion, we would never
+expect to get zero counts.
+It's also the same scale of counts as some of our more abundant viruses, including SARS-CoV-2.
+(Also note that for small $\phi_1$, i.e. large overdispersion, $P(0)$ is not very sensitive to $\lambda$ so the exact choice doesn't matter much.)
+
+Using @eq-p0, and
+$$\mathbb{E}[r] = \lambda = \mathbb{E}[r|r>0](1 - P(0))$$
+for we can solve for $\lambda$ and $P(0)$
+for a given $\phi_1$ and $\mathbb{E}[r | r>0]$:
+
+```{r}
+#| message: false
+
+library(tidyverse)
+library(knitr)
+p0 <- function(lam, phi) (phi / (lam + phi))^phi
+
+find_lam <- function(phi, rv, npos){
+  fn <- \(lam) lam - (rv / npos) * (1 - p0(lam, phi))
+  uniroot(fn, c(1e-4, 10000))$root
+}
+
+shape_phi_1 <- 2
+rate_phi_1 <- 7
+prior_phi_1 <- function(x) pgamma(x, shape_phi_1, rate_phi_1)
+
+df_phi <- crossing(
+  phi = seq(0.005, 1, 0.005),
+  r = c(2, 100, 500),
+) %>%
+  mutate(
+    lam = map2_dbl(phi, r, \(x, y) find_lam(x, y, 1)),
+    p0 = p0(lam, phi),
+    prior = prior_phi_1(phi),
+  ) 
+  
+df_phi %>% 
+  ggplot(aes(phi, p0, color = as.factor(r))) + 
+  geom_line() +
+  labs(y = "", x = "phi_1", title = "P(r = 0)", color = "E[r | r > 0]")
+```
+
+As we vary $\phi_1$ between zero and one, $P(r = 0)$ when the expected non-zero read count is in the hundreds also varies between zero and one.
+(We show both $\mathbb{E}[r | r > 0] = 100$ and $500$ to demonstrate that the exact choice of large value doesn't matter much.)
+
+Note that with shallow sequencing (relative to shedding, $\mathbb{E}[r | r > 0] = 2$),
+$P(r=0)$ is much higher than with deep sequencing.
+The correspondence between $P(r=0)$ for deep vs shallow sequencing is a consequence
+of the negative binomial model, rather than a tunable parameter.
+
+When fitting the model, we put a $\text{Gamma}(2, 7)$ prior on $\phi_1$,
+whose CDF looks like:
+
+```{r}
+df_phi %>%
+  ggplot(aes(phi, prior)) +
+  geom_line() +
+  labs(y = "", x = "phi_1", title = "Prior CDF on phi_1")
+```
+
+We can use the analysis above to convert this into an implied prior CDF on $P(r = 0)$:
+
+```{r}
+df_phi %>%
+  ggplot(aes(p0, 1 - prior, color = as.factor(r))) +
+  geom_line() +
+  labs(y = "", x = "P(r = 0)", title = "Implied prior CDF on P(r = 0)", color = "E[r | r > 0]")
+```
+
+This shows that the prior on $\phi_1$ expresses a lot of uncertainty about $P(r = 0)$
+with high sequencing depth.
+
+In the rest of the document, when we specify values of $\phi_1$ for numerical examples,
+we'll look at three values: 0.1, 0.25, and 0.5.
+These are close to the 15th, 50th, and 85th percentiles of the prior
+and span $P(0)$ for deep sequencing of $\approx 7-54\%$:
+```{r}
+df_phi %>%
+  filter(phi %in% c(0.1, 0.25, 0.5), r == 100) %>%
+  select(phi, p0, prior) %>%
+  rename(phi_1 = phi, `P(0)` = p0, `Prior CDF` = prior) %>%
+  mutate(across(everything(), ~round(.x, digits = 2))) %>%
+  kable
+
+df_phi %>% filter(r == 100)
+```
+
+# The MLE
+
+## Prevalence
+
+To find the MLE prevalence $\hat{p}$, we maximize $\log L$ by setting its $p$ derivative to zero:
+
+$$\frac{\partial \log L}{\partial p} = -n_0s(1 - P(0|\lambda, \phi_1)) + \frac{n_{>0}}{p} = 0$$
+Solving for $\hat{p}$ gives:
+$$\hat{p}(1 - P(0|\lambda, \phi_1)) = \frac{n_{>0}}{n_0 s}.$$
+
+This has a nice interpretation: the MLE prevalence times the probability that
+a positive swab contributes reads to a pool equals the number of pools with viral reads
+divided by the number of swabs in pools with no viral reads.
+(Why isn't the denominator of the RHS the total number of swabs?
+Maybe it has to do with our approximation; maybe it has to do with avoiding double-counting.
+Either way, the relative difference should be on the order of $sp(1 - P(0))$ and so consistent with our approximation.)
+
+If the probability of getting zero reads from a positive swab is high---either because
+the average number of viral reads from a positive swab ($\lambda$) is small
+or because the overdispersion is large ($\phi_1$ is small)---then $\hat{p}$ must be larger to compensate.
+For example, if $\lambda = \phi_1 = 1$, $P(0) = \frac{1}{2}$ and $\hat{p}$ must be twice as large
+as if $P(0) = 0$.
+
+## Expected viral reads
+
+Following the same procedure for $\lambda$, we get
+$$
+\frac{\partial \log L}{\partial \lambda} =
+n_0 s p \frac{\partial}{\partial \lambda} P(0) + \sum_{i:r_i > 0} \frac{\partial}{\partial \lambda} \log P(r_i) = 0,
+$$
+
+which we can solve for $\hat{\lambda}$ using the NB model (@eq-nb) for $P(r)$:
+$$
+\frac{\hat{\lambda}}{1 - P(0|\hat{\lambda}, \phi_1)} = \frac{\sum_i r_i}{n_{>0}}.
+$$
+
+As with $\hat{p}$, this has a nice interpretation.
+The left-hand side is the expected number of viral reads in a pool conditional on there being any at all.
+The right-hand side is the total number of viral reads divided by the number of pools with viral reads.
+
+## Numerical examples
+
+For given data and $\phi_1$, we can solve for $\hat{\lambda}$ and then for 
+$P(0 | \hat{\lambda}, \phi_1)$ and $\hat{p}$.

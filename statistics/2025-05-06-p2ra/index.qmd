@@ -114,8 +114,8 @@ For each wastewater sample $j$:
 #| code-fold: false
 
 ### prevalence
-alpha_p <- 0.5
-beta_p <- 10
+alpha_p <- 0.25
+beta_p <- 4 
 prior_p <- function(x) dbeta(x, alpha_p, beta_p)
 
 ### swab: logit(mu_1)
@@ -147,7 +147,7 @@ $$p \sim \text{Beta}(0.5, 10)$$
 
 ```{r}
 tibble(
-  p = 10^seq(-5, 0, length.out = 1000),
+  p = 10^seq(-7, 0, length.out = 1000),
   density = prior_p(p),
   density_log10 = density * p
 ) %>%
@@ -173,9 +173,9 @@ Namely, we: (1) proposed some priors, (2) fit the model, (3) saw whether the pri
 
 We also included the following considerations:
 
--   Because we are looking at respiratory viruses, we expect a priori the viral fraction at a given prevalence to be higher in swabs than in wastewater.
--   We want the wastewater prior to be consistent with our previous P2RA estimates.
--   It seems unlikely that the expected viral fraction in a positive swab is O(1). We don't want to totally exclude this possibility, but a single very high count in a single pool seems more likely to be lucky than reflective of the average.
+- Because we are looking at respiratory viruses, we expect a priori the viral fraction at a given prevalence to be higher in swabs than in wastewater.
+- We want the wastewater prior to be consistent with our previous P2RA estimates.
+- It seems unlikely that the expected viral fraction in a positive swab is O(1). We don't want to totally exclude this possibility, but a single very high count in a single pool seems more likely to be lucky than reflective of the average.
 
 ```{r}
 crossing(datatype = factor(c("swab", "wastewater")),
@@ -232,7 +232,7 @@ crossing(
                           prior_phi_ww(phi)),
     prior_log10 = prior * phi * log(10),
   ) %>%
-  ggplot(aes(phi, prior, color = datatype, linetype = datatype)) +
+  ggplot(aes(phi, prior_log10, color = datatype, linetype = datatype)) +
   geom_line() +
   scale_x_log10() +
   labs(title = "Prior distributions on phi")
@@ -845,9 +845,9 @@ This is encouraging because it suggests that if our primary goal is to estimate 
 
 TODO: Quantify with R^2
 
-## Posterior Predictive Checks
+# Posterior Predictive Checks
 
-### Swab data
+## Swab data
 
 To validate our model, we can use posterior predictive checks - generating new data from the fitted model and comparing it to the observed data.
 The following table gives the summary statistics for the data.
@@ -960,7 +960,7 @@ Vertical bars show quartiles (conditional on at least one read).
 
 Together, these plots suggest that the model is capturing the swab data reasonably well.
 
-### Wastewater data
+## Wastewater data
 
 Now we'll perform similar posterior predictive checks for the wastewater data:
 

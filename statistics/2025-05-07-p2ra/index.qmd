@@ -1025,6 +1025,73 @@ The relationships with $\mu_{swab}$ and $\phi_1$ are mediated by $p$ and are not
 The relationship with $\phi_{ww}$ suggests that the posteriors are uncorrelated,
 which is encouraging because we don't have any real information about this parameter.
 
+# Prior predictive checks
+```{r}
+#| label: prior-pred-check
+#| cache: true
+
+n_prior_samples <- 1000
+prior_samples <- tibble(
+  rep = 1:n_prior_samples,
+  p = plogis(rnorm(mean = mean_logit_p, sd = sd_logit_p, n = n_prior_samples)),
+  mu_swab = plogis(rnorm(mean = mean_logit_mu_ww, sd = sd_logit_mu_swab, n = n_prior_samples)),
+  phi_1 = rgamma(shape = shape_phi_1, rate = rate_phi_1, n = n_prior_samples),
+) %>%
+  cross_join(swab_metadata) %>%
+  mutate(
+    n_pos = map2_int(pool_size, p, ~ rbinom(1, .x, .y)),
+    mu = n_pos * mu_swab * all_reads / pool_size,
+    phi = n_pos * phi_1,
+    viral_reads = map2_int(mu, phi, ~ ifelse(.x > 0, rnbinom(
+      1, size = .y, mu = .x
+    ), 0)),
+  ) %>%
+  glimpse
+
+prior_predictive_summary <- prior_samples %>%
+  summarise(
+    pos_pools = sum(viral_reads > 1),
+    exp_pos_swabs = sum(p * pool_size),
+    p_no_pos_swabs = exp(-exp_pos_swabs),
+    total_reads = sum(viral_reads),
+    max_reads = max(viral_reads),
+    .by = rep,
+  ) 
+
+prior_predictive_summary %>%
+  ggplot(aes(x = pos_pools)) +
+  geom_histogram(binwidth = 1)
+
+prior_predictive_summary %>%
+  ggplot(aes(x = p_no_pos_swabs)) +
+  geom_density() +
+  scale_x_continuous(transform = "logit", limits=c(0.01, 0.99)) 
+  # geom_histogram(binwidth = 1)
+
+prior_predictive_summary %>%
+  ggplot(aes(x = total_reads)) +
+  geom_density() +
+  scale_x_continuous(transform = "pseudo_log", breaks = c(0, 10^seq(1:4)))
+
+prior_predictive_summary %>%
+  filter(pos_pools > 0) %>%
+  ggplot(aes(x = total_reads)) +
+  geom_density() +
+  scale_x_continuous(transform = "log10", breaks = 10^seq(1:4))
+
+prior_predictive_summary %>%
+  filter(pos_pools > 0) %>%
+  ggplot(aes(x = total_reads)) +
+  geom_density() +
+  scale_x_continuous(transform = "log10", breaks = 10^seq(0:5))
+
+prior_predictive_summary %>%
+  filter(pos_pools > 0) %>%
+  ggplot(aes(x = max_reads)) +
+  geom_density() +
+  scale_x_continuous(transform = "log10", breaks = 10^seq(0:4))
+```
+
 # Posterior Predictive Checks
 
 ## Swab data
