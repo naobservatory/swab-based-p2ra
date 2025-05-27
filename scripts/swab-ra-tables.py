@@ -60,9 +60,17 @@ samples = defaultdict(Counter)  # (date, location, pathogen) -> counts
 treatment_samples = defaultdict(Counter) # (date, location, pathogen, treatment) -> counts
 
 # Process classified reads
+seen_reads = set()
 with open(os.path.join(validation_output_dir, "swabs-classified-all-reads.tsv")) as f:
     for row in csv.DictReader(f, delimiter="\t"):
         date = datetime.strptime(row["date"], "%Y-%m-%d")
+        read_id = row["read_id"]
+
+        # Some reads had multiple BLAST alignments to the same genome. We
+        # don't want to count those multiple times.
+        if read_id in seen_reads:
+            continue
+        seen_reads.add(read_id)
         if not is_date_in_range(date):
             continue
 
@@ -136,9 +144,7 @@ with open(os.path.join(TABLE_DIR, "swabs-ra-summary.tsv"), "w") as outf:
         "dedup_hv",
         "all_reads"
     ])
-    # Sort samples by date
-    sorted_samples = sorted(samples.items(), key=lambda x: x[0][0])
-    for (date, location, pathogen), data in sorted_samples:
+    for (date, location, pathogen), data in sorted(samples.items()):
         species = first_level_mapping(pathogen)
         group = second_level_mapping(species)
         date_str = date.strftime("%y%m%d")
@@ -166,10 +172,8 @@ with open(os.path.join(TABLE_DIR, "swabs-ra-per-treatment-summary.tsv"), "w") as
         "dedup",
         "all_reads"
     ])
-    # Sort samples by date
-    sorted_samples = sorted(treatment_samples.items(), key=lambda x: x[0][0])
 
-    for (date, location, pathogen, treatment), data in sorted_samples:
+    for (date, location, pathogen, treatment), data in sorted(treatment_samples.items()):
         species = first_level_mapping(pathogen)
         group = second_level_mapping(species)
         date_str = date.strftime("%y%m%d")

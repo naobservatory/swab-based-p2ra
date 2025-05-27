@@ -56,8 +56,20 @@ for delivery in target_deliveries:
 samples = defaultdict(Counter)  # (date, location, pathogen) -> counts
 
 # Process classified reads
+seen = set()
+read_genomes = defaultdict(set)
 with open(os.path.join(validation_output_dir, "ww-classified-all-reads.tsv")) as f:
     for row in csv.DictReader(f, delimiter="\t"):
+        read_id = row["read_id"]
+        genome_name = row["genome_name"]
+        read_genomes[read_id].add(genome_name)
+        if len(read_genomes[read_id]) > 1:
+            raise Exception(f"Warning: Read {read_id} has more than one genome match. Maybe read pairs aligned to different genomes?")
+        # We should avoid double-counting both read pairs and multiple
+        # alignments of a single read to the same genome.
+        if read_id in seen:
+            continue
+        seen.add(read_id)
         date = datetime.strptime(row["date"], "%Y-%m-%d")
         if not is_date_in_range(date):
             continue
@@ -67,7 +79,7 @@ with open(os.path.join(validation_output_dir, "ww-classified-all-reads.tsv")) as
 
         key = date, row["loc"], row["genome_name"]
         if duplicate == "True":
-            samples[key]["dedup"] += 1
+            samples[key]["non_dedup"] += 1
         else:
             samples[key]["non_dedup"] += 1
             samples[key]["dedup"] += 1
@@ -87,7 +99,7 @@ with open(os.path.join(validation_output_dir, "ww-non-validated-reads.tsv")) as 
 
         key = date, row["loc"], pathogen
         if duplicate == "True":
-            samples[key]["dedup"] += 1
+            samples[key]["non_dedup"] += 1
         else:
             samples[key]["non_dedup"] += 1
             samples[key]["dedup"] += 1
@@ -118,8 +130,7 @@ with open(os.path.join(TABLE_DIR, "ww-ra-summary.tsv"), "w") as outf:
         "dedup_hv",
         "all_reads"
     ])
-    # Sort samples by date
-    sorted_samples = sorted(samples.items(), key=lambda x: x[0][0])
+    sorted_samples = sorted(samples.items())
     for (date, location, pathogen), data in sorted_samples:
         if pathogen in pathogens_to_ignore():
             continue
