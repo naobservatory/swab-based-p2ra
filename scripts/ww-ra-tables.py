@@ -78,10 +78,11 @@ with open(os.path.join(validation_output_dir, "ww-classified-all-reads.tsv")) as
         duplicate = row["is_duplicate"]
 
         key = date, row["loc"], row["genome_name"]
-        if duplicate == "True":
-            samples[key]["non_dedup"] += 1
-        else:
-            samples[key]["non_dedup"] += 1
+        # Count all reads for non-deduplicated count
+        samples[key]["non_dedup"] += 1
+
+        # Only count non-duplicate reads for deduplicated count
+        if duplicate == "False":
             samples[key]["dedup"] += 1
 
 # Process non-validated reads
@@ -98,10 +99,11 @@ with open(os.path.join(validation_output_dir, "ww-non-validated-reads.tsv")) as 
         duplicate = row["is_duplicate"]
 
         key = date, row["loc"], pathogen
-        if duplicate == "True":
-            samples[key]["non_dedup"] += 1
-        else:
-            samples[key]["non_dedup"] += 1
+        # Count all reads for non-deduplicated count
+        samples[key]["non_dedup"] += 1
+
+        # Only count non-duplicate reads for deduplicated count
+        if duplicate == "False":
             samples[key]["dedup"] += 1
 
 
