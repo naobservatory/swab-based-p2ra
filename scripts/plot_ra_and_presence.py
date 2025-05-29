@@ -6,16 +6,8 @@ import numpy as np
 from collections import defaultdict, Counter
 import textwrap
 from metadata_utils import first_level_mapping, second_level_mapping
+from virus_order import get_species_order, COLOR_MAPPING, DESIRED_GROUP_ORDER
 
-# Define color palettes for different virus groups
-color_mapping = {
-    "Coronaviruses (seasonal)": "#05a4a5",
-    "Coronaviruses (SARS-CoV-2)": "#445681",
-    "Rhinoviruses": "#ba5c97",
-    "Mononegavirales": "#8CCEA4",
-    "Influenza": "#E08F60",
-    "Other": "#9D9D9D"
-}
 
 ZERO_VALUE_REPLACEMENT = 3.16e-10
 
@@ -77,51 +69,8 @@ def main():
     ww = load_ww_abundance_data()
     sw = load_swab_presence_data()
 
-    # Get all unique species from wastewater data
-    all_species = ww[['species', 'group']].drop_duplicates()
-
-    # Count positive swab pools
-    swab_counts = (
-        sw[sw['present'] == 1]
-        .groupby(['species', 'group'])
-        .size()
-        .reset_index(name='n_positive_pools')
-    )
-
-    # Calculate median relative abundance per species
-    median_ra = (
-        ww.groupby('species')['relative_abundance']
-        .median()
-        .rename('median_ra')
-        .reset_index()
-    )
-
-    # Calculate group average relative abundance
-    group_avg_ra = (
-        ww.groupby('group')['relative_abundance']
-        .mean()
-        .rename('group_avg_ra')
-        .reset_index()
-    )
-
-    # Merge all data, starting with all species from wastewater
-    panel_df = (all_species
-                .merge(swab_counts, how='left', on=['species', 'group'])
-                .merge(median_ra, how='left', on='species')
-                .merge(group_avg_ra, how='left', on='group')
-                .fillna({'n_positive_pools': 0, 'median_ra': 0, 'group_avg_ra': 0})
-    )
-
-    # Sort by group average RA (ascending = lowest abundance groups at top)
-    # and within each group sort by species median RA (descending)
-    panel_df = panel_df.sort_values(['group_avg_ra', 'median_ra'],
-                                ascending=[False, False]
-                                ).reset_index(drop=True)
-
-    # Create a y-position lookup with explicit positions (ensures alignment)
-    num_species = len(panel_df)
-    spacing = 1.0  # Consistent spacing
-    panel_df['y'] = np.arange(num_species) * spacing
+    # Get species ordering from virus_order module
+    panel_df, ordered_species = get_species_order()
 
     # ------------ Create figure ---------- #
     fig = plt.figure(figsize=(14, 7.2), dpi=450)
@@ -152,7 +101,7 @@ def main():
         ax_left.scatter(
             x_values,
             y_values,
-            color=color_mapping.get(grp, 'gray'),
+            color=COLOR_MAPPING.get(grp, 'gray'),
             alpha=0.7,
             s=30,
             marker=group_to_marker[grp],  # Use marker based on group
@@ -237,7 +186,7 @@ def main():
         panel_df['y'],
         panel_df['n_positive_pools'],
         height=0.6,
-        color=[color_mapping.get(g, 'gray') for g in panel_df['group']]
+        color=[COLOR_MAPPING.get(g, 'gray') for g in panel_df['group']]
     )
 
     # ------------ Swab plot styling---------- #
@@ -262,23 +211,14 @@ def main():
         ax_right.spines[spine].set_visible(False)
 
     # ---- Add legend for virus groups ---- #
-    desired_order = [
-        "Mononegavirales",
-        "Influenza",
-        "Coronaviruses (seasonal)",
-        "Coronaviruses (SARS-CoV-2)",
-        "Rhinoviruses",
-    ]
-
     # Filter to include only groups that are actually in our data
-    # present_groups = panel_df['group'].unique()
-    ordered_groups = [group for group in desired_order]
+    ordered_groups = [group for group in DESIRED_GROUP_ORDER]
 
     # Create legend entries in the specified order
     handles = []
     labels = []
     for group in ordered_groups:
-        color = color_mapping.get(group, 'gray')
+        color = COLOR_MAPPING.get(group, 'gray')
         marker = group_to_marker.get(group, 'o')
         handles.append(plt.Line2D([0], [0], marker=marker, color=color, markersize=8,
                             linestyle='None', alpha=1.0))

@@ -5,143 +5,49 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from collections import defaultdict
+from get_fig_order import extract_species_order
 
-# Load posteriors data
-def load_posteriors_data():
-    df = pd.read_csv("statistics/2025-05-28-p2ra/posteriors.tsv", sep="\t")
-    return df
+# Load and process data
+def load_and_process_data():
+    # Load data sources
+    posteriors = pd.read_csv("statistics/2025-05-28-p2ra/posteriors.tsv", sep="\t")
 
-# Load pathogen presence data to filter species that have any positive entries
-def load_pathogen_presence():
-    df = pd.read_csv("tables/pathogen_presence.tsv", sep="\t")
+    # Get ordered species from get_fig_order.py
+    ordered_species = extract_species_order()
 
-    # Get all columns excluding the first two (sample, pool_size)
-    pathogen_columns = df.columns[2:]
+    # Filter ordered_species to only include those present in posteriors
+    ordered_species = [species for species in ordered_species if species in posteriors['species'].unique()]
+    # Filter posteriors to only include ordered species
+    filtered_posteriors = posteriors[posteriors['species'].isin(ordered_species)]
 
-    # Find species with at least one positive result
-    positive_species = []
-    for col in pathogen_columns:
-        if df[col].sum() > 0:
-            positive_species.append(col)
+    return filtered_posteriors, ordered_species
 
-    return positive_species
-
-# Define color palettes for different virus groups (matching plot_ra_and_presence.py)
+# Define color mapping for virus groups
 color_mapping = {
     "Coronaviruses (seasonal)": "#05a4a5",
     "Coronaviruses (SARS-CoV-2)": "#445681",
     "Rhinoviruses": "#ba5c97",
     "Mononegavirales": "#8CCEA4",
     "Influenza": "#E08F60",
-    "Other": "#9D9D9D"
 }
 
-# Define desired order of virus groups (matching plot_ra_and_presence.py)
-desired_order = [
-    "Rhinoviruses",
-    "Influenza",
-    "Mononegavirales",
-    "Coronaviruses (SARS-CoV-2)",
-    "Coronaviruses (seasonal)",
-]
+# Load and process data
+filtered_posteriors, ordered_species = load_and_process_data()
 
-# Load data
-posteriors = load_posteriors_data()
-positive_species = load_pathogen_presence()
-
-# Filter posteriors to only include species that have positive entries in pathogen_presence.tsv
-filtered_species = []
-for species in posteriors['species'].unique():
-    # Handle different naming formats
-    if species in positive_species or any(species in ps for ps in positive_species):
-        filtered_species.append(species)
-
-filtered_posteriors = posteriors[posteriors['species'].isin(filtered_species)]
-
-# Use the exact same species order as in plot_ra_and_presence.py
-def get_ra_and_presence_species_order():
-    # Load the same data sources as the RA script to get identical ordering
-    ww_df = pd.read_csv("tables/ww-ra-summary.tsv", sep="\t")
-    ww_df["relative_abundance"] = ww_df["dedup_hv"] / ww_df["all_reads"]
-
-    sw_df = pd.read_csv("tables/swabs-ra-summary.tsv", sep="\t")
-    sw_df["present"] = (sw_df["dedup_hv"] > 0).astype(int)
-
-    # Recreate the same processing steps
-    swab_counts = (
-        sw_df[sw_df['present'] == 1]
-          .groupby(['species', 'group'])
-          .size()
-          .reset_index(name='n_positive_pools')
-    )
-
-    all_species = (
-        pd.concat([ww_df[['species', 'group']], sw_df[['species', 'group']]])
-          .drop_duplicates()
-    )
-
-    median_ra = (
-        ww_df.groupby('species')['relative_abundance']
-          .median()
-          .rename('median_ra')
-          .reset_index()
-    )
-
-    group_avg_ra = (
-        ww_df.groupby('group')['relative_abundance']
-          .mean()
-          .rename('group_avg_ra')
-          .reset_index()
-    )
-
-    panel_df = (all_species
-                .merge(swab_counts, how='left', on=['species', 'group'])
-                .merge(median_ra, how='left', on='species')
-                .merge(group_avg_ra, how='left', on=['group'])
-                .fillna({'n_positive_pools': 0, 'median_ra': 0, 'group_avg_ra': 0})
-    )
-
-    # Sort in the same way
-    panel_df = panel_df.sort_values(['group_avg_ra', 'median_ra'],
-                                   ascending=[True, True]
-                                  ).reset_index(drop=True)
-
-    # Only include species with non-zero median RA or positive pools
-    panel_df = panel_df[(panel_df['median_ra'] > 0) | (panel_df['n_positive_pools'] > 0)]
-
-    # Limit to top N species
-    N = 20  # Same limit as in plot_ra_and_presence.py
-    if len(panel_df) > N:
-        panel_df = panel_df.iloc[:N]
-
-    # Return the species in the exact same order
-    return panel_df['species'].tolist()
-
-# Get species order from RA script
-ra_ordered_species = get_ra_and_presence_species_order()
-
-# Filter to only include species in our posteriors data
-ordered_species = [sp for sp in ra_ordered_species if sp in filtered_posteriors['species'].unique()]
-
-# Assign colors to each species based on its group
-species_colors = {}
+# Get present groups and their colors
 species_to_group = dict(filtered_posteriors[['species', 'group']].drop_duplicates().values)
-
-for species in ordered_species:
-    group = species_to_group[species]
-    species_colors[species] = color_mapping.get(group, color_mapping["Other"])
+present_groups = list(set(species_to_group.values()))
+species_colors = {species: color_mapping[species_to_group[species]]
+                 for species in ordered_species}
 
 # Calculate mu_ww * 0.01 and add log-transformed values
-filtered_posteriors['scaled_mu_ww'] = filtered_posteriors['mu_ww'] * 0.01  # Scale by 0.01
-filtered_posteriors['log_scaled_mu_ww'] = np.log10(filtered_posteriors['scaled_mu_ww'])  # Log of scaled value
-
-# Create a new column with species name and group for better labels
-filtered_posteriors['species_with_group'] = filtered_posteriors['species'] + " (" + filtered_posteriors['group'] + ")"
+filtered_posteriors['scaled_mu_ww'] = filtered_posteriors['mu_ww'] * 0.01
+filtered_posteriors['log_scaled_mu_ww'] = np.log10(filtered_posteriors['scaled_mu_ww'])
 
 # Create the figure
 plt.figure(figsize=(10, 5.4))
 
-# Create the violin plot with log-transformed values
+# Create the violin plot
 ax = sns.violinplot(
     x="log_scaled_mu_ww",
     y="species",
@@ -150,70 +56,42 @@ ax = sns.violinplot(
     hue="species",
     palette=species_colors,
     legend=False,
-    inner=None,  # No internal box or points
+    inner=None,
     linewidth=0.5,
     width=0.8,
     density_norm="width",
-    cut=0.1,  # Don't extend the violin past the data
+    cut=0.1,
 )
 
-# Add vertical grid lines at log values
+# Configure plot appearance
+ax.set_xlabel('RA(1%)', fontsize=12)
+ax.set_ylabel('')
+ax.set_xticks([-11, -10, -9, -8, -7, -6, -5, -4, -3])
+ax.set_xticklabels(['10⁻¹¹', '10⁻¹⁰', '10⁻⁹', '10⁻⁸', '10⁻⁷', '10⁻⁶', '10⁻⁵', '10⁻⁴', '10⁻³'])
+
+# Add vertical grid lines
 for x in [-11, -10, -9, -8, -7, -6, -5, -4, -3]:
     ax.axvline(x=x, color='lightgray', linestyle='-', linewidth=0.3, alpha=0.5, zorder=0)
 
-# Add horizontal grid lines aligned with each species
-for y in range(len(ordered_species)):
-    ax.axhline(y=y, color='lightgray', linestyle='-', linewidth=0.5, alpha=0.5, zorder=0)
-
-# Create group separators and labels
-group_positions = {}
-current_groups = []
-
-for i, species in enumerate(ordered_species):
-    group = species_to_group[species]
-    if group not in current_groups:
-        current_groups.append(group)
-        group_positions[group] = i
-
-# Create a custom legend for the different virus groups
-handles = []
-labels = []
-present_groups = [g for g in desired_order if g in species_to_group.values()]
-
-# Add legend entries for groups
-for group in present_groups:
-    color = color_mapping.get(group, 'gray')
-    handles.append(plt.Line2D([0], [0], color=color, lw=4))
-    labels.append(group)
-
-# Remove top and right spines
+# Remove spines and ticks
 sns.despine(ax=ax, top=True, right=True, left=True)
-ax.tick_params(axis='y', length=0)  # Remove y-axis tick marks
-ax.tick_params(axis='x', length=0)  # Remove x-axis tick marks
+ax.tick_params(axis='y', length=0)
+ax.tick_params(axis='x', length=0)
 
-# Set title and labels
-ax.set_xlabel('RA(1%)', fontsize=12)
-
-# Set x-ticks with proper scientific notation
-ax.set_xticks([-11, -10, -9, -8, -7, -6, -5, -4, -3])
-ax.set_xticklabels(['10⁻¹¹', '10⁻¹⁰', '10⁻⁹', '10⁻⁸', '10⁻⁷', '10⁻⁶', '10⁻⁵', '10⁻⁴', '10⁻³'])
-ax.set_ylabel('')
-
-# Add legend at the bottom
+# Create and add legend
+handles = [plt.Line2D([0], [0], color=color_mapping[group], lw=4) for group in present_groups]
 fig = plt.gcf()
-fig.legend(handles, labels,
+fig.legend(handles, present_groups,
           loc='center',
-          bbox_to_anchor=(0.53, 0.03),  # Position in the bottom space
+          bbox_to_anchor=(0.53, 0.03),
           ncol=len(present_groups) if len(present_groups) <= 4 else 3,
           frameon=False,
           fontsize=10)
 
 plt.tight_layout()
-plt.subplots_adjust(bottom=0.15)  # Make room for legend
+plt.subplots_adjust(bottom=0.15)
 
-# Create the output directory if it doesn't exist
+# Create output directory and save figure
 os.makedirs('figures', exist_ok=True)
-
-# Save the figure
 plt.savefig('figures/pathogen_mu_ww_violin.png', dpi=300)
 print("Saved to figures/pathogen_mu_ww_violin.png")
