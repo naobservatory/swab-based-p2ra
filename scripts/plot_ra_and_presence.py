@@ -17,8 +17,6 @@ color_mapping = {
     "Other": "#9D9D9D"
 }
 
-markers = ['s', 'o', '^']  # square, triangle, circle
-
 ZERO_VALUE_REPLACEMENT = 3.16e-10
 
 # Load wastewater relative abundance data
@@ -62,24 +60,20 @@ def load_swab_presence_data():
 
     return swabs_df
 
+def handle_zero_values(x_values, y_values, x_scale=0.1, y_scale=0.2):
+    x_values = x_values.to_numpy(float)
+    mask = x_values == 0
+    x_values[mask] = ZERO_VALUE_REPLACEMENT
 
+    x_jitter_multiplier = np.random.uniform(1 - x_scale, 1 + x_scale, mask.sum())
+    y_jitter_addition = np.random.uniform(-y_scale, y_scale, mask.sum())
+    x_values[mask] *= x_jitter_multiplier
+    y_values[mask] += y_jitter_addition
 
-def handle_zero_values(values):
-    values = values.to_numpy(float)
-    mask = values == 0
-    values[mask] = ZERO_VALUE_REPLACEMENT
-    return values, mask
+    return x_values, y_values
 
-def apply_jitter_to_zeros(x, y, mask, x_scale=0.1, y_scale=0.2):
-    if mask.any():
-        factors = np.random.uniform(1 - x_scale, 1 + x_scale, mask.sum())
-        x[mask] *= factors
-        y[mask] += np.random.uniform(-y_scale, y_scale, mask.sum())
-    return x, y
-
-
-# ---------- Load & prepare data ---------- #
 def main():
+    # ---------- Load & prepare data ---------- #
     ww = load_ww_abundance_data()
     sw = load_swab_presence_data()
 
@@ -117,7 +111,6 @@ def main():
                 .merge(group_avg_ra, how='left', on='group')
                 .fillna({'n_positive_pools': 0, 'median_ra': 0, 'group_avg_ra': 0})
     )
-    print(panel_df)
 
     # Sort by group average RA (ascending = lowest abundance groups at top)
     # and within each group sort by species median RA (descending)
@@ -125,61 +118,61 @@ def main():
                                 ascending=[False, False]
                                 ).reset_index(drop=True)
 
-
     # Create a y-position lookup with explicit positions (ensures alignment)
     num_species = len(panel_df)
     spacing = 1.0  # Consistent spacing
     panel_df['y'] = np.arange(num_species) * spacing
-    y_lookup = panel_df.set_index('species')['y'].to_dict()
 
-
+    # ------------ Create figure ---------- #
     fig = plt.figure(figsize=(14, 7.2), dpi=450)
     gs = fig.add_gridspec(2, 2, height_ratios=[0.85, 0.15], width_ratios=[3, 1], wspace=0.05, hspace=0)
     ax_left = fig.add_subplot(gs[0, 0])
     ax_right = fig.add_subplot(gs[0, 1])
 
     # Define marker cycling for different groups
-    group_to_marker = {}
+    markers = ['s', 'o', '^']  # square, triangle, circle
 
     # Assign markers to groups
+    group_to_marker = {}
     for i, group in enumerate(panel_df['group'].unique()):
         group_to_marker[group] = markers[i % len(markers)]
 
-    # Wastewater plot
+    # ------------ Wastewater plot ---------- #
     for _, row in panel_df.iterrows():
         sp = row['species']
         grp = row['group']
-        y = row['y']
+        y_pos = row['y']
         sp_data = ww[ww['species'] == sp]
+
         # Handle zero values and apply jitter
-        x_values, zero_mask = handle_zero_values(sp_data['relative_abundance'])
-        y_values = np.full(len(sp_data), y)
-        x_jittered, y_jittered = apply_jitter_to_zeros(x_values, y_values, zero_mask)
+        x_values = sp_data['relative_abundance']
+        y_values = np.full(len(sp_data), y_pos)
+        x_values, y_values = handle_zero_values(x_values, y_values)
 
         ax_left.scatter(
-            x_jittered,
-            y_jittered,
+            x_values,
+            y_values,
             color=color_mapping.get(grp, 'gray'),
-            alpha=0.7,  # No transparency
+            alpha=0.7,
             s=30,
             marker=group_to_marker[grp],  # Use marker based on group
             linewidth=0
         )
 
+    # ------------ Wastewater plot styling---------- #
+
     ax_left.set_xscale('log')
     ax_left.set_xlabel('Relative abundance (wastewater)', fontsize=12)
-    # ax_left.set_title('Wastewater Abundance', fontsize=14)
     ax_left.set_yticks(panel_df['y'])
     ax_left.set_yticklabels(panel_df['species'], fontsize=10)
     ax_left.tick_params(axis='y', length=0)  # Remove y-axis tick marks
     ax_left.tick_params(axis='x', length=0)  # Remove x-axis tick marks
-    ax_left.grid(False)  # Remove default grid
     # Set y-limits with explicit padding to match right axis
     ax_left.set_ylim(-0.5, max(panel_df['y']) + 0.5)
 
     # Only show grid lines at order of magnitude intervals
     ax_left.grid(which='major', axis='x', linewidth=0.3, alpha=0.5)
-    ax_left.grid(which='minor', axis='x', linestyle='', alpha=0)  # Remove minor grid lines
+
 
     # Set x-limits
     max_ra = ww['relative_abundance'].max() * 2
@@ -190,11 +183,8 @@ def main():
     from matplotlib.ticker import LogLocator, LogFormatter
 
     # Create custom tick locations
-    major_ticks = [1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1e0]
-    zero_tick_location = np.sqrt(1e-9 * 1e-10)  # Geometric mean ≈ 3.16e-10
-
-    # Filter major ticks to only include those within our range
-    major_ticks = [tick for tick in major_ticks if tick >= min_ra and tick <= max_ra]
+    major_ticks = [1e-9, 1e-8, 1e-7]
+    zero_tick_location = ZERO_VALUE_REPLACEMENT
     all_ticks = [zero_tick_location] + major_ticks
 
     # Set custom ticks
@@ -205,20 +195,26 @@ def main():
     ax_left.set_xticklabels(labels)
 
     # Add minor ticks from 1e-9 to max, but not below 1e-9
-    # Create manual minor tick locations
     minor_ticks = []
-    for exp in range(-9, int(np.log10(max_ra)) + 1):  # From 1e-9 to max_ra
+    for exp in range(-9, int(np.log10(max_ra)) + 1):
         base = 10**exp
         for mult in [2, 3, 4, 5, 6, 7, 8, 9]:
             tick_val = base * mult
-            if min_ra <= tick_val <= max_ra and tick_val >= 1e-9:
+            if min_ra <= tick_val <= max_ra:
                 minor_ticks.append(tick_val)
 
     ax_left.set_xticks(minor_ticks, minor=True)
-    ax_left.tick_params(which='minor', bottom=True, length=3)
+
+    # Add horizontal grid lines aligned with each virus
+    for y in panel_df['y']:
+        ax_left.axhline(y=y, color='lightgray', linestyle='-', linewidth=0.5, alpha=0.5, zorder=0)
+
+    for spine in ['top', 'right', 'left']:
+        ax_left.spines[spine].set_visible(False)
+
+    # ---------- Render bottom spine ---------- #
 
     # Make the x-axis dashed between zero tick and 10^-9 to show discontinuity
-    zero_tick_location = np.sqrt(1e-9 * 1e-10)  # ≈ 3.16e-10
     y_axis_bottom = ax_left.get_ylim()[0]
 
     # Hide the default bottom spine
@@ -235,9 +231,6 @@ def main():
     ax_left.plot([min_nonzero_ra, max_ra], [y_axis_bottom, y_axis_bottom],
                 color='black', linewidth=2, solid_capstyle='butt')
 
-    # Add horizontal grid lines aligned with each virus
-    for y in panel_df['y']:
-        ax_left.axhline(y=y, color='lightgray', linestyle='-', linewidth=0.5, alpha=0.5, zorder=0)
 
     # ---- Right: swab positive-count bars ---- #
     bars = ax_right.barh(
@@ -246,6 +239,8 @@ def main():
         height=0.6,
         color=[color_mapping.get(g, 'gray') for g in panel_df['group']]
     )
+
+    # ------------ Swab plot styling---------- #
 
     ax_right.set_xlabel('Positive swab pools', fontsize=12)
     # ax_right.set_title('Swab Positivity', fontsize=14)
@@ -263,21 +258,21 @@ def main():
             ax_right.text(width + 0.1, bar.get_y() + bar.get_height()/2,
                         f'{int(width)}', ha='left', va='center', fontsize=8)
 
+    for spine in ['top', 'right']:
+        ax_right.spines[spine].set_visible(False)
+
     # ---- Add legend for virus groups ---- #
-    # Define the desired order explicitly based on what we can see in the data
     desired_order = [
-        "Rhinoviruses",
-        "Influenza",
         "Mononegavirales",
-
-
-        "Coronaviruses (SARS-CoV-2)",
+        "Influenza",
         "Coronaviruses (seasonal)",
+        "Coronaviruses (SARS-CoV-2)",
+        "Rhinoviruses",
     ]
 
     # Filter to include only groups that are actually in our data
-    present_groups = panel_df['group'].unique()
-    ordered_groups = [group for group in desired_order if group in present_groups]
+    # present_groups = panel_df['group'].unique()
+    ordered_groups = [group for group in desired_order]
 
     # Create legend entries in the specified order
     handles = []
@@ -288,13 +283,6 @@ def main():
         handles.append(plt.Line2D([0], [0], marker=marker, color=color, markersize=8,
                             linestyle='None', alpha=1.0))
         labels.append(group)
-
-    # ---- Final touches ---- #
-    for spine in ['top', 'right', 'left']:  # Also remove the y-axis spine on the left plot (bottom already handled above)
-        ax_left.spines[spine].set_visible(False)
-
-    for spine in ['top', 'right']:
-        ax_right.spines[spine].set_visible(False)
 
     # Position legend in the reserved bottom space
     fig.legend(handles, labels,
