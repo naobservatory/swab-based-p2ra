@@ -79,13 +79,13 @@ with open(os.path.join(validation_output_dir, "swabs-classified-all-reads.tsv"))
         pathogen = row["genome_name"]
         sample = row["sample"]
         treatment = sample_treatment[sample]
-        if duplicate == "True":
-            samples[(date, location, pathogen)]["non_dedup"] += 1
-            treatment_samples[(date, location, pathogen, treatment)]["non_dedup"] += 1
-        else:
+        # Count all reads for non-deduplicated count
+        samples[(date, location, pathogen)]["non_dedup"] += 1
+        treatment_samples[(date, location, pathogen, treatment)]["non_dedup"] += 1
+
+        # Only count non-duplicate reads for deduplicated count
+        if duplicate == "False":
             samples[(date, location, pathogen)]["dedup"] += 1
-            samples[(date, location, pathogen)]["non_dedup"] += 1
-            treatment_samples[(date, location, pathogen, treatment)]["non_dedup"] += 1
             treatment_samples[(date, location, pathogen, treatment)]["dedup"] += 1
 
 # Process non-validated reads
@@ -102,13 +102,13 @@ with open(os.path.join(validation_output_dir, "swabs-non-validated-reads.tsv")) 
         pathogen = taxid_names[int(taxid)]
         treatment = sample_treatment[sample]
 
-        if duplicate == "True":
-            samples[(date, location, pathogen)]["non_dedup"] += 1
-            treatment_samples[(date, location, pathogen, treatment)]["non_dedup"] += 1
-        else:
+        # Count all reads for non-deduplicated count
+        samples[(date, location, pathogen)]["non_dedup"] += 1
+        treatment_samples[(date, location, pathogen, treatment)]["non_dedup"] += 1
+
+        # Only count non-duplicate reads for deduplicated count
+        if duplicate == "False":
             samples[(date, location, pathogen)]["dedup"] += 1
-            samples[(date, location, pathogen)]["non_dedup"] += 1
-            treatment_samples[(date, location, pathogen, treatment)]["non_dedup"] += 1
             treatment_samples[(date, location, pathogen, treatment)]["dedup"] += 1
 
 
