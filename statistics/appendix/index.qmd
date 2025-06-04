@@ -12,6 +12,7 @@ knitr:
 editor: source 
 author: dan
 date: 2025-05-30
+date-modified: today
 ---
 
 
@@ -97,38 +98,39 @@ all_species <- bind_rows(swab_reads, wastewater_reads) %>%
 
 species_order <- all_species$species
 
-# Fill in zero counts
-swab_reads_complete <- crossing(all_species, swab_metadata) %>%
-  left_join(
-    summarise(
-      swab_reads,
-      .by = c(date, location, species, group),
-      viral_reads = sum(dedup_hv)
-    ),
-    by = join_by(date, location, species, group),
-  ) %>%
-  arrange(group, species) %>%
-  mutate(
-    viral_reads = replace_na(viral_reads, 0),
-    species = fct_inorder(species),
-    group = fct_inorder(group)
-  )
 
-wastewater_reads_complete <- wastewater_metadata %>%
-  crossing(all_species) %>%
-  left_join(
-    summarise(
-      wastewater_reads,
-      .by = c(date, location, species, group),
-      viral_reads = sum(dedup_hv)
-    ),
-    by = join_by(date, location, species, group),
-  ) %>%
-  arrange(group, species) %>%
-  mutate(
-    viral_reads = replace_na(viral_reads, 0),
-    species = fct_inorder(species),
-    group = fct_inorder(group)
+complete_data <- function(all_species, metadata, read_data){
+  complete <- crossing(all_species, metadata) %>%
+    left_join(
+      summarise(
+        read_data,
+        .by = c(date, location, species, group),
+        viral_reads = sum(dedup_hv)
+      ),
+      by = join_by(date, location, species, group),
+    ) %>%
+    arrange(group, species) %>%
+    mutate(
+      viral_reads = replace_na(viral_reads, 0),
+      species = fct_inorder(species),
+      group = fct_inorder(group),
+      )
+}
+
+all_species <- bind_rows(swab_reads, wastewater_reads) %>%
+  select(species, group) %>%
+  distinct %>%
+  arrange(group, species)
+
+swab_reads_complete <- complete_data(
+  all_species,
+  swab_metadata,
+  swab_reads
+  )
+wastewater_reads_complete <- complete_data(
+  all_species,
+  wastewater_metadata,
+  wastewater_reads
   )
 ```
 
@@ -416,7 +418,7 @@ information in the inference is coming from the data.
 #| fig-cap: "Posterior (solid) and prior (dashed) distributions of prevalence"
 #| warning: false
 
-posteriors <- read_tsv("../2025-05-27-p2ra/posteriors.tsv") %>%
+posteriors <- read_tsv("../../tables/posteriors.tsv") %>%
   filter(group %in% c("Coronaviruses (SARS-CoV-2)", "Coronaviruses (seasonal)", "Rhinoviruses"))
 
 posteriors %>%
@@ -470,7 +472,7 @@ posteriors %>%
   left_join(swab_reads_complete, relationship = "many-to-many", by = join_by(species, group)) %>%
   mutate(
     lambda = mu_swab * all_reads / pool_size,
-    p0 = (phi_1 / (lambda + phi_1)) ^ phi_1,
+    p0 = (phi_swab / (lambda + phi_swab)) ^ phi_swab,
   ) %>%
   summarise(
     p = first(p),
@@ -570,11 +572,11 @@ It depends on whether we think it's likely that $\mu_{swab}$ could actually be t
 
 ### Overdispersion
 
-Posteriors for swab inverse-overdispersion $\phi_1$.
+Posteriors for swab inverse-overdispersion $\phi_{swab}$.
 
 ```{r}
 posteriors %>%
-  ggplot(aes(phi_1, color=group)) +
+  ggplot(aes(phi_swab, color=group)) +
   geom_density() +
   prior_density(10^seq(-3, 3, length.out=100), prior_phi_swab, log10x = TRUE) +
   scale_x_log10(limits = 10^c(-3,1)) +
@@ -584,7 +586,7 @@ posteriors %>%
 ```
 
 The posterior distributions are all very close to the prior,
-suggesting that, as expected the data contains very little information about $\phi_1$, at least relative to the prior.
+suggesting that, as expected the data contains very little information about $\phi_{swab}$, at least relative to the prior.
 
 There is a slight leftward shift for HCoV-OC43, which has the most positive pools (5).
 
@@ -639,7 +641,7 @@ TODO: Add maximum likelihood calculation here.
 
 ```{r}
 posteriors %>%
-  ggplot(aes(phi_1, p)) +
+  ggplot(aes(phi_swab, p)) +
   geom_point(alpha = 0.05, size = 0.1) +
   geom_smooth() +
   scale_x_log10(limits = c(1e-3, 10), labels=scientific) +
@@ -647,22 +649,22 @@ posteriors %>%
   facet_wrap(~species)
 ```
 
-Smaller $\phi_1$ implies a higher probability of failing to get viral reads a positive swab.
-Thus, the inferred prevalence conditional on $phi_1$ is inversely related to $phi_1$.
+Smaller $\phi_{swab}$ implies a higher probability of failing to get viral reads a positive swab.
+Thus, the inferred prevalence conditional on $phi_{swab}$ is inversely related to $phi_{swab}$.
 
 ```{r}
 posteriors %>%
   summarise(
-    corr_log_p_phi_1 = cor(log(p), log(phi_1), method = "spearman"),
-    corr_p_phi_1 = cor(p, phi_1, method = "spearman"),
+    corr_log_p_phi_swab = cor(log(p), log(phi_swab), method = "spearman"),
+    corr_p_phi_swab = cor(p, phi_swab, method = "spearman"),
     corr_p_mu_ww = cor(log(p), log(mu_swab), method = "spearman"),
     .by = species,
   )
 ```
 
-To encapsulate the relationship between $p$, $\mu_{swab}$, and $\phi_1$,
+To encapsulate the relationship between $p$, $\mu_{swab}$, and $\phi_{swab}$,
 we can approximate $\hat{p}$, the maximum likelihood $p$ conditional on known $\mu_{swab}$ and
-$\phi_1$.
+$\phi_{swab}$.
 (The approximation is in the the limit where most pools are expected to be negative.)
 
 
@@ -672,7 +674,7 @@ posteriors %>%
   left_join(swab_reads_complete, relationship = "many-to-many", by = join_by(species, group)) %>%
   mutate(
     lambda = mu_swab * all_reads / pool_size,
-    p0 = (phi_1 / (lambda + phi_1)) ^ phi_1,
+    p0 = (phi_swab / (lambda + phi_swab)) ^ phi_swab,
   ) %>%
   summarise(
     p = first(p),
@@ -717,7 +719,7 @@ As expected, there is a very tight relationship between prevalence and estimated
 Often, strong correlations between parameters suggest that we should reparameterize the model so the parameters are more independent.
 However, in this case, I think this is appropriate. We need a distinct $p$ parameter to make use of the discreteness of the swab pools.
 
-The next three plots show the relationship between $\mu_{ww}$ and $\mu_{swab}$, $\phi_1$, and $\phi_{ww}$:
+The next three plots show the relationship between $\mu_{ww}$ and $\mu_{swab}$, $\phi_{swab}$, and $\phi_{ww}$:
 
 ```{r}
 posteriors %>%
@@ -732,7 +734,7 @@ posteriors %>%
 
 ```{r}
 posteriors %>%
-  ggplot(aes(phi_1, mu_ww)) +
+  ggplot(aes(phi_swab, mu_ww)) +
   geom_point(alpha = 0.05, size = 0.1) +
   geom_smooth() +
   scale_x_log10(labels = scientific) +
@@ -750,7 +752,7 @@ posteriors %>%
   facet_wrap(~species)
 ```
 
-The relationships with $\mu_{swab}$ and $\phi_1$ are mediated by $p$ and are not surprising.
+The relationships with $\mu_{swab}$ and $\phi_{swab}$ are mediated by $p$ and are not surprising.
 
 The relationship with $\phi_{ww}$ suggests that the posteriors are uncorrelated,
 which is encouraging because we don't have any real information about this parameter.
@@ -772,7 +774,7 @@ posterior_predictive_swab <- posteriors %>%
   mutate(
     n_pos = map2_int(pool_size, p, ~ rbinom(1, .x, .y)),
     mu = n_pos * mu_swab * all_reads / pool_size,
-    phi = n_pos * phi_1,
+    phi = n_pos * phi_swab,
     viral_reads = map2_int(mu, phi, ~ ifelse(.x > 0, rnbinom(
       1, size = .y, mu = .x
     ), 0)),
@@ -786,7 +788,7 @@ posterior_predictive_swab_summary <- posterior_predictive_swab %>%
     viral_reads_max = max(viral_reads),
     viral_reads_sd = sd(viral_reads),
     false_negative_pools = sum(false_negative),
-    across(c(p, mu_swab, phi_1), first),
+    across(c(p, mu_swab, phi_swab), first),
     .by = c(species, group, rep),
   )
 
@@ -1006,7 +1008,7 @@ posteriors %>%
   left_join(swab_reads_complete, relationship = "many-to-many", by = join_by(species, group)) %>%
   mutate(
     lambda = mu_swab * all_reads / pool_size,
-    p0 = (phi_1 / (lambda + phi_1)) ^ phi_1,
+    p0 = (phi_swab / (lambda + phi_swab)) ^ phi_swab,
   ) %>%
   summarise(
     p = first(p),
