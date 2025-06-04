@@ -14,6 +14,11 @@ author: dan
 date: 2025-05-27
 ---
 
+:::{.callout-warning}
+## Warning
+The text of this notebook may be out of date with the results.
+:::
+
 # Introduction
 
 This document provides a statistical analysis approach for estimating virus prevalence from pooled nasal swab samples, and for calculating the relative abundance at 1% prevalence (RA_p(1%)) from wastewater metagenomic sequencing data. The approach addresses concerns raised in the internal memo regarding the sensitivity of detection in pooled samples with low read counts.
