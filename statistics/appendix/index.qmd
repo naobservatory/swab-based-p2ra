@@ -124,10 +124,9 @@ $$s_{+, i} \sim \text{Binomial}(s_i, p)$$
 Let $v_{swab,i}$ be the number of viral reads in swab pool $i$.
 We assume that the viral reads from different swabs are independent and combine linearly so that
 $$\mathbb{E}[v_{swab,i} | s_{+,i}] = r_i \, \frac{s_{+,i}}{s_i} \, \mu_{swab} \equiv \lambda_i,$$
-where $r_i$ is the total read depth in pool $i$ and $\mu_{swab}$ is the expected
-relative of the virus in an infected swab.
-Note that the expected number of viral reads is proportional to the fraction of swabs
-from infected people.
+where $r_i$ is the total read depth in pool $i$ and $\mu_{swab}$ is
+a relative abundance factor equal to the the expected relative abundance of the virus in an infected swab.
+Note that the expected number of viral reads is proportional to the fraction of swabs from infected people.
 
 To account for counting noise as well as overdispersion from, e.g., variation
 in swab quality, we use a negative binomial distribution for viral read counts.
@@ -142,7 +141,7 @@ reads from different swabs.)
 In the limit where read depth is high so that $\lambda_i \gg s_{+,i}\phi_{swab}$, 
 the coefficient of variation of $v_{swab,i}$ is given by
 $$CV \approx \frac{1}{\sqrt{s_{+,i} \, \phi_{swab}}}.$$
-Thus, our model allows for substantial noise from swab quality,
+Thus, our model allows for substantial noise from low-quality swabs and other sources,
 even when the sequencing depth is high.
 
 ## Wastewater read counts
@@ -150,40 +149,50 @@ even when the sequencing depth is high.
 We also use a negative binomial distribution for our wastewater reads.
 For wastewater sample $j$, the number of viral reads is
 $$v_{ww, i} \sim \text{NegativeBinomial}(r_j \, p \, \mu_{ww}, \phi_{ww})$$
-where $\phi_{ww}$ is the inverse-overdispersion parameter for wastewater sequencing.
-The expected relative abundance in a wastewater sample, when the prevalence is $p$,
+where $r_j$ is the total read depth,
+$p$ is the same prevalence as for swab samples,
+$\mu_{ww}$ is a relative abundance factor, and
+$\phi_{ww}$ is the inverse-overdispersion parameter for wastewater sequencing.
+The relative abundance factor $\mu_{ww}$ is defined so that
+the expected relative abundance in a wastewater sample, when the prevalence is $p$,
 is given by $p \cdot \mu_{ww}$. 
 Thus, in this parameterization, $RA_p(1\%) = 0.01 \cdot \mu_{ww}$.
 
 # Prior Distributions
 
 Our model has five parameters: one for the prevalence, two for the expected
-relative abundance in the two sample sources, and two for the read
+relative abundance factors in the two sample sources, and two for the read
 count overdispersion.
 We chose prior distributions that reflect several orders of magnitude of
 uncertainty in these parameters.
-We confirmed, using prior predictive checks, that the number of samples with
-zero reads, the maximum read counts, and the total read counts for each virus
-are within the probable ranges under the priors.
+We confirmed, using prior predictive checks, that the observed number of samples with
+zero reads, the largest viral read count, and the total viral read count
+for each virus are within the probable ranges under the priors.
 
 ## Prevalence
 
 The prevalence of respiratory viruses is both variable and unknown,
 so we put a prior on $p$ that spans several orders of magnitude.
 
-We collected 547 total swabs, so our detection limit is roughly 0.2%.
-Because we had several viruses with zero viral reads in swab data---including a number of respiratory viruses that we did not see in our wastewater data---our prior should put significant probability on prevalence below this limit.
-However, the exact shape of the left tail should not matter for viruses observed at least once.
+The left tail of our prior controls the probability that a virus is too rare to observe in our swab sampling.
+We designed our model to apply to all viruses found in wastewater
+(though we subsequenctly restricted our analysis to those with high swab read counts).
+Because we observed several viruses with zero viral reads in swab data---including a number of respiratory viruses that we did not see in our wastewater data---we chose a prior that puts significant probability on prevalence below our swab sampling detection limit.
+We collected 547 total swabs, so our best-case detection limit is roughly 0.2%.
+(The exact shape of the left tail of the prior should not 
+effect our prevalence estimates for viruses observed in at least one swab
+sample because the likelihood function will sharply constrain the posterior
+probability of prevalences much below 0.2%.)
 
-The right tail of the prior is more important because it sets the upper bound
+The right tail of the prior sets the upper bound
 of our prevalence estimates when our sensitivity is low.
 We assume that it's unlikely, but not impossible, that the prevalence of a single
 respiratory virus is much above 10%.
 
 With these considerations as guides, 
-we put a logit-Normal prior on $p$, which constrains the values to be between zero and one:
+we put a logit-Normal prior on $p$:
 $$\text{logit}(p) \sim \text{Normal}(-6, 2).$$
-With this distribution, the prior median is 0.25%, the 85th percentile is 1.8%
+With this distribution, which constrains the values to be between zero and one, the prior median is 0.25%, the 85th percentile is 1.8%
 and the 95th percentile is 12%.
 
 ```{r}
@@ -206,10 +215,11 @@ tibble(
   labs(title = "Prior distribution of prevalence", y = "", x = "")
 ```
 
-This prior allows for the possibility that the sensitivity of our swab sequencing is low and the true prevalence is higher than the pool positivity rate would suggest.
-The Coronavirus or Rhinovirus with the fewest viral reads is Rhinovirus A with 9 reads across three pools.
-Assuming perfect sensitivity, the maximum likelihood prevalence for Rhinovirus A would be 0.069%.
-Our prior assigns a 9% probability that the true prevalence is more than five times higher than this.
+An implication of this prior is that it allows for
+the possibility that the false positive rate of our swab sequencing is high, so that the true prevalence is higher than the pool positivity rate would suggest.
+For example, the coronavirus or rhinovirus with the fewest viral reads is Rhinovirus A with 9 reads across three pools.
+Assuming perfect sensitivity, the maximum likelihood prevalence for Rhinovirus A would be 0.7%.
+Our prior assigns a 9% probability that the true prevalence is more than five times higher than this, i.e., a false positive rate over 83%.
 
 ## Relative abundance factors
 
@@ -219,31 +229,30 @@ For wastewater sequencing, the expected relative abundance at prevalence $p$ is
 $p\, \mu_{ww}$, so that $RA_p(1\%) = 0.01 \mu_{ww}$.
 For pooled swabs, the expected relative abundance is $p \, \mu_{swab}$,
 where $\mu_{swab}$ is the expected relative abundance in a swab from an infected person.
-Since these parameters represent proportions, we use logit-normal priors to constrain
-their values between zero and one.
+Since these parameters represent proportions, as with the prevalence we use logit-normal priors to constrain their values between zero and one.
 
 Because we do not have much prior information about these parameters,
 we chose priors that span many orders of magnitude.
-Our previous estimates for Flu and SARS-CoV-2 in wastewater suggest a range
+Our previous estimates for Influenza A and SARS-CoV-2 in our wastewater data suggest a range
 of $\mu_{ww}$ from 1e-8 to 1e-4.
 We would like to include more uncertainty than this range, so we use:
 
 $$\text{logit}(\mu_{ww}) \sim \text{Normal}(-14, 6)$$
 With these parameters:
 
- -  The median is 8.3e-7. This corresponds to an $RA_p(1\%)$ of 8.3e-9,
-    compared to our previous Flu A estimate of 1.4e-8.
+ -  The median $\mu_{ww} is 8e-7,
+    compared to our previous Flu A estimate of 1e-6.
  -  70% of the probability is between 2e-9 and 3e-4.
  -  96% of the probability is between 5e-12 and 0.1,
     spanning more than 10 orders of magnitude.
 
 Because we are studying respiratory viruses,
-we might expect the swabs to have higher relative abundance than wastewater at the same prevalence.
+we expect the swabs to have higher relative abundance than wastewater at the same prevalence.
 Accordingly, we'll shift the prior for $\mu_{swab}$ to the right relative to $\mu_{ww}$.
 However, we don't want to make this assumption too strongly,
-so we'll shift it by less than a standard deviation to:
+so we'll shift the mean by less than a standard deviation (keeping the same standard deviation) to:
 $$\text{logit}(\mu_{swab}) \sim \text{Normal}(-10, 6).$$
-With these priors, the geometric mean of $\frac{\mu_{swab}}{\mu_{ww}} \approx 58$
+With these priors, the median and geometric mean of $\frac{\mu_{swab}}{\mu_{ww}} \approx 58$
 and the probability that a given virus's $\mu_{swab} > \mu_{ww}$ is 68%.
 
 ```{r}
@@ -282,19 +291,29 @@ $\phi_{swab}$ and $\phi_{ww}$.
 We have little prior information about these parameters except that they must be greater than zero,
 and we expect overdispersion relative to Poisson in both sample sources.
 Unfortunately, with only twelve samples of each type, we do not expect our data
-to give us much. information about $\phi$ either.
-(This is born out: our posterior distributions are close to the priors, especially for $\phi_{swab}$.)
+to give us much information about $\phi$ either.
+(This is born out: our posterior distributions are close to the priors, especially for $\phi_{swab}$, see below.)
 
-For wastewater, a weakly informative prior:
+For wastewater, we use a standard weakly informative prior for non-negative dimensionless quantities:
 $$\phi_{ww} \sim \text{Gamma}(1, 1) = \text{Exponential}(1).$$
-This prior allows for both strong overdispersion $\phi_{ww} < 1$ and weak overdispersion $\phi_{ww} > 1$.
+When viral read counts are large, their coefficient of variation is approximately $\frac{1}{\sqrt{\phi_{ww}}}$.
+Our prior allows the CV to be either larger than one ($\phi_{ww} < 1$) or smaller than one ($\phi_{ww} > 1$).
+
 In practice, $\phi_{ww}$ does not appear to have much effect on our inference of $RA_p(1\%)$.
+Plotting the the joint posterior distributions of $\mu_{ww}$ and $\phi_{ww}$
+shows them to be approximately independent (not shown).
 
-For swabs, the most important impact of $\phi_{swab}$ on our estimates of prevalence
-comes from the fact that it, along with $\mu_{swab}$, controls the probability of getting zero viral reads from a positive swab.
-We expect that one major source of these false negatives is variation in how well subjects swab themselves.
+In contrast, $\phi_{swab}$ is important for our inference of prevalence (and thus $RA_p(1\%))$.
+In our model, $\phi_{swab}$ determines the false-negative rate when the read depth is high.
+When one swab comes from an infected person,
+the probability of getting zero viral reads in our negative binomial model is 
+$${\left(\frac{\phi_{swab}}{\lambda + \phi_{swab}}\right)}^{\phi_{swab}},$$ {#eq-p0}
+where $\lambda$ is the expected number of viral reads.
+If $\phi_{swab} < 1$, this probability can be substantial even for large $\lambda$.
+The higher the false positive rate, the larger $p$ has to be to account for the same data.
+
+We expect that one major source of false negatives is variation in how well subjects swab themselves.
 Poor swabs can contribute zero viral reads, even with deep sequencing.
-
 Accordingly, we selected a prior that expresses a high degree of uncertainty
 about the probability of getting zero reads from an infected swab at high sequencing depth:
 $$\phi_{swab} \sim \text{Gamma}(2, 7),$$
@@ -326,9 +345,11 @@ crossing(
   labs(title = expression("Prior distributions of inverse-overdispersion "~phi), y = "", x = "")
 ```
 
-Dotted grey lines show the values of $\phi_{swab}$ that imply the probability of
-getting zero viral reads from an infected person's swab is 0.4, 0.2, and 0.1 from left to right
-(assuming that we expect to see 100 viral reads conditional on seeing any).
+We can use @eq-p0 to calculate the implied probability of false negatives for a given sequencing depth and relative abundance factor.
+As a proxy for "deep sequencing", assume that we sequence deeply enough that we expect to find 100 viral reads conditional on finding at least one.
+Then, the dotted grey lines show the values of $\phi_{swab}$ that imply the probability of
+getting zero viral reads from a pool containing one swab from an infected person is (from left to right) 0.4, 0.2, and 0.1.
+The prior thus allows for a broad range of false negative rates.
 
 # Model fitting
 
@@ -338,7 +359,7 @@ For each virus, we ran four chains for 4,000 iterations each with a warm-up of 1
 
 After fitting, we checked for convergence problems, which indicate
 that the program had difficulty sampling from the posterior distribution.
-We confirmed that the chains mixed well ([rhat](https://mc-stan.org/learn-stan/diagnostics-warnings.html#r-hat) < 1.005) and that there were no [divergent transitions](https://mc-stan.org/learn-stan/diagnostics-warnings.html#divergent-transitions-after-warmup).
+For all viruses, including those with few or no swab reads, we confirmed that the chains mixed well ([rhat](https://mc-stan.org/learn-stan/diagnostics-warnings.html#r-hat) < 1.005) and that there were no [divergent transitions](https://mc-stan.org/learn-stan/diagnostics-warnings.html#divergent-transitions-after-warmup).
 
 # Model checking
 
@@ -354,7 +375,7 @@ For each virus and sample source, we calculated the posterior predictive distrib
 3. The maximum viral reads in a sample
 4. The standard deviation of viral reads.
 
-We compared these distributions to the observed quantities.
+We visually compared these distributions to the observed quantities.
 We did not find any large or systematic deviations from the posterior predictive distributions,
 indicating that the model predicts these features of the data well.
 
@@ -365,8 +386,7 @@ are not inappropriately dominating the inference of prevalence and $\mu_{ww}$
 (and thus $RA_p(1\%)$).
 
 For the Coronaviruses and Rhinoviruses,
-the posteriors are narrow compared to the priors, suggesting that most of the
-information in the inference is coming from the data.
+the posterior distributions of these parameters are narrow compared to their priors.
 
 ```{r}
 #| fig-cap: "Posterior (solid) and prior (dashed) distributions of prevalence"
@@ -412,16 +432,54 @@ posteriors %>%
 ```
 
 Much of our posterior uncertainty in the prevalence comes from our uncertainty
-about the sensitivity of our swab sequencing to detect reads if an infected
-person contributes a swab.
-We can transform our posterior samples of $\mu_{swab}$ and $\phi_{swab}$ into the
-posterior probability that we observe viral reads in a sample given that one infected person contributed a swab to the pool.
+about the false negative rate of swab sequencing:
+the probability that a swab pool will have zero viral reads when
+it contains a sample from an infected person.
+This probability is controlled by the parameters $\mu_{swab}$ and $\phi_{swab}$.
+
+For the coronaviruses and rhinoviruses, we observe enough reads to estimate
+$\mu_{swab}$, though with a lot of uncertainty:
+
+```{r}
+breaks <- 10^seq(-5, -1, 2)
+posteriors %>%
+  ggplot(aes(logit_mu_swab, color = group)) +
+  geom_density() +
+  prior_density(seq(-16, 2, length.out = 100), prior_logit_mu_swab) +
+  scale_x_continuous(
+    limits = c(-14, 2),
+    breaks = qlogis(breaks),
+    labels = scientific(breaks)
+  ) +
+  facet_wrap(vars(species), ncol = 4) +
+  scale_y_continuous(transform = "log10", limits = c(1e-3, 1)) +
+  labs(y = "", x = "mu_swab") +
+  theme(legend.position = "")
+```
+
+On the other hand, the data provide very little information about $\phi_{swab}$ relative to the priors:
+
+```{r}
+posteriors %>%
+  ggplot(aes(phi_swab, color=group)) +
+  geom_density() +
+  prior_density(10^seq(-3, 3, length.out=100), prior_phi_swab, log10x = TRUE) +
+  scale_x_log10(limits = 10^c(-3,1)) +
+  scale_y_continuous(transform = "log10", limits = c(1e-3, 2)) +
+  facet_wrap(vars(species), ncol = 4) +
+  labs(y = "") +
+  theme(legend.position = "") #, axis.text.y = element_blank())
+```
+
+To see the combined effect of these parameters on our prevalence estimates,
+we can transform the posterior samples of $\mu_{swab}$ and $\phi_{swab}$ into the
+posterior samples of the true positive rate, the probability that we observe viral reads when one swab comes from an infected person.
 (Because the pools vary in number of swabs and total sequencing depth, we average this probability over the pools.)
 
 ```{r}
 #| warning: false
 
-posteriors %>%
+with_positivity <- posteriors %>%
   mutate(posterior_sample = seq(nrow(.))) %>%
   left_join(swab_reads_complete, relationship = "many-to-many", by = join_by(species, group)) %>%
   mutate(
@@ -434,7 +492,9 @@ posteriors %>%
     p_hat = pos_pools / sum(pool_size[viral_reads == 0] * (1 - p0[viral_reads == 0])),
     mean_p0 = mean(p0),
     .by = c(species, group, posterior_sample),
-  ) %>%
+  )
+
+with_positivity %>%
   ggplot(aes(1 - mean_p0, p)) +
   geom_point(alpha = 0.01, size = 0.1) +
   scale_x_log10(limits = c(8e-3, 1.2)) +
@@ -444,10 +504,12 @@ posteriors %>%
   labs(y = "posterior prevalence", x = "Pr(viral reads > 0 | infected swab)")
 ```
 
-We find that this measure of sensitivity explains much of our uncertainty in prevalence.
-For viruses where we observed many viral reads (HCoV-229E and SARS-CoV-2),
-the estimated sensitivity is higher and it explains less of the uncertainty in prevalence.
+When the true positive rate is lower (i.e., the false negative rate is higher),
+the estimated prevalence is higher to account for the observed positive pools.
+The median R-squared between log posterior prevalence and log posterior true positive rate is 0.3, implying that about a third of the uncertainty in prevalence comes from uncertainty in the true positive rate.
 
+Because the data does not constrain $\phi_{swab}$ very much,
+our prior $\phi_{swab}$, thus has a meaningful impact on our estimates.
 
 ```{r}
 knitr::knit_exit()
