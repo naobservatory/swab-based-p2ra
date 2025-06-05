@@ -15,7 +15,6 @@ date: 2025-05-30
 date-modified: today
 ---
 
-
 ```{r setup}
 #| echo: false
 
@@ -136,6 +135,19 @@ wastewater_reads_complete <- complete_data(
 
 
 # Model
+
+## Overview [WIP] (text cut from main text)
+
+We implemented the model in Stan and used the rstan R package to fit the model to each virus
+
+To account for these effects, we developed a Bayesian model that generates sequence read counts for both pooled swab samples and wastewater samples. In overview,
+
+- Each swab in each pool has a probability of being from an infected person equal to the prevalence
+- Each infected swab contributes a random number of viral reads to its pool drawn from a negative binomial distribution. The average number of viral reads contributed is proportional to the sequencing depth and inversely proportional to the number of swabs in the pool.
+- Each wastewater sample has a random number of viral reads drawn from a negative binomial distribution. The average number of viral reads is proportional to the prevalence and the sequencing depth.
+- To account for variability in swab quality and other sources of randomness, read counts in both sample types are overdispersed relative to the minimal (Poisson) noise expected from sampling a finite number of reads.
+
+## </end Overview>
 
 We define a Bayesian model to jointly estimate viral prevalence and $RA_p(1\%)$
 from sequencing of pooled swab samples and wastewater samples.
@@ -494,6 +506,7 @@ We find that this measure of sensitivity explains much of our uncertainty in pre
 For viruses where we observed many viral reads (HCoV-229E and SARS-CoV-2),
 the estimated sensitivity is higher and it explains less of the uncertainty in prevalence.
 
+
 ```{r}
 knitr::knit_exit()
 ```
@@ -511,6 +524,23 @@ species_swab_summary <- swab_reads_complete %>%
   ) %>%
   arrange(species)
 kable(species_swab_summary)
+```
+
+```{r}
+right_join(
+  species_swab_summary %>%
+    mutate(sd_logp_perf = 1 / sqrt(pos_pools)) %>%
+    select(species, sd_logp_perf),
+  posteriors %>%
+    summarise(
+      sd_logp = sd(log(p)),
+      .by = species
+    )
+) %>%
+  mutate(
+    sd_ratio = sd_logp / sd_logp_perf,
+  ) %>%
+  summarise(median(exp(sd_ratio)))
 ```
 
 ```{r}
