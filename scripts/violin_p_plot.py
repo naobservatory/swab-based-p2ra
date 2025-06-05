@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from fig_utils import (
-    get_species_order_filtered,
+    get_detected_species_order,
     COLOR_MAPPING,
     SMALL_GROUP_ORDER,
     GROUPS_TO_DROP,
@@ -16,16 +16,15 @@ from metadata_utils import first_level_mapping, second_level_mapping
 
 
 def load_and_process_data():
-    posteriors = pd.read_csv("statistics/2025-05-27-p2ra/posteriors.tsv", sep="\t")
+    posteriors = pd.read_csv("tables/posteriors.tsv", sep="\t")
 
     # Get ordered species from virus_order module
-    ordered_species = get_species_order_filtered()
+    ordered_species = get_detected_species_order()
 
     # Filter to only include species present in posteriors
     ordered_species = [
         species
         for species in ordered_species
-        if species in posteriors["species"].unique()
         if second_level_mapping(species) not in GROUPS_TO_DROP
     ]
     filtered_posteriors = posteriors[posteriors["species"].isin(ordered_species)]
@@ -33,17 +32,8 @@ def load_and_process_data():
     return filtered_posteriors, ordered_species
 
 
-def load_pathogen_presence():
-    df = pd.read_csv("tables/pathogen_presence.tsv", sep="\t")
-    pathogen_columns = df.columns[2:]
-    positive_species = [col for col in pathogen_columns if df[col].sum() > 0]
-    return positive_species
-
-
 # Load data
 filtered_posteriors, ordered_species = load_and_process_data()
-positive_species = load_pathogen_presence()
-
 
 present_groups = set()
 # Create species colors using the color mapping from virus_order
@@ -70,12 +60,8 @@ filtered_posteriors = (
     .reset_index(drop=True)
 )
 
-
-# Create the figure
 plt.figure(figsize=(10, 3.9))
 
-
-# Create the violin plot with log-transformed percentage values
 ax = sns.violinplot(
     x="log_p",
     y="species",
@@ -88,8 +74,7 @@ ax = sns.violinplot(
     linewidth=0.5,
     width=0.8,
     bw=0.5,
-    # density_norm="width",
-    # cut=0.1,
+
 )
 
 # Add median, Q15 and Q85 lines for each species
@@ -172,9 +157,7 @@ fig.legend(
 plt.tight_layout()
 plt.subplots_adjust(bottom=0.25)
 
-# Create the output directory if it doesn't exist
-os.makedirs("figures", exist_ok=True)
 
 # Save the figure
 plt.savefig("figures/pathogen_p_violin.png", dpi=300)
-print("Saved to figures/pathogen_p_violin.png")
+plt.savefig("figures/pathogen_p_violin.svg")

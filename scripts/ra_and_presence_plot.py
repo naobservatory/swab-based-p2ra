@@ -75,8 +75,8 @@ def handle_zero_values(x_values, y_values, x_scale=0.1, y_scale=0.2):
 
 def main():
     # ---------- Load & prepare data ---------- #
-    ww = load_ww_abundance_data()
-    sw = load_swab_presence_data()
+    ww_data = load_ww_abundance_data()
+    sw_data = load_swab_presence_data()
 
     # Get species ordering from virus_order module
     species_to_group = {
@@ -90,7 +90,7 @@ def main():
 
     # Count positive swab pools
     swab_counts = (
-        sw[sw["present"] == 1]
+        sw_data[sw_data["present"] == 1]
         .groupby(["species", "group"])
         .size()
         .reset_index(name="n_positive_pools")
@@ -100,9 +100,9 @@ def main():
     panel_df = panel_df.merge(swab_counts, how="left", on=["species", "group"])
     panel_df["n_positive_pools"] = panel_df["n_positive_pools"].fillna(0)
 
-    # Create y-position lookup with explicit positions (ensures alignment)
+    # Create y-position lookup with explicit positions (to align y positions of both plots)
     num_species = len(panel_df)
-    spacing = 1.0  # Consistent spacing
+    spacing = 1.0
     panel_df["y"] = np.arange(num_species) * spacing
 
     # ------------ Create figure ---------- #
@@ -117,29 +117,29 @@ def main():
     markers = ["s", "o", "^"]  # square, triangle, circle
 
     # Assign markers to groups
-    group_to_marker = {}
+    MARKER_MAPPING = {}
     for i, group in enumerate(panel_df["group"].unique()):
-        group_to_marker[group] = markers[i % len(markers)]
+        MARKER_MAPPING[group] = markers[i % len(markers)]
 
     # ------------ Wastewater plot ---------- #
     for _, row in panel_df.iterrows():
-        sp = row["species"]
-        grp = row["group"]
+        species = row["species"]
+        group = row["group"]
         y_pos = row["y"]
-        sp_data = ww[ww["species"] == sp]
+        species_data = ww_data[ww_data["species"] == species]
 
         # Handle zero values and apply jitter
-        x_values = sp_data["relative_abundance"]
-        y_values = np.full(len(sp_data), y_pos)
+        x_values = species_data["relative_abundance"]
+        y_values = np.full(len(species_data), y_pos)
         x_values, y_values = handle_zero_values(x_values, y_values)
 
         ax_left.scatter(
             x_values,
             y_values,
-            color=COLOR_MAPPING[grp],
+            color=COLOR_MAPPING[group],
             alpha=0.7,
             s=30,
-            marker=group_to_marker[grp],  # Use marker based on group
+            marker=MARKER_MAPPING[group],  # Use marker based on group
             linewidth=0,
         )
 
@@ -151,32 +151,28 @@ def main():
     ax_left.set_yticklabels(panel_df["species"], fontsize=10)
     ax_left.tick_params(axis="y", length=0)  # Remove y-axis tick marks
     ax_left.tick_params(axis="x", length=0)  # Remove x-axis tick marks
-    # Set y-limits with explicit padding to match right axis
     ax_left.set_ylim(-0.5, max(panel_df["y"]) + 0.5)
 
-    # Only show grid lines at order of magnitude intervals
+    # Grid lines
     ax_left.grid(which="major", axis="x", linewidth=0.3, alpha=0.5)
-
-    # Set x-limits
-    max_ra = ww["relative_abundance"].max() * 2
+    for y in panel_df["y"]:
+        ax_left.axhline(
+            y=y, color="lightgray", linestyle="-", linewidth=0.5, alpha=0.5, zorder=0
+        )
+    # X-limits
+    max_ra = ww_data["relative_abundance"].max() * 2
     min_ra = 2e-10
     ax_left.set_xlim(min_ra, max_ra)
 
-    # Set up custom ticks and labels
-
-    # Create custom tick locations
+    # Major x-ticks
     major_ticks = [1e-9, 1e-8, 1e-7]
     zero_tick_location = ZERO_VALUE_REPLACEMENT
     all_ticks = [zero_tick_location] + major_ticks
-
-    # Set custom ticks
     ax_left.set_xticks(all_ticks)
-
-    # Create custom labels
     labels = ["0"] + [f"$10^{{{int(np.log10(tick))}}}$" for tick in major_ticks]
     ax_left.set_xticklabels(labels)
 
-    # Add minor ticks from 1e-9 to max, but not below 1e-9
+    # Minor x-ticks
     minor_ticks = []
     for exp in range(-9, int(np.log10(max_ra)) + 1):
         base = 10**exp
@@ -187,27 +183,14 @@ def main():
 
     ax_left.set_xticks(minor_ticks, minor=True)
 
-    # Add horizontal grid lines aligned with each virus
-    for y in panel_df["y"]:
-        ax_left.axhline(
-            y=y, color="lightgray", linestyle="-", linewidth=0.5, alpha=0.5, zorder=0
-        )
-
-    for spine in ["top", "right", "left"]:
+    # ---------- Spine styling ---------- #
+    # Hide spines
+    for spine in ["top", "right", "left", "bottom"]:
         ax_left.spines[spine].set_visible(False)
 
-    # ---------- Render bottom spine ---------- #
-
-    # Make the x-axis dashed between zero tick and 10^-9 to show discontinuity
+    # X-axis dashed between zero tick and 10^-9 to show discontinuity
     y_axis_bottom = ax_left.get_ylim()[0]
-
-    # Hide the default bottom spine
-    ax_left.spines["bottom"].set_visible(False)
-
-    # Find the smallest non-zero relative abundance value
-    min_nonzero_ra = ww[ww["relative_abundance"] > 0]["relative_abundance"].min()
-
-    # Dashed segment from zero_tick_location to smallest non-zero value
+    min_nonzero_ra = ww_data[ww_data["relative_abundance"] > 0]["relative_abundance"].min()
     ax_left.plot(
         [min_ra, min_nonzero_ra],
         [y_axis_bottom, y_axis_bottom],
@@ -217,7 +200,7 @@ def main():
         solid_capstyle="butt",
     )
 
-    # Solid segment from smallest non-zero value to max_ra
+    # X-axis solid segment from smallest non-zero value to max_ra
     ax_left.plot(
         [min_nonzero_ra, max_ra],
         [y_axis_bottom, y_axis_bottom],
@@ -226,7 +209,7 @@ def main():
         solid_capstyle="butt",
     )
 
-    # ---- Right: swab positive-count bars ---- #
+    # -------------- Swab plot -------------- #
     bars = ax_right.barh(
         panel_df["y"],
         panel_df["n_positive_pools"],
@@ -234,18 +217,15 @@ def main():
         color=[COLOR_MAPPING[g] for g in panel_df["group"]],
     )
 
-    # ------------ Swab plot styling---------- #
-
+    # ----------- Swab plot styling --------- #
     ax_right.set_xlabel("Positive swab pools", fontsize=12)
-    # ax_right.set_title('Swab Positivity', fontsize=14)
     ax_right.set_xlim(0, max(panel_df["n_positive_pools"].max(), 1) * 1.1)
-    ax_right.set_yticks([])  # hide duplicate labels
+    ax_right.set_yticks([])  # Hide duplicate labels
     ax_right.tick_params(axis="x", length=0)  # Remove x-axis tick marks
-    # Set y-limits exactly the same as left axis for perfect alignment
     ax_right.set_ylim(ax_left.get_ylim())
     ax_right.grid(axis="x", linewidth=0.3, alpha=0.5, zorder=-5)
 
-    # Add value labels to bars for easier reading
+    # Set 0 values when no positive swab pools
     for bar in bars:
         width = bar.get_width()
         if width == 0:
@@ -261,8 +241,7 @@ def main():
     for spine in ["top", "right"]:
         ax_right.spines[spine].set_visible(False)
 
-    # ---- Add legend for virus groups ---- #
-    # Filter to include only groups that are actually in our data
+    # -------------- Legend -------------- #
     present_groups = panel_df["group"].unique()
     ordered_groups = [group for group in GROUP_ORDER if group in present_groups]
 
@@ -271,7 +250,7 @@ def main():
     labels = []
     for group in ordered_groups:
         color = COLOR_MAPPING[group]
-        marker = group_to_marker[group]
+        marker = MARKER_MAPPING[group]
         handles.append(
             plt.Line2D(
                 [0],
@@ -297,8 +276,9 @@ def main():
     )
 
     # Save figure
-    plt.savefig("figures/wastewater_vs_swab.png")
-    print("Saved to figures/wastewater_vs_swab.png")
+    os.makedirs("figures", exist_ok=True)
+    plt.savefig("figures/ra_and_presence.png", dpi=300)
+    plt.savefig("figures/ra_and_presence.svg")
 
 
 if __name__ == "__main__":

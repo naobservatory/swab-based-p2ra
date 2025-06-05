@@ -27,9 +27,9 @@ def get_species_order():
         .rename(columns={"relative_abundance": "group_median_ra"})
     )
 
-    # Merge and sort
     panel_df = species_info.merge(group_median_ra, on="group")
 
+    # Sort by group median RA and species
     panel_df = panel_df.sort_values(
         ["group_median_ra", "species"], ascending=[True, True]
     ).reset_index(drop=True)
@@ -38,7 +38,7 @@ def get_species_order():
     return species_order
 
 
-def get_species_order_filtered():
+def get_detected_species_order():
     """Get filtered species order with only positive detections."""
     # Load swab data to check for positive detections
     swabs = pd.read_csv("tables/swabs-ra-summary.tsv", sep="\t")

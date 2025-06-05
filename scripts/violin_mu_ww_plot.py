@@ -6,12 +6,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from fig_utils import (
-    get_species_order_filtered,
+    get_detected_species_order,
     COLOR_MAPPING,
     SMALL_GROUP_ORDER,
     GROUPS_TO_DROP,
 )
-
 from metadata_utils import second_level_mapping
 
 outside_groups = {
@@ -25,26 +24,24 @@ outside_colors = {
 }
 
 
-def load_and_process_data():
+def load_posteriors():
     posteriors = pd.read_csv("tables/posteriors.tsv", sep="\t")
 
     # Get ordered species from virus_order module
-    ordered_species = get_species_order_filtered()
+    species_order = get_detected_species_order()
 
-    # Filter to only include species present in posteriors
     filtered_species = [
         species
-        for species in ordered_species
-        if species in posteriors["species"].unique()
+        for species in species_order
         if second_level_mapping(species) not in GROUPS_TO_DROP
     ]
     filtered_posteriors = posteriors[posteriors["species"].isin(filtered_species)]
     filtered_posteriors["source"] = "swab-p2ra"
 
-    with open("outside-data/ww-rai1pct.json", "r") as f:
-        outside_data = json.load(f)
+    with open("tables/ww-rai1pct.json", "r") as f:
+        previous_estimates = json.load(f)
 
-    # Parse outside data for Rothman-2697049 and MU-11320
+    # Parse previous estimates for Rothman-2697049 and MU-11320
     outside_species = {
         "Rothman-2697049": "SARS-CoV-2\n(previously)",
         "MU-11320": "Influenza A\n(previously)",
@@ -52,23 +49,20 @@ def load_and_process_data():
     outside_distributions = {}
 
     for species, pretty_name in outside_species.items():
-        if species in outside_data:
-            # Convert string keys to float values and create distribution
+        if species in previous_estimates:
             distribution = []
-            for key, count in outside_data[species].items():
+            for key, count in previous_estimates[species].items():
                 value = float(key.replace("e", "E"))
                 distribution.extend([value] * count)
             outside_distributions[pretty_name] = distribution
-    # Add outside data to filtered_posteriors
 
     for species, distribution in outside_distributions.items():
-        # Create new rows for outside data
         new_rows = pd.DataFrame(
             {
                 "species": [species] * len(distribution),
                 "scaled_mu_ww": distribution,
                 "log_scaled_mu_ww": np.log10(distribution),
-                "source": ["outside-data"] * len(distribution),
+                "source": ["previous-estimate"] * len(distribution),
             }
         )
 
@@ -77,13 +71,11 @@ def load_and_process_data():
         )
         filtered_species.append(species)
 
-    print(filtered_posteriors["species"].unique())
-
     return filtered_posteriors, filtered_species
 
 
 # Load and process data
-filtered_posteriors, ordered_species = load_and_process_data()
+filtered_posteriors, ordered_species = load_posteriors()
 # Get species to group mapping from virus_order module
 groups = set()
 species_colors = {}
@@ -97,8 +89,7 @@ for species in ordered_species:
     groups.add(group)
     species_colors[species] = color
 
-# Calculate mu_ww * 0.01 and add log-transformed values
-# Only scale non-external species
+# Scale mu_ww * 0.01 and add log-transformed values
 mask = filtered_posteriors["source"] == "swab-p2ra"
 filtered_posteriors.loc[mask, "scaled_mu_ww"] = (
     filtered_posteriors.loc[mask, "mu_ww"] * 0.01
@@ -106,10 +97,8 @@ filtered_posteriors.loc[mask, "scaled_mu_ww"] = (
 filtered_posteriors.loc[mask, "log_scaled_mu_ww"] = np.log10(
     filtered_posteriors.loc[mask, "scaled_mu_ww"]
 )
-print(ordered_species)
 
-
-# Filter out values outside 2nd-98th percentile range for each species
+# Filter out values outside 2nd-98th percentile range for each species (for violin styling)
 filtered_posteriors = (
     filtered_posteriors.groupby("species")
     .apply(
@@ -120,7 +109,6 @@ filtered_posteriors = (
     )
     .reset_index(drop=True)
 )
-print(filtered_posteriors["species"].unique())
 
 # Create the figure
 plt.figure(figsize=(10, 6.5))
@@ -157,7 +145,7 @@ for i, species in enumerate(ordered_species[-2:]):
         x_values = shade_vertices[:, 0]
         y_values = shade_vertices[:, 1]
 
-        # Plot the diagonal shading
+        # Plot shading
         ax.fill_betweenx(
             y_values,
             x_values,
@@ -232,7 +220,6 @@ ax.tick_params(axis="x", length=0)
 
 # Create and add legend using GROUP_ORDER
 present_groups_ordered = [g for g in SMALL_GROUP_ORDER if g in groups] + ["Influenza"]
-print(present_groups_ordered)
 
 handles = [
     plt.Line2D([0], [0], color=COLOR_MAPPING[group], lw=4)
@@ -250,11 +237,10 @@ fig.legend(
     fontsize=10,
 )
 
-
 plt.tight_layout()
 plt.subplots_adjust(bottom=0.25)
 
-# Create output directory and save figure
 os.makedirs("figures", exist_ok=True)
 plt.savefig("figures/pathogen_mu_ww_violin.png", dpi=300)
-print("Saved to figures/pathogen_mu_ww_violin.png")
+plt.savefig("figures/pathogen_mu_ww_violin.svg")
+
