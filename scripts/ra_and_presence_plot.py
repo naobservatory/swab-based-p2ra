@@ -106,9 +106,9 @@ def main():
     panel_df["y"] = np.arange(num_species) * spacing
 
     # ------------ Create figure ---------- #
-    fig = plt.figure(figsize=(14, 7.2), dpi=450)
+    fig = plt.figure(figsize=(10, 5.2), dpi=450)
     gs = fig.add_gridspec(
-        2, 2, height_ratios=[0.85, 0.15], width_ratios=[3, 1], wspace=0.05, hspace=0
+        2, 2, height_ratios=[0.85, 0.15], width_ratios=[3, 1], wspace=0.00, hspace=0
     )
     ax_left = fig.add_subplot(gs[0, 0])
     ax_right = fig.add_subplot(gs[0, 1])
@@ -207,6 +207,7 @@ def main():
         color="black",
         linewidth=2,
         solid_capstyle="butt",
+        zorder=10,
     )
 
     # -------------- Swab plot -------------- #
@@ -215,6 +216,7 @@ def main():
         panel_df["n_positive_pools"],
         height=0.6,
         color=[COLOR_MAPPING[g] for g in panel_df["group"]],
+        zorder=10,
     )
 
     # ----------- Swab plot styling --------- #
@@ -223,7 +225,7 @@ def main():
     ax_right.set_yticks([])  # Hide duplicate labels
     ax_right.tick_params(axis="x", length=0)  # Remove x-axis tick marks
     ax_right.set_ylim(ax_left.get_ylim())
-    ax_right.grid(axis="x", linewidth=0.3, alpha=0.5, zorder=-5)
+    ax_right.grid(axis="x", linewidth=0.3, alpha=0.5, zorder=-10)
 
     # Set 0 values when no positive swab pools
     for bar in bars:
@@ -263,20 +265,25 @@ def main():
             )
         )
         labels.append(group)
+    # Add some space at the bottom for the legend
 
     # Position legend in the reserved bottom space
     fig.legend(
         handles,
         labels,
         loc="center",
-        bbox_to_anchor=(0.4, 0.1),  # Position in the reserved bottom space
+        bbox_to_anchor=(0.45, 0.05),  # Position in the reserved bottom space
         ncol=len(ordered_groups) if len(ordered_groups) <= 4 else 3,
         frameon=False,
-        fontsize=10,
+        fontsize=8,
     )
+    plt.tight_layout()
 
     # Save figure
     os.makedirs("figures", exist_ok=True)
+
+    fig.subplots_adjust(bottom=0.05)
+
     plt.savefig("figures/ra_and_presence.png", dpi=300)
     plt.savefig("figures/ra_and_presence.svg")
 
