@@ -6,9 +6,8 @@ import numpy as np
 from collections import defaultdict, Counter
 import textwrap
 from metadata_utils import first_level_mapping, second_level_mapping
-from virus_order import (
+from scripts.fig_utils import (
     get_species_order,
-    get_species_to_group_mapping,
     COLOR_MAPPING,
     GROUP_ORDER,
 )
@@ -80,7 +79,9 @@ def main():
     sw = load_swab_presence_data()
 
     # Get species ordering from virus_order module
-    species_to_group = get_species_to_group_mapping()
+    species_to_group = {
+        species: second_level_mapping(species) for species in get_species_order()
+    }
     ordered_species = get_species_order()[::-1]  # Invert the order of species
 
     # Create panel dataframe from ordered species list

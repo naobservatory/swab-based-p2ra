@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def get_species_order():
-    """Get species ordering: groups by median RA, within groups by mean RA."""
+    """Get species ordering: groups by median RA, within groups alphabetically."""
     # Load data
     ww = pd.read_csv("tables/ww-ra-summary.tsv", sep="\t")
 
@@ -26,21 +26,11 @@ def get_species_order():
         .rename(columns={"relative_abundance": "group_median_ra"})
     )
 
-    # Calculate species mean RA
-    species_mean_ra = (
-        ww.groupby("species")["relative_abundance"]
-        .mean()
-        .reset_index()
-        .rename(columns={"relative_abundance": "species_mean_ra"})
-    )
-
     # Merge and sort
-    panel_df = species_info.merge(group_median_ra, on="group").merge(
-        species_mean_ra, on="species"
-    )
+    panel_df = species_info.merge(group_median_ra, on="group")
 
     panel_df = panel_df.sort_values(
-        ["group_median_ra", "species_mean_ra"], ascending=[True, True]
+        ["group_median_ra", "species"], ascending=[True, True]
     ).reset_index(drop=True)
 
     species_order = panel_df["species"].tolist()
@@ -65,20 +55,13 @@ def get_species_order_filtered():
     return filtered_species
 
 
-def get_species_to_group_mapping():
-    """Get mapping from species to group."""
-    ww = pd.read_csv("tables/ww-ra-summary.tsv", sep="\t")
-    species_groups = ww[["species", "group"]].drop_duplicates()
-    return dict(species_groups.values)
-
-
 # Color mapping for virus groups
 COLOR_MAPPING = {
-    "Coronaviruses (seasonal)": "#05a4a5",
-    "Coronaviruses (SARS-CoV-2)": "#445681",
-    "Rhinoviruses": "#ba5c97",
+    "Coronaviruses (seasonal)": "#445681",
+    "Coronaviruses (SARS-CoV-2)": "#05a4a5",
+    "Rhinoviruses": "#E08F60",
     "Mononegavirales": "#8CCEA4",
-    "Influenza": "#E08F60",
+    "Influenza": "#ba5c97",
     "Other": "#9D9D9D",
 }
 
@@ -90,3 +73,12 @@ GROUP_ORDER = [
     "Coronaviruses (SARS-CoV-2)",
     "Rhinoviruses",
 ]
+
+SMALL_GROUP_ORDER = [
+    "Coronaviruses (seasonal)",
+    "Rhinoviruses",
+    "Coronaviruses (SARS-CoV-2)",
+]
+
+# Groups to drop from Bayesian analysis.
+GROUPS_TO_DROP = ["Mononegavirales", "Influenza"]
