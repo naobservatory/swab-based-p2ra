@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import pandas as pd
-
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as font_manager
 
 def get_species_order():
     """Get species ordering: groups by median RA, within groups alphabetically."""
@@ -82,3 +83,11 @@ SMALL_GROUP_ORDER = [
 
 # Groups to drop from Bayesian analysis.
 GROUPS_TO_DROP = ["Mononegavirales", "Influenza"]
+
+def set_dm_sans_font():
+    # Set up DM Sans font
+    font_path = (
+        "../fonts/DMSans-Regular.ttf"  # Adjust path as needed
+    )
+    font_manager.fontManager.addfont(font_path)
+    plt.rcParams["font.family"] = "DM Sans"

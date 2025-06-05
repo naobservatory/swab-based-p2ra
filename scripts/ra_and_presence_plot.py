@@ -6,7 +6,7 @@ import numpy as np
 from collections import defaultdict, Counter
 import textwrap
 from metadata_utils import first_level_mapping, second_level_mapping
-from scripts.fig_utils import (
+from fig_utils import (
     get_species_order,
     COLOR_MAPPING,
     GROUP_ORDER,
