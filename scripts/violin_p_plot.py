@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from scripts.fig_utils import (
+from fig_utils import (
     get_species_order_filtered,
     COLOR_MAPPING,
     SMALL_GROUP_ORDER,
