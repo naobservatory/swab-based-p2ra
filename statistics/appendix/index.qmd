@@ -4,8 +4,8 @@ format:
   html:
     code-fold: true
     toc: true
-  pdf:
-    toc: true
+execute:
+  cache: false
 knitr:
   opts_chunk: 
     message: false
@@ -21,8 +21,13 @@ date-modified: today
 library(tidyverse)
 library(rstan)
 library(knitr)
+library(here)
 library(kableExtra)
+
 theme_set(theme_minimal())
+
+source("../scripts/prepare_data.R")
+source("../scripts/define_model.R")
 
 # Colors borrowed from https://github.com/JLSteenwyk/ggpubfigs
 wong_eight <- c(
@@ -43,8 +48,6 @@ options(
   ggplot2.discrete.fill = function()
     scale_fill_manual(values = wong_eight)
 )
-
-options(mc.cores = parallel::detectCores())
 
 # For axis labels
 scientific <- function(x) {
@@ -72,65 +75,7 @@ prior_density <- function(x, density_function, log10x = FALSE){
     inherit.aes = FALSE
     )
 }
-```
 
-```{r}
-swab_metadata <- read_tsv("../../tables/swab-sample-metadata.tsv") %>%
-  mutate(date = ymd(paste0("20", date)))
-
-# Use the per-day data. Caveat about the different treatments
-swab_reads <- read_tsv("../../tables/swabs-ra-summary.tsv") %>%
-  mutate(date = ymd(paste0("20", date))) %>%
-  select(-all_reads)
-
-wastewater_metadata <- read_tsv("../../tables/wastewater-sample-metadata.tsv") %>%
-  mutate(date = ymd(paste0("20", date)))
-
-wastewater_reads <- read_tsv("../../tables/ww-ra-summary.tsv") %>%
-  mutate(date = ymd(paste0("20", date))) %>%
-  select(-all_reads)
-
-all_species <- bind_rows(swab_reads, wastewater_reads) %>%
-  select(species, group) %>%
-  distinct %>%
-  arrange(group, species)
-
-species_order <- all_species$species
-
-
-complete_data <- function(all_species, metadata, read_data){
-  complete <- crossing(all_species, metadata) %>%
-    left_join(
-      summarise(
-        read_data,
-        .by = c(date, location, species, group),
-        viral_reads = sum(dedup_hv)
-      ),
-      by = join_by(date, location, species, group),
-    ) %>%
-    arrange(group, species) %>%
-    mutate(
-      viral_reads = replace_na(viral_reads, 0),
-      species = fct_inorder(species),
-      group = fct_inorder(group),
-      )
-}
-
-all_species <- bind_rows(swab_reads, wastewater_reads) %>%
-  select(species, group) %>%
-  distinct %>%
-  arrange(group, species)
-
-swab_reads_complete <- complete_data(
-  all_species,
-  swab_metadata,
-  swab_reads
-  )
-wastewater_reads_complete <- complete_data(
-  all_species,
-  wastewater_metadata,
-  wastewater_reads
-  )
 ```
 
 
@@ -238,8 +183,6 @@ and the 95th percentile is 12%.
 ```{r}
 #| label: prior-p
 
-mean_logit_p <- -6
-sd_logit_p <- 2
 prior_logit_p <- function(x) dnorm(x, mean_logit_p, sd_logit_p)
 
 tibble(
@@ -300,14 +243,7 @@ and the probability that a given virus's $\mu_{swab} > \mu_{ww}$ is 68%.
 ```{r}
 #| label: prior-mu
 
-# swab
-mean_logit_mu_swab <- -10  # Prior mean on logit scale
-sd_logit_mu_swab <- 6      # Prior standard deviation on logit scale
 prior_logit_mu_swab <- function(x) dnorm(x, mean_logit_mu_swab, sd_logit_mu_swab)
-
-# wastewater
-mean_logit_mu_ww <- -14  # Prior mean on logit scale
-sd_logit_mu_ww <- 6      # Prior standard deviation on logit scale
 prior_logit_mu_ww <- function(x) dnorm(x, mean_logit_mu_ww, sd_logit_mu_ww)
 
 crossing(
@@ -430,7 +366,7 @@ information in the inference is coming from the data.
 #| fig-cap: "Posterior (solid) and prior (dashed) distributions of prevalence"
 #| warning: false
 
-posteriors <- read_tsv("../../tables/posteriors.tsv") %>%
+posteriors <- read_tsv(here(tables_dir, "posteriors.tsv")) %>%
   filter(group %in% c("Coronaviruses (SARS-CoV-2)", "Coronaviruses (seasonal)", "Rhinoviruses"))
 
 posteriors %>%
