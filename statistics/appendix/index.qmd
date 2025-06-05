@@ -1,5 +1,5 @@
 ---
-title: "[WIP] Appendix"
+title: "Appendix"
 format:
   html:
     code-fold: true
@@ -10,7 +10,7 @@ knitr:
   opts_chunk: 
     message: false
 editor: source 
-author: dan
+author: Dan Rice
 date: 2025-05-30
 date-modified: today
 ---
@@ -81,19 +81,6 @@ prior_density <- function(x, density_function, log10x = FALSE){
 
 # Model
 
-## Overview [WIP] (text cut from main text)
-
-We implemented the model in Stan and used the rstan R package to fit the model to each virus
-
-To account for these effects, we developed a Bayesian model that generates sequence read counts for both pooled swab samples and wastewater samples. In overview,
-
-- Each swab in each pool has a probability of being from an infected person equal to the prevalence
-- Each infected swab contributes a random number of viral reads to its pool drawn from a negative binomial distribution. The average number of viral reads contributed is proportional to the sequencing depth and inversely proportional to the number of swabs in the pool.
-- Each wastewater sample has a random number of viral reads drawn from a negative binomial distribution. The average number of viral reads is proportional to the prevalence and the sequencing depth.
-- To account for variability in swab quality and other sources of randomness, read counts in both sample types are overdispersed relative to the minimal (Poisson) noise expected from sampling a finite number of reads.
-
-## </end Overview>
-
 We define a Bayesian model to jointly estimate viral prevalence and $RA_p(1\%)$
 from sequencing of pooled swab samples and wastewater samples.
 Joint estimation allows us to propagate our uncertainty in the prevalence
@@ -105,8 +92,27 @@ We designed the model to account for the following factors:
 2. We do not know the sensitivity of our swab sequencing to detect each virus,
 but we expect it to increase with sequencing depth.
 3. We expect the viral read counts to be overdispersed relative to pure counting (Poisson) noise.
-The amount of overdispersion is likely to be different between swabs and wastewater.
+The amount of overdispersion is likely differ between swabs and wastewater.
 
+For each virus, our model takes as input data the total read depth and number of
+viral reads observed in each swab pool and wastewater sample, and the number of
+swabs in each swab pool.
+In overview:
+
+- Each swab in each pool comes from an infected person
+  with probability equal to the prevalence
+- Each swab from an infected person contributes a random number of viral reads
+  to its pool drawn from a negative binomial distribution.
+  The average number of viral reads contributed is proportional to the
+  sequencing depth and inversely proportional to the number of swabs in the pool.
+- Each wastewater sample has a random number of viral reads drawn from a negative
+  binomial distribution. The average number of viral reads is proportional to the
+  prevalence and the sequencing depth.
+
+In the following sections, we give the technical definition of the model and
+the prior distributions of all parameters, then describe our model fitting and
+checking procedures.
+  
 ## Swab pool read counts
 
 Let $p$ be the prevalence of a virus.
@@ -182,6 +188,7 @@ and the 95th percentile is 12%.
 
 ```{r}
 #| label: prior-p
+#| fig-cap: "Note the logistic spacing of the x-axis."
 
 prior_logit_p <- function(x) dnorm(x, mean_logit_p, sd_logit_p)
 
@@ -195,9 +202,8 @@ tibble(
   scale_x_continuous(
     transform = "logit",
     breaks = c(10^seq(-6, -1, 1), 0.5),
-    name = "prevalence (logistic scale)",
   ) +
-  labs(title = "Prior on prevalence", y = "")
+  labs(title = "Prior distribution of prevalence", y = "", x = "")
 ```
 
 This prior allows for the possibility that the sensitivity of our swab sequencing is low and the true prevalence is higher than the pool positivity rate would suggest.
@@ -205,10 +211,10 @@ The Coronavirus or Rhinovirus with the fewest viral reads is Rhinovirus A with 9
 Assuming perfect sensitivity, the maximum likelihood prevalence for Rhinovirus A would be 0.069%.
 Our prior assigns a 9% probability that the true prevalence is more than five times higher than this.
 
-## Expected relative abundance
+## Relative abundance factors
 
 For each sample type, the expected relative abundance is the product of the prevalence
-and a parameter $\mu$.
+and a relative abundance factor $\mu$.
 For wastewater sequencing, the expected relative abundance at prevalence $p$ is
 $p\, \mu_{ww}$, so that $RA_p(1\%) = 0.01 \mu_{ww}$.
 For pooled swabs, the expected relative abundance is $p \, \mu_{swab}$,
@@ -242,6 +248,7 @@ and the probability that a given virus's $\mu_{swab} > \mu_{ww}$ is 68%.
 
 ```{r}
 #| label: prior-mu
+#| fig-cap: "Note the logistic spacing of the x-axis."
 
 prior_logit_mu_swab <- function(x) dnorm(x, mean_logit_mu_swab, sd_logit_mu_swab)
 prior_logit_mu_ww <- function(x) dnorm(x, mean_logit_mu_ww, sd_logit_mu_ww)
@@ -263,9 +270,8 @@ crossing(
   scale_x_continuous(
     transform = "logit",
     breaks = c(10^seq(-12, -2, 2), 0.5), #, 0.99),
-    name = expression(mu~"(logistic scale)"),
   ) +
-  labs(title = expression("Priors on "~mu))
+  labs(title = expression("Prior distributions of relative abundance factors "~mu), x="", y="")
 ```
 
 
@@ -317,7 +323,7 @@ crossing(
   geom_line() +
   geom_vline(xintercept = c(0.15, 0.28, 0.4), linetype = "dotted", color = "grey") +
   scale_x_log10() +
-  labs(title = expression("Priors on inverse-overdispersion"), y = "", x = expression(phi))
+  labs(title = expression("Prior distributions of inverse-overdispersion "~phi), y = "", x = "")
 ```
 
 Dotted grey lines show the values of $\phi_{swab}$ that imply the probability of
