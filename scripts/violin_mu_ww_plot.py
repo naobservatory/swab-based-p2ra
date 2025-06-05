@@ -26,7 +26,7 @@ outside_colors = {
 
 
 def load_and_process_data():
-    posteriors = pd.read_csv("statistics/2025-05-27-p2ra/posteriors.tsv", sep="\t")
+    posteriors = pd.read_csv("tables/posteriors.tsv", sep="\t")
 
     # Get ordered species from virus_order module
     ordered_species = get_species_order_filtered()
