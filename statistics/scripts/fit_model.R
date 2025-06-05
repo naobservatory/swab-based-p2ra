@@ -16,7 +16,7 @@ options(mc.cores = parallel::detectCores())
 swab_metadata <- read_tsv("tables/swab-sample-metadata.tsv") %>%
   mutate(date = ymd(paste0("20", date)))
 
-# Use the per-day swab data, merging different treatments
+# Use the per-day swab data, which disregards treatment
 swab_reads <- read_tsv("tables/swabs-ra-summary.tsv") %>%
   mutate(date = ymd(paste0("20", date))) %>%
   # Redundant with the metadata table
@@ -30,18 +30,22 @@ wastewater_reads <- read_tsv("tables/ww-ra-summary.tsv") %>%
   # Redundant with the metadata table
   select(-all_reads)
 
-# Fill in zero counts
-
-complete_data <- function(all_species, metadata, read_data){
-  complete <- crossing(all_species, metadata) %>%
-    left_join(
-      summarise(
-        read_data,
-        .by = c(date, location, species, group),
-        viral_reads = sum(dedup_hv)
-      ),
-      by = join_by(date, location, species, group),
-    ) %>%
+# Aggregate to species level and fill in zero counts for species unobserved in
+# each sample
+prepare_data <- function(all_species, metadata, read_data){
+  all_species_and_samples <- crossing(all_species, metadata)
+  # The taxonomic assignments go to below species level, but we want to analyze
+  # at the species-level assignments
+  read_data_species <- summarise(
+    read_data,
+    .by = c(date, location, species, group),
+    viral_reads = sum(dedup_hv)
+  )
+  left_join(
+    all_species_and_samples,
+    read_data_species,
+    by = join_by(date, location, species, group),
+  ) %>%
     arrange(group, species) %>%
     mutate(viral_reads = replace_na(viral_reads, 0))
 }
@@ -51,12 +55,12 @@ all_species <- bind_rows(swab_reads, wastewater_reads) %>%
   distinct %>%
   arrange(group, species)
 
-swab_reads_complete <- complete_data(
+swab_reads_complete <- prepare_data(
   all_species,
   swab_metadata,
   swab_reads
   )
-wastewater_reads_complete <- complete_data(
+wastewater_reads_complete <- prepare_data(
   all_species,
   wastewater_metadata,
   wastewater_reads
@@ -250,4 +254,4 @@ ra_posteriors <- posteriors %>%
     .by = c(species, group),
   )
 
-write_tsv(ra_posteriors, "tables/ra_posterior_summary.tsv")
+write_tsv(ra_posteriors, "tables/ra01_posterior_summary.tsv")
