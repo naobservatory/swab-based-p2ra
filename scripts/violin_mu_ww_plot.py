@@ -231,16 +231,15 @@ fig.legend(
     handles,
     present_groups_ordered,
     loc="center",
-    bbox_to_anchor=(0.53, 0.12),
+    bbox_to_anchor=(0.53, 0.03),
     ncol=len(present_groups_ordered) if len(present_groups_ordered) <= 4 else 3,
     frameon=False,
     fontsize=10,
 )
 
 plt.tight_layout()
-plt.subplots_adjust(bottom=0.25)
+plt.subplots_adjust(bottom=0.15)
 
 os.makedirs("figures", exist_ok=True)
 plt.savefig("figures/pathogen_mu_ww_violin.png", dpi=300)
 plt.savefig("figures/pathogen_mu_ww_violin.svg")
-
