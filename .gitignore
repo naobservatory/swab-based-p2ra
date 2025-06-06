@@ -12,3 +12,5 @@ validation-output/
 statistics/*/index.html
 statistics/*/index_cache/
 statistics/*/index_files/
+/.quarto/
+/_site/
