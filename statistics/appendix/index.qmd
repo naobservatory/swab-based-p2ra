@@ -11,8 +11,11 @@ knitr:
   opts_chunk: 
     message: false
 editor: source 
-author: Dan Rice
-date: 2025-05-30
+author: 
+  - Dan Rice
+  - Simon Grimm
+  - Mike McLaren
+date: 2025-06-06
 date-modified: today
 ---
 
