@@ -307,7 +307,7 @@ In contrast, $\phi_{swab}$ is important for our inference of prevalence (and thu
 In our model, $\phi_{swab}$ determines the false-negative rate when the read depth is high.
 When one swab comes from an infected person,
 the probability of getting zero viral reads in our negative binomial model is 
-$${\left(\frac{\phi_{swab}}{\lambda + \phi_{swab}}\right)}^{\phi_{swab}},$$ {#eq-p0}
+$$P(v = 0 | s_+ = 1) = {\left(\frac{\phi_{swab}}{\lambda + \phi_{swab}}\right)}^{\phi_{swab}},$$ {#eq-p0}
 where $\lambda$ is the expected number of viral reads.
 If $\phi_{swab} < 1$, this probability can be substantial even for large $\lambda$.
 The higher the false positive rate, the larger $p$ has to be to account for the same data.
@@ -381,12 +381,18 @@ indicating that the model predicts these features of the data well.
 
 ## Posterior distributions
 
-We compared our posterior distributions to our priors to check that the priors
-are not inappropriately dominating the inference of prevalence and $\mu_{ww}$
-(and thus $RA_p(1\%)$).
+We examined our posterior distributions to understand the influence
+of our priors and the structure of our model on our inferences
+of prevalence and $\mu_{ww}$ (and thus $RA_p(1\%)$).
 
-For the Coronaviruses and Rhinoviruses,
-the posterior distributions of these parameters are narrow compared to their priors.
+### The influence of the prior distributions of prevalence and $\mu_{ww}$ is weak
+
+We intended our priors on $p$ and $\mu_{ww}$ to be weakly informative,
+intending that our data would constrain the posterior distributions relative
+to the priors.
+
+For coronaviruses and rhinoviruses,
+the posterior distributions of these parameters are narrow compared to their priors:
 
 ```{r}
 #| fig-cap: "Posterior (solid) and prior (dashed) distributions of prevalence"
@@ -431,14 +437,52 @@ posteriors %>%
   theme(legend.position = "")
 ```
 
-Much of our posterior uncertainty in the prevalence comes from our uncertainty
-about the false negative rate of swab sequencing:
-the probability that a swab pool will have zero viral reads when
-it contains a sample from an infected person.
-This probability is controlled by the parameters $\mu_{swab}$ and $\phi_{swab}$.
+This suggests that the data, interpreted in light of our model and the priors on the other parameters effectively constrains the posteriors of these parameters.
 
-For the coronaviruses and rhinoviruses, we observe enough reads to estimate
-$\mu_{swab}$, though with a lot of uncertainty:
+For viruses with zero or one read in swab samples (not shown), the posterior distributions were dominated by the priors
+because the model was not able to constrain the false negative rate of swab sequencing.
+
+### Uncertainty in prevalence propagates to uncertainty in $\mu_{ww}$
+
+Because the expected relative abundance of viral reads in wastewater is the product of $p$ and $\mu_{ww}$, we expect uncertainty in prevalence to contribute to uncertainty in $\mu_{ww}$ (and thus $RA_p(1\%)$).
+
+Indeed, posterior uncertainty in $p$ explains much of the posterior uncertainty in $\mu_{ww}$.
+Plotting the joint posterior distribution of these parameters (on a log-log scale) shows a tight correlation:
+
+```{r}
+posteriors %>%
+  ggplot(aes(p, mu_ww)) +
+  geom_point(alpha = 0.05, size = 0.1) +
+  scale_x_log10(labels = scientific) +
+  scale_y_log10(labels = scientific) +
+  facet_wrap(~species, ncol = 4)
+```
+
+We can calculate the posterior fraction of variance in $\log \mu_{ww}$ explained by $\log p$ ($R^2$):
+
+```{r}
+#| fig-cap: $R^2$ of $\log \mu_{ww}$ vs $\log p$
+posteriors %>%
+  summarise(
+    cor_log = cor(log(p), log(mu_ww), method = "pearson"),
+    R_squared = cor_log ^2,
+    .by = species,
+  ) %>%
+  select(-cor_log) %>%
+  kable(digits = c(NA, 2), col.names = c("species", "R^2"))
+```
+
+For all viruses, at least 80% of the posterior variance in $\log \mu_ww$ is explained by variance in $\log p$.
+
+### Uncertainty in the true positive rate contributes to uncertainty in prevalence
+
+Much of our posterior uncertainty in the prevalence comes from our uncertainty
+about the true positive rate of swab sequencing:
+the probability that a swab pool will have at least one viral read when
+it contains at least one swab from an infected person.
+This probability, which is one minus the false negative rate, is controlled by the parameters $\mu_{swab}$ and $\phi_{swab}$.
+
+For the coronaviruses and rhinoviruses, we observe enough reads to estimate $\mu_{swab}$:
 
 ```{r}
 breaks <- 10^seq(-5, -1, 2)
@@ -471,10 +515,17 @@ posteriors %>%
   theme(legend.position = "") #, axis.text.y = element_blank())
 ```
 
-To see the combined effect of these parameters on our prevalence estimates,
+Because the data does not constrain $\phi_{swab}$ very much,
+our prior $\phi_{swab}$, thus has a meaningful impact on our estimates.
+
+To see the combined effect of $\mu_{swab}$ and $\phi_{swab}$ on our prevalence estimates,
 we can transform the posterior samples of $\mu_{swab}$ and $\phi_{swab}$ into the
-posterior samples of the true positive rate, the probability that we observe viral reads when one swab comes from an infected person.
-(Because the pools vary in number of swabs and total sequencing depth, we average this probability over the pools.)
+posterior samples of the true positive rate:
+
+$$\text{true positive rate} \approx 1 - P(v = 0 | s_+ = 1), $$
+where we make the approximation that most pools have either zero or one swab from an infected person.
+$P(v = 0 | s_+ = 1)$ depends on $\phi_{swab}$, $\mu_{swab}$, the total read depth and the number of swabs in the pool according to @eq-p0.
+Because our pools vary in number of swabs and read depth, we average the true positive rate over pools.
 
 ```{r}
 #| warning: false
@@ -501,15 +552,24 @@ with_positivity %>%
   scale_y_log10() +
   facet_wrap(~species, ncol = 4) +
   theme(legend.position="none") +
-  labs(y = "posterior prevalence", x = "Pr(viral reads > 0 | infected swab)")
+  labs(y = "posterior prevalence", x = "posterior true positive rate")
+```
+
+```{r}
+#| fig-cap: $R^2$ of $\log p$ vs $\log \text{true positive rate}$
+with_positivity %>%
+  summarise(
+    cor_log = cor(log(1 - mean_p0), log(p), method = "pearson"),
+    R_squared = cor_log ^2,
+    .by = species,
+  ) %>%
+  select(-cor_log) %>%
+  kable(digits = c(NA, 2), col.names = c("species", "R^2"))
 ```
 
 When the true positive rate is lower (i.e., the false negative rate is higher),
 the estimated prevalence is higher to account for the observed positive pools.
 The median R-squared between log posterior prevalence and log posterior true positive rate is 0.3, implying that about a third of the uncertainty in prevalence comes from uncertainty in the true positive rate.
-
-Because the data does not constrain $\phi_{swab}$ very much,
-our prior $\phi_{swab}$, thus has a meaningful impact on our estimates.
 
 ```{r}
 knitr::knit_exit()
