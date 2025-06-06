@@ -100,7 +100,7 @@ swabs in each swab pool.
 In overview:
 
 - Each swab in each pool comes from an infected person
-  with probability equal to the prevalence
+  with probability equal to the prevalence.
 - Each swab from an infected person contributes a random number of viral reads
   to its pool drawn from a negative binomial distribution.
   The average number of viral reads contributed is proportional to the
@@ -180,9 +180,9 @@ We designed our model to apply to all viruses found in wastewater
 Because we observed several viruses with zero viral reads in swab data---including a number of respiratory viruses that we did not see in our wastewater data---we chose a prior that puts significant probability on prevalence below our swab sampling detection limit.
 We collected 547 total swabs, so our best-case detection limit is roughly 0.2%.
 (The exact shape of the left tail of the prior should not 
-effect our prevalence estimates for viruses observed in at least one swab
+affect our prevalence estimates for viruses observed in at least one swab
 sample because the likelihood function will sharply constrain the posterior
-probability of prevalences much below 0.2%.)
+probability of prevalence below 0.2%.)
 
 The right tail of the prior sets the upper bound
 of our prevalence estimates when our sensitivity is low.
@@ -197,7 +197,7 @@ and the 95th percentile is 12%.
 
 ```{r}
 #| label: prior-p
-#| fig-cap: "Note the logistic spacing of the x-axis."
+#| fig-cap: "**Prior distribution of prevalence.** Note the logistic spacing of the x-axis."
 
 prior_logit_p <- function(x) dnorm(x, mean_logit_p, sd_logit_p)
 
@@ -212,14 +212,15 @@ tibble(
     transform = "logit",
     breaks = c(10^seq(-6, -1, 1), 0.5),
   ) +
-  labs(title = "Prior distribution of prevalence", y = "", x = "")
+  labs(y = "", x = "")
 ```
 
-An implication of this prior is that it allows for
-the possibility that the false positive rate of our swab sequencing is high, so that the true prevalence is higher than the pool positivity rate would suggest.
-For example, the coronavirus or rhinovirus with the fewest viral reads is Rhinovirus A with 9 reads across three pools.
+This prior is broad enough to permit
+the true prevalence to be much higher than the pool positivity rate would suggest,
+allowing for significant false negative rate.
+For example, the coronavirus or rhinovirus with the fewest swab reads is Rhinovirus A with nine reads across three pools.
 Assuming perfect sensitivity, the maximum likelihood prevalence for Rhinovirus A would be 0.7%.
-Our prior assigns a 9% probability that the true prevalence is more than five times higher than this, i.e., a false positive rate over 83%.
+Our prior assigns a 9% probability that the true prevalence is more than five times higher than this, i.e., a false negative rate over 83%.
 
 ## Relative abundance factors
 
@@ -229,35 +230,31 @@ For wastewater sequencing, the expected relative abundance at prevalence $p$ is
 $p\, \mu_{ww}$, so that $RA_p(1\%) = 0.01 \mu_{ww}$.
 For pooled swabs, the expected relative abundance is $p \, \mu_{swab}$,
 where $\mu_{swab}$ is the expected relative abundance in a swab from an infected person.
-Since these parameters represent proportions, as with the prevalence we use logit-normal priors to constrain their values between zero and one.
+Since these parameters represent proportions we use logit-normal priors to constrain their values between zero and one, as with the prevalence.
 
-Because we do not have much prior information about these parameters,
+Because we do not have much prior information about the relative abundance factors,
 we chose priors that span many orders of magnitude.
 Our previous estimates for Influenza A and SARS-CoV-2 in our wastewater data suggest a range
 of $\mu_{ww}$ from 1e-8 to 1e-4.
 We would like to include more uncertainty than this range, so we use:
 
 $$\text{logit}(\mu_{ww}) \sim \text{Normal}(-14, 6)$$
-With these parameters:
-
- -  The median $\mu_{ww} is 8e-7,
-    compared to our previous Flu A estimate of 1e-6.
- -  70% of the probability is between 2e-9 and 3e-4.
- -  96% of the probability is between 5e-12 and 0.1,
-    spanning more than 10 orders of magnitude.
+With these parameters, the median $\mu_{ww} is 8e-7 compared to our previous Flu A estimate of 1e-6.
+The prior allows for a lot of uncertainty: 96% of the probability is between 5e-12 and 0.1,
+spanning more than 10 orders of magnitude.
 
 Because we are studying respiratory viruses,
-we expect the swabs to have higher relative abundance than wastewater at the same prevalence.
+we expect swabs to have higher relative abundance than wastewater at the same prevalence.
 Accordingly, we'll shift the prior for $\mu_{swab}$ to the right relative to $\mu_{ww}$.
 However, we don't want to make this assumption too strongly,
-so we'll shift the mean by less than a standard deviation (keeping the same standard deviation) to:
+so we'll shift the mean by less than a standard deviation (keeping the standard deviation constant) to:
 $$\text{logit}(\mu_{swab}) \sim \text{Normal}(-10, 6).$$
-With these priors, the median and geometric mean of $\frac{\mu_{swab}}{\mu_{ww}} \approx 58$
-and the probability that a given virus's $\mu_{swab} > \mu_{ww}$ is 68%.
+With these priors, the median and geometric mean of $\frac{\mu_{swab}}{\mu_{ww}} \approx 60$
+and the probability that a given virus's $\mu_{swab} > \mu_{ww}$ is $\approx 70\%$.
 
 ```{r}
 #| label: prior-mu
-#| fig-cap: "Note the logistic spacing of the x-axis."
+#| fig-cap: "**Prior distibutions of relative abundance factors $\\mu$.** Note the logistic spacing of the x-axis."
 
 prior_logit_mu_swab <- function(x) dnorm(x, mean_logit_mu_swab, sd_logit_mu_swab)
 prior_logit_mu_ww <- function(x) dnorm(x, mean_logit_mu_ww, sd_logit_mu_ww)
@@ -280,7 +277,7 @@ crossing(
     transform = "logit",
     breaks = c(10^seq(-12, -2, 2), 0.5), #, 0.99),
   ) +
-  labs(title = expression("Prior distributions of relative abundance factors "~mu), x="", y="")
+  labs(x="", y="")
 ```
 
 
@@ -321,13 +318,9 @@ which looks like:
 
 ```{r}
 #| label: prior-phi
+#| fig-cap: "**Prior distributions of inverse-overdispersion $\\phi$**"
 
-shape_phi_swab <- 2
-rate_phi_swab <- 7
 prior_phi_swab <- function(x) dgamma(x, shape_phi_swab, rate_phi_swab)
-
-shape_phi_ww <- 1
-rate_phi_ww <- 1
 prior_phi_ww <- function(x) dgamma(x, shape_phi_ww, rate_phi_ww)
 
 crossing(
@@ -342,7 +335,7 @@ crossing(
   geom_line() +
   geom_vline(xintercept = c(0.15, 0.28, 0.4), linetype = "dotted", color = "grey") +
   scale_x_log10() +
-  labs(title = expression("Prior distributions of inverse-overdispersion "~phi), y = "", x = "")
+  labs(y = "", x = "")
 ```
 
 We can use @eq-p0 to calculate the implied probability of false negatives for a given sequencing depth and relative abundance factor.
@@ -387,15 +380,15 @@ of prevalence and $\mu_{ww}$ (and thus $RA_p(1\%)$).
 
 ### The influence of the prior distributions of prevalence and $\mu_{ww}$ is weak
 
-We intended our priors on $p$ and $\mu_{ww}$ to be weakly informative,
-intending that our data would constrain the posterior distributions relative
+We intended our priors on $p$ and $\mu_{ww}$ to be weakly informative
+so that our data would constrain the posterior distributions relative
 to the priors.
 
 For coronaviruses and rhinoviruses,
 the posterior distributions of these parameters are narrow compared to their priors:
 
 ```{r}
-#| fig-cap: "Posterior (solid) and prior (dashed) distributions of prevalence"
+#| fig-cap: "**Posterior (solid) and prior (dashed) distributions of prevalence**"
 #| warning: false
 
 posteriors <- read_tsv(here(tables_dir, "posteriors.tsv")) %>%
@@ -418,7 +411,7 @@ posteriors %>%
 ```
 
 ```{r}
-#| fig-cap: "Posterior (solid) and prior (dashed) distributions of $\\mu_{ww}$"
+#| fig-cap: "**Posterior (solid) and prior (dashed) distributions of $\\mu_{ww}$**"
 #| warning: false
 
 breaks <- 10^seq(-7, -3, 2)
@@ -437,7 +430,7 @@ posteriors %>%
   theme(legend.position = "")
 ```
 
-This suggests that the data, interpreted in light of our model and the priors on the other parameters effectively constrains the posteriors of these parameters.
+This suggests that the data, interpreted in light of our model and the priors on the other parameters, effectively constrains the posteriors of these parameters.
 
 For viruses with zero or one read in swab samples (not shown), the posterior distributions were dominated by the priors
 because the model was not able to constrain the false negative rate of swab sequencing.
@@ -447,21 +440,23 @@ because the model was not able to constrain the false negative rate of swab sequ
 Because the expected relative abundance of viral reads in wastewater is the product of $p$ and $\mu_{ww}$, we expect uncertainty in prevalence to contribute to uncertainty in $\mu_{ww}$ (and thus $RA_p(1\%)$).
 
 Indeed, posterior uncertainty in $p$ explains much of the posterior uncertainty in $\mu_{ww}$.
-Plotting the joint posterior distribution of these parameters (on a log-log scale) shows a tight correlation:
+Plotting the joint posterior distribution of these parameters shows a tight correlation:
 
 ```{r}
+#| fig-cap: "**Posterior samples of $\\mu_{ww}$ vs prevalence**"
 posteriors %>%
   ggplot(aes(p, mu_ww)) +
   geom_point(alpha = 0.05, size = 0.1) +
   scale_x_log10(labels = scientific) +
   scale_y_log10(labels = scientific) +
-  facet_wrap(~species, ncol = 4)
+  facet_wrap(~species, ncol = 4) +
+  labs(x = "", y = "")
 ```
 
 We can calculate the posterior fraction of variance in $\log \mu_{ww}$ explained by $\log p$ ($R^2$):
 
 ```{r}
-#| fig-cap: $R^2$ of $\log \mu_{ww}$ vs $\log p$
+#| fig-cap: Fraction of posterior variance in $\log \mu_{ww}$ explained by $\log p$
 posteriors %>%
   summarise(
     cor_log = cor(log(p), log(mu_ww), method = "pearson"),
@@ -469,7 +464,7 @@ posteriors %>%
     .by = species,
   ) %>%
   select(-cor_log) %>%
-  kable(digits = c(NA, 2), col.names = c("species", "R^2"))
+  kable(digits = c(NA, 2), col.names = c("species", "R<sup>2</sup>"))
 ```
 
 For all viruses, at least 80% of the posterior variance in $\log \mu_ww$ is explained by variance in $\log p$.
@@ -485,6 +480,7 @@ This probability, which is one minus the false negative rate, is controlled by t
 For the coronaviruses and rhinoviruses, we observe enough reads to estimate $\mu_{swab}$:
 
 ```{r}
+#| warning: false
 breaks <- 10^seq(-5, -1, 2)
 posteriors %>%
   ggplot(aes(logit_mu_swab, color = group)) +
@@ -504,6 +500,7 @@ posteriors %>%
 On the other hand, the data provide very little information about $\phi_{swab}$ relative to the priors:
 
 ```{r}
+#| warning: false
 posteriors %>%
   ggplot(aes(phi_swab, color=group)) +
   geom_density() +
@@ -516,7 +513,7 @@ posteriors %>%
 ```
 
 Because the data does not constrain $\phi_{swab}$ very much,
-our prior $\phi_{swab}$, thus has a meaningful impact on our estimates.
+our prior $\phi_{swab}$ has a meaningful impact on our estimates.
 
 To see the combined effect of $\mu_{swab}$ and $\phi_{swab}$ on our prevalence estimates,
 we can transform the posterior samples of $\mu_{swab}$ and $\phi_{swab}$ into the
@@ -529,6 +526,7 @@ Because our pools vary in number of swabs and read depth, we average the true po
 
 ```{r}
 #| warning: false
+#| fig-cap: "**Posterior prevalence vs posterior true positive rate**"
 
 with_positivity <- posteriors %>%
   mutate(posterior_sample = seq(nrow(.))) %>%
@@ -552,7 +550,7 @@ with_positivity %>%
   scale_y_log10() +
   facet_wrap(~species, ncol = 4) +
   theme(legend.position="none") +
-  labs(y = "posterior prevalence", x = "posterior true positive rate")
+  labs(y = "", x = "")
 ```
 
 ```{r}
@@ -564,764 +562,9 @@ with_positivity %>%
     .by = species,
   ) %>%
   select(-cor_log) %>%
-  kable(digits = c(NA, 2), col.names = c("species", "R^2"))
+  kable(digits = c(NA, 2), col.names = c("species", "R<sup>2</sup>"))
 ```
 
 When the true positive rate is lower (i.e., the false negative rate is higher),
 the estimated prevalence is higher to account for the observed positive pools.
 The median R-squared between log posterior prevalence and log posterior true positive rate is 0.3, implying that about a third of the uncertainty in prevalence comes from uncertainty in the true positive rate.
-
-```{r}
-knitr::knit_exit()
-```
-
-# END CURRENT VERSION
-
-```{r}
-species_swab_summary <- swab_reads_complete %>%
-  summarise(
-    pos_pools = sum(viral_reads > 0),
-    viral_reads_total = sum(viral_reads),
-    viral_reads_max = max(viral_reads),
-    viral_reads_sd = sd(viral_reads),
-    .by = c(species, group),
-  ) %>%
-  arrange(species)
-kable(species_swab_summary)
-```
-
-```{r}
-right_join(
-  species_swab_summary %>%
-    mutate(sd_logp_perf = 1 / sqrt(pos_pools)) %>%
-    select(species, sd_logp_perf),
-  posteriors %>%
-    summarise(
-      sd_logp = sd(log(p)),
-      .by = species
-    )
-) %>%
-  mutate(
-    sd_ratio = sd_logp / sd_logp_perf,
-  ) %>%
-  summarise(median(exp(sd_ratio)))
-```
-
-```{r}
-species_ww_summary <- wastewater_reads_complete %>%
-  summarise(
-    pos_samples = sum(viral_reads > 0),
-    viral_reads_total = sum(viral_reads),
-    viral_reads_max = max(viral_reads),
-    viral_reads_sd = sd(viral_reads),
-    .by = c(species, group),
-  ) %>%
-  arrange(species)
-kable(species_ww_summary)
-```
-
-
-# Posterior distributions
-
-## Marginal posterior distributions
-
-Let's visualize the posterior distributions for our key parameters.
-In the following plots, solid lines show the posterior distribution of prevalence for each virus species, compared to the prior distribution (dashed line).
-Colors represent viral groups (SARS-CoV-2, seasonal Coronaviruses, Influenza, Mononegavirales, and Rhinoviruses).
-
-
-### Expected viral fractions
-
-Posteriors on $\mu_{swab}$ (swab viral fraction with all positive swabs).
-
-```{r}
-breaks <- 10^seq(-5, -1, 2)
-posteriors %>%
-  ggplot(aes(logit_mu_swab, color = group)) +
-  geom_density() +
-  prior_density(seq(-16, 2, length.out = 100), prior_logit_mu_swab) +
-  scale_x_continuous(
-    limits = c(-14, 2),
-    breaks = qlogis(breaks),
-    labels = scientific(breaks)
-  ) +
-  facet_wrap(vars(species), ncol = 4) +
-  scale_y_continuous(transform = "log10", limits = c(1e-3, 1)) +
-  labs(y = "", x = "mu_swab") +
-  theme(legend.position = "")
-```
-
-For species with multiple positive pools, (e.g. the Rhinoviruses), there is information to constrain the expected viral fraction in a positive swab.
-With only one positive pool (e.g. H1N1, which has only one viral read), there is less, but still some information.
-
-Note that all of the posteriors are shifted to the right relative to the prior.
-This means that the prior is biasing these estimates downward.
-This is a predictable effect of using the same prior for $\mu_{swab}$ and $\mu{ww}$
-We may want to consider having separate priors.
-
-HCoV-229E is an outlier because it has only a single positive pool with 6008 viral reads.
-This puts most of the weight on $\mu_{swab} > 0.1$, which would be higher if the prior weren't pulling it down.
-I'm not sure whether this is a good effect: regularization, or a bias we'd like to eliminate.
-It depends on whether we think it's likely that $\mu_{swab}$ could actually be this high, vs this being a very lucky sample.
-
-### Overdispersion
-
-Posteriors for swab inverse-overdispersion $\phi_{swab}$.
-
-```{r}
-posteriors %>%
-  ggplot(aes(phi_swab, color=group)) +
-  geom_density() +
-  prior_density(10^seq(-3, 3, length.out=100), prior_phi_swab, log10x = TRUE) +
-  scale_x_log10(limits = 10^c(-3,1)) +
-  facet_wrap(vars(species), ncol = 4) +
-  labs(y = "") +
-  theme(legend.position = "", axis.text.y = element_blank())
-```
-
-The posterior distributions are all very close to the prior,
-suggesting that, as expected the data contains very little information about $\phi_{swab}$, at least relative to the prior.
-
-There is a slight leftward shift for HCoV-OC43, which has the most positive pools (5).
-
-Posteriors for wastewater inverse-overdispersion $\phi_{ww}$.
-
-```{r}
-posteriors %>%
-  ggplot(aes(phi_ww, color=group)) +
-  geom_density() +
-  prior_density(10^seq(-2, 3, length.out=100), prior_phi_ww, log10x = TRUE) +
-  scale_x_log10(limits = 10^c(-3,1), labels = scientific) +
-  facet_wrap(vars(species), ncol = 4) +
-  labs(y = "") +
-  theme(legend.position = "", axis.text.y = element_blank())
-```
-
-The wastewater data has more non-zero counts and thus more data to infer dispersion.
-I'm not sure I trust any of these though.
-
-Generally, the species that have high predicted overdispersion relative to the prior (low $\phi$) are ones with fewer positive wastewater samples. 
-That could be because there are more zero-read samples than expected given the counts in the non-zero-read samples.
-Or it could be because the estimates are noisier with less data.
-
-## Joint Posterior Distributions
-
-We can also examine relationships between different parameters in the posterior.
-In the following plots, each point is a sample from the joint posterior of two parameters.
-The curves are an estimate of the conditional mean of the y-axis parameter given the x-axis parameter.
-
-### Realtionships with prevalence
-
-Prevalence vs $\mu_{swab}$ (note log x-scale not logit):
-
-```{r}
-posteriors %>%
-  ggplot(aes(mu_swab, p)) +
-  geom_point(alpha = 0.05, size = 0.1) +
-  geom_smooth() +
-  scale_x_log10(limits = c(1e-7, 1), labels = scientific) +
-  scale_y_log10(limits = c(1e-5, 0.5), labels = scientific) +
-  facet_wrap(~species)
-```
-
-It looks like:
-
-- For small $\mu$, prevalence grows as $\mu$ decreases.
-- For larger $\mu$, this relationship flattens.
-
-This makes sense because low $\mu$ requires high prevalence to observe the virus since each positive swab is likely to go unobserved, while with high $\mu$ positive swabs are usually observed, so the prevalence is determined by the number of positive pools.
-
-TODO: Add maximum likelihood calculation here.
-
-```{r}
-posteriors %>%
-  ggplot(aes(phi_swab, p)) +
-  geom_point(alpha = 0.05, size = 0.1) +
-  geom_smooth() +
-  scale_x_log10(limits = c(1e-3, 10), labels=scientific) +
-  scale_y_log10(limits = c(1e-5, 0.5), labels = scientific) +
-  facet_wrap(~species)
-```
-
-Smaller $\phi_{swab}$ implies a higher probability of failing to get viral reads a positive swab.
-Thus, the inferred prevalence conditional on $phi_{swab}$ is inversely related to $phi_{swab}$.
-
-```{r}
-posteriors %>%
-  summarise(
-    corr_log_p_phi_swab = cor(log(p), log(phi_swab), method = "spearman"),
-    corr_p_phi_swab = cor(p, phi_swab, method = "spearman"),
-    corr_p_mu_ww = cor(log(p), log(mu_swab), method = "spearman"),
-    .by = species,
-  )
-```
-
-To encapsulate the relationship between $p$, $\mu_{swab}$, and $\phi_{swab}$,
-we can approximate $\hat{p}$, the maximum likelihood $p$ conditional on known $\mu_{swab}$ and
-$\phi_{swab}$.
-(The approximation is in the the limit where most pools are expected to be negative.)
-
-
-```{r}
-posteriors %>%
-  mutate(posterior_sample = seq(nrow(.))) %>%
-  left_join(swab_reads_complete, relationship = "many-to-many", by = join_by(species, group)) %>%
-  mutate(
-    lambda = mu_swab * all_reads / pool_size,
-    p0 = (phi_swab / (lambda + phi_swab)) ^ phi_swab,
-  ) %>%
-  summarise(
-    p = first(p),
-    pos_pools = sum(viral_reads > 0),
-    p_hat = pos_pools / sum(pool_size[viral_reads == 0] * (1 - p0[viral_reads == 0])),
-    mean_p0 = mean(p0),
-    .by = c(species, group, posterior_sample),
-  ) %>%
-  summarise(
-    corr_sp = cor(log(mean_p0), log(p), method = "spearman"),
-    corr_pe = cor(log(mean_p0), log(p), method = "pearson"),
-    .by = c(species),
-  )
-```
-
-The approximate maximum likelihood and posterior $p$ qualitatively agree.
-
-### Relationships with expected wastewater viral fraction
-
-Prevalence: 
-
-```{r}
-posteriors %>%
-  ggplot(aes(p, mu_ww)) +
-  geom_point(alpha = 0.05, size = 0.1) +
-  geom_smooth() +
-  scale_x_log10(labels = scientific) +
-  scale_y_log10(labels = scientific) +
-  facet_wrap(~species)
-```
-
-```{r}
-posteriors %>%
-  summarise(
-    cor_sp = cor(p, mu_ww, method = "spearman"),
-    cor_log = cor(log(p), log(mu_ww), method = "pearson"),
-    .by = species,
-  )
-```
-
-As expected, there is a very tight relationship between prevalence and estimated wastewater viral fraction (per prevalence).
-Often, strong correlations between parameters suggest that we should reparameterize the model so the parameters are more independent.
-However, in this case, I think this is appropriate. We need a distinct $p$ parameter to make use of the discreteness of the swab pools.
-
-The next three plots show the relationship between $\mu_{ww}$ and $\mu_{swab}$, $\phi_{swab}$, and $\phi_{ww}$:
-
-```{r}
-posteriors %>%
-  ggplot(aes(mu_swab, mu_ww)) +
-  geom_point(alpha = 0.05, size = 0.1) +
-  geom_smooth() +
-  scale_x_log10(labels = scientific) +
-  scale_y_log10(labels = scientific) +
-  facet_wrap(~species)
-```
-
-
-```{r}
-posteriors %>%
-  ggplot(aes(phi_swab, mu_ww)) +
-  geom_point(alpha = 0.05, size = 0.1) +
-  geom_smooth() +
-  scale_x_log10(labels = scientific) +
-  scale_y_log10(labels = scientific) +
-  facet_wrap(~species)
-```
-
-```{r}
-posteriors %>%
-  ggplot(aes(phi_ww, mu_ww)) +
-  geom_point(alpha = 0.05, size = 0.1) +
-  geom_smooth() +
-  scale_x_log10() + # label = scientific) +
-  scale_y_log10(label = scientific) +
-  facet_wrap(~species)
-```
-
-The relationships with $\mu_{swab}$ and $\phi_{swab}$ are mediated by $p$ and are not surprising.
-
-The relationship with $\phi_{ww}$ suggests that the posteriors are uncorrelated,
-which is encouraging because we don't have any real information about this parameter.
-
-# Posterior Predictive Checks
-
-## Swab data
-
-To validate our model, we can use posterior predictive checks - generating new data from the fitted model and comparing it to the observed data.
-The following table gives the summary statistics for the data.
-
-```{r}
-#| label: swab-ppd
-#| cache: true
-
-posterior_predictive_swab <- posteriors %>%
-  mutate(rep = 1:n(), .by = species) %>%
-  cross_join(swab_metadata) %>%
-  mutate(
-    n_pos = map2_int(pool_size, p, ~ rbinom(1, .x, .y)),
-    mu = n_pos * mu_swab * all_reads / pool_size,
-    phi = n_pos * phi_swab,
-    viral_reads = map2_int(mu, phi, ~ ifelse(.x > 0, rnbinom(
-      1, size = .y, mu = .x
-    ), 0)),
-    false_negative = n_pos > 0 & viral_reads == 0,
-  )
-
-posterior_predictive_swab_summary <- posterior_predictive_swab %>%
-  summarise(
-    pos_pools = sum(viral_reads > 0),
-    viral_reads_total = sum(viral_reads),
-    viral_reads_max = max(viral_reads),
-    viral_reads_sd = sd(viral_reads),
-    false_negative_pools = sum(false_negative),
-    across(c(p, mu_swab, phi_swab), first),
-    .by = c(species, group, rep),
-  )
-
-
-
-kable(species_swab_summary)
-```
-
-
-```{r}
-posterior_predictive_swab_summary %>%
-  ggplot(aes(x = pos_pools, fill = group, after_stat(density))) +
-  geom_histogram(binwidth = 1, center = 0, color = "grey") +
-  geom_vline(data = species_swab_summary, mapping = aes(xintercept=pos_pools)) +
-  facet_wrap(vars(species)) +
-  scale_x_continuous(breaks = seq(0, 12, 2), name = "positive pools")
-```
-
-This plot compares the observed number of positive pools (vertical line) with the distribution of positive pools generated from our model.
-For every virus, the observed number of positive pools is common in the simulations.
-
-```{r}
-posterior_predictive_swab_summary %>%
-  ggplot(aes(x = viral_reads_total, y = species, fill = group)) +
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_point(data = species_swab_summary) +
-  scale_x_continuous(
-    transform = "log10",
-    breaks = 10^seq(0, 4),
-    name = "total viral read count (conditional on > 0)",
-    oob = scales::oob_keep,
-  ) +
-  scale_y_discrete(limits = rev(species_order))
-```
-
-This plot compares the observed total viral reads (points) with the distribution from our model.
-Vertical bars show quartiles
-
-```{r}
-posterior_predictive_swab_summary %>%
-  ggplot(aes(x = viral_reads_max, y = species, fill = group)) +
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_point(data = species_swab_summary) +
-  scale_x_continuous(
-    # transform = "pseudo_log",
-    # breaks = c(0, 10^seq(0, 4)),
-    transform = "log10",
-    breaks = 10^seq(0, 4),
-    name = "largest viral read count (conditional on > 0)",
-    oob = scales::oob_keep,
-  ) +
-  scale_y_discrete(limits = rev(species_order))
-```
-
-This plot compares the observed maximum viral reads with the distribution from our model.
-
-```{r}
-posterior_predictive_swab_summary %>%
-  ggplot(aes(x = viral_reads_sd, y = species, fill = group)) +
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_point(data = species_swab_summary) +
-  scale_x_log10(
-    breaks = 10^seq(0, 4),
-    name = "stdev viral read count (conditional on > 0)",
-    oob = scales::oob_keep,
-  ) +
-  scale_y_discrete(limits = rev(species_order))
-```
-
-This plot compares the observed standard deviation of viral reads with the distribution from our model.
-Violins show only the simulations with at least one viral read.
-Vertical bars show quartiles (conditional on at least one read).
-
-Together, these plots suggest that the model is capturing the swab data reasonably well.
-
-## Wastewater data
-
-Now we'll perform similar posterior predictive checks for the wastewater data:
-
-```{r}
-#| label: wastewater-ppd
-#| cache: true
-
-posterior_predictive_ww <- posteriors %>%
-  mutate(rep = 1:n(), .by=species) %>%
-  cross_join(wastewater_metadata) %>%
-  mutate(
-    mu = p * mu_ww * all_reads,
-    viral_reads = map2_int(mu, phi_ww, ~ ifelse(.x > 0, rnbinom(1, size = .y, mu = .x), 0)), 
-  )
-
-posterior_predictive_ww_summary <- posterior_predictive_ww %>%
-  summarise(
-    pos_samples = sum(viral_reads > 0),
-    viral_reads_total = sum(viral_reads),
-    viral_reads_max = max(viral_reads),
-    viral_reads_sd = sd(viral_reads),
-    across(c(p, mu_ww, phi_ww), first),
-    viral_reads_expected = p * mu_ww * sum(all_reads),
-    .by = c(species, group, rep),
-  )
-
-
-kable(species_ww_summary)
-```
-
-This code calculates summary statistics for the observed wastewater data, which we'll use to compare with predictions from our model.
-
-```{r}
-posterior_predictive_ww_summary %>%
-  ggplot(aes(x = pos_samples, fill = group, after_stat(density))) +
-  geom_histogram(binwidth = 1, center = 0, color = "grey") +
-  geom_vline(data = species_ww_summary, mapping = aes(xintercept = pos_samples)) +
-  facet_wrap(vars(species)) +
-  scale_x_continuous(breaks = seq(0, 12, 2), name = "positive samples")
-```
-
-This plot compares the observed number of positive wastewater samples (vertical line) with the distribution generated from our model.
-It looks like the model systematically overestimates the number of wastewater samples with viral reads (though not by a lot in any one case).
-This may be a sign that $\phi_{ww}$ is too large: too little overdispersion leading to too few zero counts given a mean relative abundance.
-It could also mean that the negative binomial model is slightly misspecified.
-
-```{r}
-posterior_predictive_ww_summary %>%
-  ggplot(aes(x = viral_reads_total, y = species, fill = group)) +
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_point(data = species_ww_summary) +
-  scale_x_continuous(
-    transform = "pseudo_log",
-    breaks = c(0, 10^seq(0, 4)),
-  ) +
-  scale_y_discrete(limits = rev(species_order))
-```
-
-This plot compares the observed total viral reads in wastewater (points) with the distribution predicted by our model.
-The observations here are all very close to the posterior median.
-
-```{r}
-posterior_predictive_ww_summary %>%
-  ggplot(aes(x = viral_reads_max, y = species, fill = group)) +
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_point(data = species_ww_summary) +
-  scale_x_continuous(
-    transform = "pseudo_log",
-    breaks = c(0, 10^seq(0, 4)),
-  ) +
-  scale_y_discrete(limits = rev(species_order))
-```
-
-This plot compares the observed maximum viral reads in wastewater with the distribution from our model.
-
-Here the model might be systematically slightly overestimating the maximum viral reads.
-This cuts against the "too little overdispersion" hypothesis for the excess positive samples.
-
-```{r}
-posterior_predictive_ww_summary %>%
-  ggplot(aes(x = viral_reads_sd, y = species, fill = group)) +
-  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_point(data = species_ww_summary) +
-  scale_x_continuous(
-    transform = "pseudo_log",
-    breaks = c(0, 10^seq(0, 4)),
-  ) +
-  scale_y_discrete(limits = rev(species_order))
-```
-
-This plot compares the observed standard deviation of viral reads in wastewater with the distribution from our model.
-
-Here the model might also be systematically slightly too high.
-
-Taking these together, it could be that the negative binomial model can't simultaneously fit the number
-of positive samples and the dispersion of reads because these are controlled by a single parameter.
-
-I don't think this is a major issue for trusting the results.
-The observed values are all well within the posterior predictive distributions
-and it probably makes sense to be conservative with respect to the possibility of seeing anomalously large counts. 
-
-# Results 
-
-## Prevalence
-
-```{r}
-posteriors %>%
-  ggplot(aes(p, species, fill=group)) +
-  geom_violin(draw_quantiles = c(0.15, 0.5, 0.85)) +
-  scale_x_log10(name = "prevalence", limits = c(1e-4 / 4, 4e-1)) +
-  scale_y_discrete(limits=rev(species_order))
-```
-
-```{r}
-prev_posteriors <- left_join(
-  swab_reads_complete %>%
-    summarise(
-      `+ pools` = sum(viral_reads > 0),
-      `viral reads` = sum(viral_reads),
-      .by = species,
-    ),
-  posteriors %>%
-    summarise(
-      q15 = quantile(p, .15),
-      median = median(p),
-      q85 = quantile(p, .85),
-      `q85 / q15` = q85 / q15,
-      .by = species,
-    ),
-  )
-
-write_tsv(prev_posteriors, "prevalence_posteriors.tsv")
-
-prev_posteriors %>%
-  kable(digits = c(NA, 0, 0, 4, 4, 4, 2)) %>%
-  column_spec(2:7, monospace = TRUE)
-```
-```{r}
-posteriors %>%
-  mutate(posterior_sample = seq(nrow(.))) %>%
-  left_join(swab_reads_complete, relationship = "many-to-many", by = join_by(species, group)) %>%
-  mutate(
-    lambda = mu_swab * all_reads / pool_size,
-    p0 = (phi_swab / (lambda + phi_swab)) ^ phi_swab,
-  ) %>%
-  summarise(
-    p = first(p),
-    mu_swab = first(mu_swab),
-    pos_pools = sum(viral_reads > 0),
-    p_hat = pos_pools / sum(pool_size[viral_reads == 0] * (1 - p0[viral_reads == 0])),
-    mean_p0 = mean(p0),
-    .by = c(species, group, posterior_sample),
-  ) %>%
-  summarise(
-    median_mu_swab = median(mu_swab),
-    median_p0 = median(mean_p0),
-    .by = species,
-  ) 
-```
-
-Let's compare these results to what we'd get with perfect sensitivity.
-In that case, we can estimate the maximum likelihood $p$ and the Fisher information for $\log p$,
-which gives an estimate of the posterior posterior mode and inverse variance of $\log p$ if we had a flat prior on $\log p$.
-
-### Comparison with perfect sensitivity maximum likelihood estimate: 
-
-```{r}
-perfect_sensitivity <- swab_reads_complete %>%
-    summarise(
-      pos_pools = sum(viral_reads > 0),
-      p = pos_pools / (sum(pool_size[viral_reads == 0]) + sum(pool_size[viral_reads >0]) / 2),
-      sd_logp = 1 / sqrt(pos_pools),
-      viral_reads = sum(viral_reads),
-      .by = c(species, group),
-      )
-
-comparison <- posteriors %>%
-  summarise(median(p), sd(log(p)), .by = c(species, group)) %>%
-  left_join(
-    perfect_sensitivity,
-  ) %>%
-  mutate(
-    p_ratio = `median(p)` / p,
-    sd_ratio = `sd(log(p))` / sd_logp,
-    .keep = "unused",
-  )
-
-comparison %>%
-  kable(digits = 1)
-
-comparison %>%
-  filter(group %in% c("Coronaviruses (SARS-CoV-2)", "Coronaviruses (seasonal)", "Rhinoviruses")) %>%
-  summarise(
-    n(),
-    median(p_ratio),
-    median(sd_ratio),
-  )
-```
-
-```{r}
-posteriors %>%
-  ggplot(aes(x = p, y = species, fill = group)) +
-  geom_vline(xintercept = plogis(mean_logit_p), color = "grey") +
-  geom_vline(xintercept = plogis(mean_logit_p + sd_logit_p * c(1, -1)), color = "grey", linetype = "dashed") +
-  geom_violin(draw_quantiles = c(0.15, .5, 0.85)) + 
-  geom_point(aes(x = p), data = perfect_sensitivity, color = "white") +
-  geom_errorbarh(aes(xmin = p / exp(sd_logp), xmax = p * exp(sd_logp)), data = perfect_sensitivity, color = "white") +
-  scale_x_log10() +
-  scale_y_discrete(limits=rev(species_order))
-```
-
-Here, the violins show posteriors with median, 15-th, and 85-th percentiles as black lines.
-The white dots are the maximum likelihood estimates with error bars $\log \hat{p} \pm {\mathcal{I_{\log p}}}^{-1/2}$.
-Solid grey line is the prior median and dashed grey lines are the prior 15th and 85th percentiles.
-
-## RA_p(1%)
-
-Finally, we can calculate the RA_p(1%) values - the relative abundance at 1% prevalence - which was a key goal of the original analysis:
-
-```{r}
-posteriors %>%
-  mutate(ra01 = mu_ww * 0.01) %>%
-  ggplot(aes(ra01, species, fill=group)) +
-  geom_violin(draw_quantiles = c(0.15, 0.5, 0.85)) +
-  scale_x_log10(name = "wastewater RA_p(1%)") +
-  scale_y_discrete(limits=rev(species_order))
-```
-
-This plot shows the posterior distribution of RA_p(1%) for each virus species.
-Vertical lines represent 15%, 50%, and 85% quantiles of the posterior.
-
-```{r}
-posteriors %>%
-  mutate(ra01 = mu_ww * 0.01) %>%
-  summarise(
-    q05 = quantile(ra01, 0.05),
-    q15 = quantile(ra01, 0.15),
-    q25 = quantile(ra01, 0.25),
-    median = median(ra01),
-    q75 = quantile(ra01, 0.75),
-    q85 = quantile(ra01, 0.85),
-    q95 = quantile(ra01, 0.95),
-    ratio_q85q15 = q85 / q15,
-    gsd_sq = exp(2 * sd(log(ra01))),
-    ratio_q95q05 = q95 / q05,
-    .by = c(species, group),
-  ) %>%
-  mutate(
-    across(
-      -c(species, group, starts_with("ratio_"), gsd_sq),
-      ~ format(.x, scientific = TRUE, digits = 2)
-    ),
-    across(
-      c(starts_with("ratio_"), gsd_sq),
-      ~ format(.x, digits = 2)
-    )
-  ) %>% 
-  select(-group) %>%
-  kable
-```
-
-This table provides quantiles of the RA_p(1%) estimates for each virus species, representing the uncertainty in these values.
-
-```{r}
-ra_posteriors <- posteriors %>%
-  mutate(ra01 = mu_ww * 0.01) %>%
-  summarise(
-    q15 = quantile(ra01, .15),
-    median = median(ra01),
-    q85 = quantile(ra01, .85),
-    `q85 / q15` = q85 / q15,
-    .by = c(species)
-  )
-
-write_tsv(ra_posteriors, "ra_posteriors.tsv")
-
-ra_posteriors %>% 
-  mutate(
-    across(
-      c(q15, median, q85),
-      ~ format(.x, scientific = TRUE, digits = 2)
-    ),
-    across(
-      c(`q85 / q15`),
-      ~ format(.x, digits = 2)
-    )
-  ) %>%
-  kable(align = "lrrrr") %>%
-  column_spec(2:5, monospace = TRUE)
-```
-
-```{r}
-posteriors %>%
-  mutate(ra01 = mu_ww * 0.01) %>%
-  summarise(
-    q15 = quantile(ra01, .15),
-    median = median(ra01),
-    q85 = quantile(ra01, .85),
-    sd = exp(sd(log(ra01))),
-    `q85 / q15` = q85 / q15,
-    .by = c(species)
-  ) %>%
-  summarise(
-    exp(sd(log(median))),
-    median(sd),
-  )
-```
-
-## RA swab / RA wastewater
-
-```{r}
-posteriors %>%
-  mutate(ratio = mu_swab / mu_ww) %>%
-  ggplot(aes(ratio, species, fill=group)) +
-  geom_violin(draw_quantiles = c(0.15, 0.5, 0.85)) +
-  scale_x_log10(
-    name = "swab RA / wastewater RA",
-    limits = c(1e-2, 1e8),
-    breaks = 10^seq(0, 6, 2)
-  ) +
-  scale_y_discrete(limits=rev(species_order))
-```
-
-This plot shows the ratio of swab relative abundance to wastewater relative abundance for a fixed prevalence.
-Vertical lines represent quartiles of the posterior.
-
-As a sanity check, let's calculate some two different estimates of this factor from the count data alone:
-1. The ratio of relative abundances, summing reads over samples
-2. The ratio of relative abundances, averaging RA over samples
-
-```{r}
-get_ra <- function(data){
-  summarise(
-    data,
-    ra_by_read = sum(viral_reads) / sum(all_reads),
-    ra_by_sample = mean(viral_reads / all_reads),
-    .by = c(species, group)
-  )
-}
-
-naive_ra_ratios <- left_join(
-  get_ra(swab_reads_complete),
-  get_ra(wastewater_reads_complete),
-  by = join_by(species, group),
-  suffix = c(".swab", ".ww"),
-) %>%
-  mutate(
-    ratio_by_read = ra_by_read.swab / ra_by_read.ww,
-    ratio_by_sample = ra_by_sample.swab / ra_by_sample.ww,
-  )
-
-posteriors %>%
-  mutate(ratio = mu_swab / mu_ww) %>%
-  ggplot(aes(ratio, species, fill=group)) +
-  geom_violin(draw_quantiles = c(0.15, 0.5, 0.85)) +
-  geom_point(aes(ratio_by_read, species), naive_ra_ratios, shape = "x") +
-  geom_point(aes(ratio_by_sample, species), naive_ra_ratios, shape = "o") +
-  scale_x_log10(
-    name = "swab RA / wastewater RA",
-    limits = c(1e-2, 1e8),
-    breaks = 10^seq(0, 6, 2)
-  ) +
-  scale_y_discrete(limits=rev(species_order))
-```
-
-I don't see a systematic bias here, which suggests that the priors aren't influencing the ratio too much.
