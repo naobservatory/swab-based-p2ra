@@ -1,5 +1,6 @@
 ---
-title: "Appendix"
+title: "Appendix to"
+subtitle: "[Estimating the sensitivity of wastewater metagenomic sequencing using nasal swabs](link)"
 format:
   html:
     code-fold: true
