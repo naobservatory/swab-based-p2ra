@@ -16,7 +16,8 @@ date: 2025-05-30
 date-modified: today
 ---
 
-```{r setup}
+```{r}
+#| label: setup
 #| echo: false
 
 library(tidyverse)
@@ -56,6 +57,10 @@ scientific <- function(x) {
 }
 
 # Helper function for plotting priors
+# If the x-axis is log10-transformed,transform the density function of x to
+# the density of log10(x) by a Jacobian adjustment:
+# dividing by $\frac{d log_{10}(x){dx} = \frac{1}{x \log 10}$
+# so that the areas under the curve give probabilities correctly
 prior_density <- function(x, density_function, log10x = FALSE){
   if (log10x){
     data <- tibble(
@@ -330,7 +335,9 @@ crossing(
 ) %>%
   mutate(
     prior = if_else(source == "swab", prior_phi_swab(phi), prior_phi_ww(phi)),
-    prior_log10 = prior * phi * log(10), # Jacobian adjustment
+    # Jacobian adjustment so that area under the curve gives probabilities
+    # when the x-scale is log10 transformed (see setup block for explaination)
+    prior_log10 = prior * phi * log(10),
   ) %>%
   ggplot(aes(phi, prior_log10, linetype = source)) +
   geom_line() +
@@ -389,22 +396,31 @@ For coronaviruses and rhinoviruses,
 the posterior distributions of these parameters are narrow compared to their priors:
 
 ```{r}
+#| label: post-p
 #| fig-cap: "**Posterior (solid) and prior (dashed) distributions of prevalence**"
 #| warning: false
 
 posteriors <- read_tsv(here(tables_dir, "posteriors.tsv")) %>%
   filter(group %in% c("Coronaviruses (SARS-CoV-2)", "Coronaviruses (seasonal)", "Rhinoviruses"))
 
+# To get a logit-spaced x-axis for both the prior and the posterior,
+# Plot logit p on the x-axis, but change the x-tick labels
+# to p on the natural scale
+breaks <- 10^seq(-4, -1, 1)
 posteriors %>%
-  ggplot(aes(p, color=group)) +
+  ggplot(aes(logit_p, color=group)) +
   geom_density() +
-  prior_density(plogis(seq(-12, 4, length.out=100)), compose(prior_logit_p, qlogis)) +
-  scale_x_continuous(transform = "logit", limits = c(1e-5, 2e-1), breaks = 10^seq(-4, -1, 1), labels = scientific) +
+  prior_density(seq(-12, 4, length.out=100), prior_logit_p) +
+  scale_x_continuous(
+    limits = qlogis(c(1e-5, 2e-1)),
+    breaks = qlogis(breaks),
+    labels = scientific(breaks),
+    ) +
   facet_wrap(vars(species), ncol = 4) +
   scale_y_continuous(
     transform = "log10",
     limits = c(1e-2, 1),
-    breaks = 10^seq(0, -2),
+    breaks = 10^seq(0,-2),
     labels = scientific
   ) +
   labs(x = "", y = "") +
@@ -414,7 +430,10 @@ posteriors %>%
 ```{r}
 #| fig-cap: "**Posterior (solid) and prior (dashed) distributions of $\\mu_{ww}$**"
 #| warning: false
+#| label: post-mu
 
+# Plot logit mu on the x-axis, but change the x-tick labels to mu on the
+# untransformed scale
 breaks <- 10^seq(-7, -3, 2)
 posteriors %>%
   ggplot(aes(logit_mu_ww, color = group)) +
@@ -482,6 +501,8 @@ For the coronaviruses and rhinoviruses, we observe enough reads to estimate $\mu
 
 ```{r}
 #| warning: false
+# Plot logit mu on the x-axis, but change the x-tick labels to mu on the
+# untransformed scale
 breaks <- 10^seq(-5, -1, 2)
 posteriors %>%
   ggplot(aes(logit_mu_swab, color = group)) +
@@ -510,7 +531,7 @@ posteriors %>%
   scale_y_continuous(transform = "log10", limits = c(1e-3, 2)) +
   facet_wrap(vars(species), ncol = 4) +
   labs(y = "") +
-  theme(legend.position = "") #, axis.text.y = element_blank())
+  theme(legend.position = "")
 ```
 
 Because the data does not constrain $\phi_{swab}$ very much,
@@ -529,23 +550,25 @@ Because our pools vary in number of swabs and read depth, we average the true po
 #| warning: false
 #| fig-cap: "**Posterior prevalence vs posterior true positive rate**"
 
-with_positivity <- posteriors %>%
-  mutate(posterior_sample = seq(nrow(.))) %>%
-  left_join(swab_reads_complete, relationship = "many-to-many", by = join_by(species, group)) %>%
+# For each posterior sample and each swab pool, calculate the probability of
+# getting zero reads if a single swab comes from an infected person.
+# Then estimate the true positive rate in each posterior sample
+# as the average across pools of 1 - p(0).
+true_positive_rate <- posteriors %>%
+  mutate(posterior_sample = row_number()) %>%
+  crossing(swab_metadata) %>%
   mutate(
     lambda = mu_swab * all_reads / pool_size,
     p0 = (phi_swab / (lambda + phi_swab)) ^ phi_swab,
   ) %>%
   summarise(
     p = first(p),
-    pos_pools = sum(viral_reads > 0),
-    p_hat = pos_pools / sum(pool_size[viral_reads == 0] * (1 - p0[viral_reads == 0])),
-    mean_p0 = mean(p0),
+    tpr = 1 - mean(p0),
     .by = c(species, group, posterior_sample),
   )
 
-with_positivity %>%
-  ggplot(aes(1 - mean_p0, p)) +
+true_positive_rate %>%
+  ggplot(aes(tpr, p)) +
   geom_point(alpha = 0.01, size = 0.1) +
   scale_x_log10(limits = c(8e-3, 1.2)) +
   scale_y_log10() +
@@ -556,9 +579,9 @@ with_positivity %>%
 
 ```{r}
 #| fig-cap: $R^2$ of $\log p$ vs $\log \text{true positive rate}$
-with_positivity %>%
+true_positive_rate %>%
   summarise(
-    cor_log = cor(log(1 - mean_p0), log(p), method = "pearson"),
+    cor_log = cor(log(tpr), log(p), method = "pearson"),
     R_squared = cor_log ^2,
     .by = species,
   ) %>%
