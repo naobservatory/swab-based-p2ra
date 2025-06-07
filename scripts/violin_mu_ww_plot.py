@@ -111,7 +111,7 @@ filtered_posteriors = (
 )
 
 # Create the figure
-plt.figure(figsize=(10, 6.5))
+plt.figure(figsize=(10, 4.9))
 
 # Create the violin plot
 ax = sns.violinplot(
@@ -212,6 +212,13 @@ for x in [-10, -9, -8, -7, -6, -5, -4]:
     ax.axvline(
         x=x, color="lightgray", linestyle="-", linewidth=0.3, alpha=0.5, zorder=0
     )
+
+# Add horizontal grid lines aligned with each species
+for y in range(len(ordered_species)):
+    ax.axhline(
+        y=y, color="lightgray", linestyle="-", linewidth=0.5, alpha=0.5, zorder=0
+    )
+
 
 # Remove spines and ticks
 sns.despine(ax=ax, top=True, right=True, left=True)
