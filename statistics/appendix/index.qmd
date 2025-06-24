@@ -357,13 +357,16 @@ The prior thus allows for a broad range of false negative rates.
 
 # Model fitting
 
-We implemented and fit the model using the `rstan` interface to the [Stan](https://mc-stan.org/) programming language.
+We implemented and fit the model using the [RStan](https://mc-stan.org/rstan/) interface to the [Stan](https://mc-stan.org/) programming language.
 We fit the model independently to each virus observed in the wastewater data.
 For each virus, we ran four chains for 4,000 iterations each with a warm-up of 1,000 iterations.
 
 After fitting, we checked for convergence problems, which indicate
 that the program had difficulty sampling from the posterior distribution.
 For all viruses, including those with few or no swab reads, we confirmed that the chains mixed well ([rhat](https://mc-stan.org/learn-stan/diagnostics-warnings.html#r-hat) < 1.005) and that there were no [divergent transitions](https://mc-stan.org/learn-stan/diagnostics-warnings.html#divergent-transitions-after-warmup).
+
+For instructions to reproduce the model fits and diagnostics, see
+the project's [git repository](https://github.com/naobservatory/swab-based-p2ra).
 
 # Model checking
 
