@@ -168,7 +168,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">June 8, 2025</p>
+      <p class="date-modified">July 21, 2025</p>
     </div>
   </div>
     
@@ -179,6 +179,7 @@ window.Quarto = {
 </header>
 
 
+<p>For bioinformatics and statistical analysis code, see the project’s <a href="https://github.com/naobservatory/swab-based-p2ra">GitHub repo</a>.</p>
 <section id="model" class="level1">
 <h1>Model</h1>
 <p>We define a Bayesian model to jointly estimate viral prevalence and <span class="math inline">\(RA_p(1\%)\)</span> from sequencing of pooled swab samples and wastewater samples. Joint estimation allows us to propagate our uncertainty in the prevalence to uncertainty in <span class="math inline">\(RA_p(1\%)\)</span>.</p>
@@ -329,8 +330,9 @@ window.Quarto = {
 </section>
 <section id="model-fitting" class="level1">
 <h1>Model fitting</h1>
-<p>We implemented and fit the model using the <code>rstan</code> interface to the <a href="https://mc-stan.org/">Stan</a> programming language. We fit the model independently to each virus observed in the wastewater data. For each virus, we ran four chains for 4,000 iterations each with a warm-up of 1,000 iterations.</p>
+<p>We implemented and fit the model using the <a href="https://mc-stan.org/rstan/">RStan</a> interface to the <a href="https://mc-stan.org/">Stan</a> programming language. We fit the model independently to each virus observed in the wastewater data. For each virus, we ran four chains for 4,000 iterations each with a warm-up of 1,000 iterations.</p>
 <p>After fitting, we checked for convergence problems, which indicate that the program had difficulty sampling from the posterior distribution. For all viruses, including those with few or no swab reads, we confirmed that the chains mixed well (<a href="https://mc-stan.org/learn-stan/diagnostics-warnings.html#r-hat">rhat</a> &lt; 1.005) and that there were no <a href="https://mc-stan.org/learn-stan/diagnostics-warnings.html#divergent-transitions-after-warmup">divergent transitions</a>.</p>
+<p>For instructions to reproduce the model fits and diagnostics, see the project’s <a href="https://github.com/naobservatory/swab-based-p2ra">git repository</a>.</p>
 </section>
 <section id="model-checking" class="level1">
 <h1>Model checking</h1>
