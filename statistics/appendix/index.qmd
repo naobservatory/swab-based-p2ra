@@ -19,6 +19,8 @@ date: 2025-06-06
 date-modified: today
 ---
 
+For bioinformatics and statistical analysis code, see the project's [GitHub repo](https://github.com/naobservatory/swab-based-p2ra).
+
 ```{r}
 #| label: setup
 #| echo: false
@@ -86,6 +88,7 @@ prior_density <- function(x, density_function, log10x = FALSE){
 }
 
 ```
+
 
 
 # Model
